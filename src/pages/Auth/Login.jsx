@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../services/authService';
-import api from '../../services/api';
 
 export default function Login() {
   const { register, handleSubmit } = useForm();
@@ -10,24 +9,7 @@ export default function Login() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-    const [connectionStatus, setConnectionStatus] = useState('');
 
-      // --- Función para probar la conexión ---
-const testConnection = async () => {
-  setConnectionStatus('Probando conexión...');
-  try {
-    // Le decimos a Axios que trate la respuesta como texto
-    const response = await api.get('', { transformResponse: (res) => res }); 
-    
-    console.log('Respuesta de la API (como texto):', response.data);
-    // Como ahora es texto, response.data es el string directamente
-    setConnectionStatus(`¡Conexión exitosa! Respuesta: ${response.data}`);
-
-  } catch (err) {
-    console.error('Error de conexión:', err);
-    setConnectionStatus(`Falló la conexión: ${err.message}`);
-  }
-};
 
   const enviar = async (data) => {
     setIsLoading(true);
@@ -62,12 +44,6 @@ const testConnection = async () => {
 
   return (
     <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-              <div style={{ marginBottom: '20px' }}>
-        <button type="button" onClick={testConnection}>
-          Probar Conexión a la API
-        </button>
-        {connectionStatus && <p>{connectionStatus}</p>}
-      </div>
       <h1 className="main-title">Login</h1>
       
       <form className="Formulario" onSubmit={handleSubmit(enviar)}>
