@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// cuando tengas el endpoint real, importamos el servicio
-// import { register as registerUser } from '../../services/authService';
+import { Link } from 'react-router-dom';
+import { register as registerUser } from '../../services/authService';
 
 export default function Registro() {
   const { register, handleSubmit } = useForm();
@@ -14,12 +14,11 @@ export default function Registro() {
   const [success, setSuccess] = useState(false);
   const [especialidades, setEspecialidades] = useState([]);
 
-  // Traemos las especialidades desde el endpoint real
   useEffect(() => {
     const fetchEspecialidades = async () => {
       try {
         const response = await axios.get("/api/specialties");
-        setEspecialidades(response.data); // asumimos que response.data es un array de strings
+        setEspecialidades(response.data.List);
       } catch (err) {
         console.error("Error al cargar especialidades:", err);
       }
@@ -35,18 +34,28 @@ export default function Registro() {
     setError(null);
     setSuccess(false);
 
-    try {
-      // BOCETO: simulamos el envío al backend con un delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    const payload = {
+      MedicoID: 0,
+      Email: data.Email,
+      DNI: data.DNI,
+      Denominacion: data.Denominacion,
+      EspecialidadID: parseInt(data.EspecialidadID, 10),
+      Matricula: data.Matricula,
+      FirmaTexto: data.FirmaTexto,
+      FirmaImagen: "",
+      HashSeguridad: "",
+      DebeCambiarClave: "0",
+      MomentoAlta: new Date().toISOString().slice(0, 19),
+    };
 
-      // Si fuera real, sería:
-      // await registerUser(data);
+    try {
+
+      await registerUser(payload);
 
       console.log("Registro simulado exitoso");
       setSuccess(true);
 
-      // Redirigimos al perfil después de 1.5 segundos
-      setTimeout(() => navigate('/perfil'), 1500);
+      setTimeout(() => navigate('/PerfilUsuario'), 1500);
 
     } catch (err) {
       setError(err.message || 'Error en el registro');
@@ -70,15 +79,26 @@ export default function Registro() {
         <input
           type="text"
           placeholder="Ingresa tu DNI o Pasaporte"
-          {...register("dni", { required: true })}
+          {...register("DNI", { required: true })}
         />
         <br /><br />
 
         <input
           type="text"
           placeholder="Ingresa tu Nombre y Apellido"
-          {...register("nombreCompleto", { required: true })}
+          {...register("Denominacion", { required: true })}
         />
+        <br /><br />
+
+        <label>Especialidad:</label>
+        <select {...register("EspecialidadID", { required: true })}>
+          <option value="">Selecciona una especialidad</option>
+          {especialidades.map((esp) => (
+            <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
+              {esp.Descripcion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
         <label>Especialidad:</label>
@@ -100,7 +120,7 @@ export default function Registro() {
         <input
           type="text"
           placeholder="Ingresa tu Firma y Aclaración"
-          {...register("firmaAclaracion", { required: true })}
+          {...register("FirmaTexto", { required: true })}
         />
         <br /><br />
 
@@ -109,9 +129,9 @@ export default function Registro() {
 
         <button className="enviar" type="submit" disabled={isLoading}>
           {isLoading ? 'Registrando...' : 'Enviar'}
-        </button>
+        </button><br /><br />
+        <Link to="/login">¿Ya tiene una cuenta?</Link>
       </form>
     </div>
   );
 }
-

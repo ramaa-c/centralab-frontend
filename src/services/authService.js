@@ -1,49 +1,30 @@
 import api from './api';
 
-// --- Login ---
-const LOGIN_ENDPOINT = "/api/auth/login"; // reemplazá con la real
+const LOGIN_ENDPOINT = "/auth/login";
+const DOCTORS_ENDPOINT = "/doctors";
 
-export const login = async (email, password) => {
+export const login = async (identifier, password) => {
   try {
-    console.log("Simulando login con:", { email, password });
+    const isEmail = identifier.includes('@');
+    const queryParam = isEmail ? `Email=${identifier}` : `DNI=${identifier}`;
 
-    /* Simulación de respuesta
-    return {
-      token: "simulated-token-123",
-      doctor_id: 1,
-      doctor_name: "Dr. Simulado",
-      doctor_email: email,
-      doctor_specialty: "Cardiología",
-      must_change_password: false
-    };*/
+    const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
 
-    // Para API real:
-     const response = await api.post(LOGIN_ENDPOINT, { email, password });
-     return response.data;
+    if (!searchResponse.data || searchResponse.data.List?.length === 0) {
+      throw new Error('El DNI o Email no se encuentra registrado.');
+    }
+
+    const doctorId = searchResponse.data.List[0].MedicoID;
+
+    const loginResponse = await api.post(LOGIN_ENDPOINT, {
+      doctor_id: String(doctorId),
+      password: password,
+    });
+
+    return loginResponse.data;
+
   } catch (error) {
     const msg = error.response?.data?.message || error.message || 'Error en el login';
-    throw new Error(msg);
-  }
-};
-
-// --- Registro ---
-const REGISTER_ENDPOINT = "http://tu-servidor/api/registro"; // reemplazá con la real
-
-export const register = async (userData) => {
-  try {
-    console.log("Simulando registro con:", userData);
-
-    // Simulación de respuesta
-    return {
-      id: 1,
-      ...userData
-    };
-
-    // Para API real:
-    // const response = await api.post(REGISTER_ENDPOINT, userData);
-    // return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error en el registro';
     throw new Error(msg);
   }
 };
@@ -147,6 +128,17 @@ export const cambiarClave = async (doctorId, nuevaPassword) => {
     return response.data;
   } catch (error) {
     const msg = error.response?.data?.message || 'Error al cambiar la contraseña';
+    throw new Error(msg);
+  }
+};
+
+export const register = async (userData) => {
+  try {
+    console.log("registro con:", userData);
+    const response = await api.post(DOCTORS_ENDPOINT, userData);
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error en el registro';
     throw new Error(msg);
   }
 };
