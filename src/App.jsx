@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Auth/Login';
 import Registro from './pages/Auth/Registro';
-import NuevaReceta from './pages/Auth/NuevaReceta';
-import Receta from './pages/Auth/Receta';
-import NuevoPaciente from './pages/Auth/NuevoPaciente';
-import Paciente from './pages/Auth/Paciente';
-import UserProfile from './pages/Perfil/UserProfile.jsx';
+import NuevaReceta from './pages/Recetas/NuevaReceta.jsx';
+import Receta from './pages/Recetas/Receta.jsx';
+import NuevoPaciente from './pages/Pacientes/NuevoPaciente.jsx';
+import Paciente from './pages/Pacientes/Paciente.jsx';
+import UserProfile from './pages/Perfil/PerfilUsuario.jsx';
 
 function App() {
   return (
