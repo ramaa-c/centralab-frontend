@@ -11,10 +11,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta por defecto / */}
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Rutas principales */}
         <Route path="/login" element={<Login />} />
         <Route path="/NuevoPaciente" element={<NuevoPaciente />} />
         <Route path="/NuevaReceta" element={<NuevaReceta />} />
