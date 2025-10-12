@@ -21,16 +21,16 @@ export default function Login() {
             const userData = await login(data.identifier, data.password);
             console.log("Login exitoso:", userData);
             
-            localStorage.setItem('token', responseData.token);
+            localStorage.setItem('token', userData.token);
             localStorage.setItem('user', JSON.stringify({
-                id: responseData.doctor_id,
-                name: responseData.doctor_name,
-                email: responseData.doctor_email,
-                specialty: responseData.doctor_specialty
+                id: userData.doctor_id,
+                name: userData.doctor_name,
+                email: userData.doctor_email,
+                specialty: userData.doctor_specialty 
             }));
 
 
-            if (responseData.must_change_password) {
+            if (userData.must_change_password) {
                 navigate('/CamiarClave'); 
             } else {
                 navigate('/PerfilUsuario');

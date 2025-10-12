@@ -24,8 +24,111 @@ export const login = async (identifier, password) => {
     return loginResponse.data;
 
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message || 'Error en el inicio de sesión';
-    throw new Error(errorMessage);
+    const msg = error.response?.data?.message || error.message || 'Error en el login';
+    throw new Error(msg);
+  }
+};
+
+// --- Crear Paciente ---
+const PACIENTE_ENDPOINT = "http://tu-servidor/api/pacientes"; // reemplazá con la real
+
+export const crearPaciente = async (pacienteData) => {
+  try {
+    console.log("Simulando creación de paciente con:", pacienteData);
+
+    // Simulación de respuesta
+    return {
+      id: 1,
+      ...pacienteData
+    };
+
+    // Para API real:
+    // const response = await api.post(PACIENTE_ENDPOINT, pacienteData);
+    // return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al crear el paciente';
+    throw new Error(msg);
+  }
+};
+
+// --- Crear Receta ---
+const RECETA_ENDPOINT = "http://tu-servidor/api/recetas"; // reemplazá con la real
+
+export const crearReceta = async (recetaData) => {
+  try {
+    console.log("Simulando creación de receta con:", recetaData);
+
+    // Simulación de respuesta
+    return {
+      id: 1,
+      ...recetaData
+    };
+
+    // Para API real:
+    // const response = await api.post(RECETA_ENDPOINT, recetaData);
+    // return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al crear la receta';
+    throw new Error(msg);
+  }
+};
+// ------------------- NUEVO PACIENTE -------------------
+const NUEVO_PACIENTE_ENDPOINT = "http://tu-servidor/api/pacientes"; // reemplazá con la real
+
+export const crearNuevoPaciente = async (pacienteData) => {
+  try {
+    console.log("Simulando creación de nuevo paciente con:", pacienteData);
+
+    // Simulación de respuesta
+    return {
+      id: 1,
+      ...pacienteData
+    };
+
+    // Para API real:
+    // const response = await api.post(NUEVO_PACIENTE_ENDPOINT, pacienteData);
+    // return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al crear el nuevo paciente';
+    throw new Error(msg);
+  }
+};
+
+// ------------------- NUEVA RECETA -------------------
+const NUEVA_RECETA_ENDPOINT = "http://tu-servidor/api/recetas"; // reemplazá con la real
+
+export const crearNuevaReceta = async (recetaData) => {
+  try {
+    console.log("Simulando creación de nueva receta con:", recetaData);
+
+    // Simulación de respuesta
+    return {
+      id: 1,
+      ...recetaData
+    };
+
+    // Para API real:
+    // const response = await api.post(NUEVA_RECETA_ENDPOINT, recetaData);
+    // return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al crear la nueva receta';
+    throw new Error(msg);
+  }
+};
+
+// ------------------- CAMBIAR CLAVE -------------------
+const CAMBIAR_CLAVE_ENDPOINT = "/doctors"; // base, completaremos con doctorId en la función
+
+export const cambiarClave = async (doctorId, nuevaPassword) => {
+  try {
+    const response = await api.put(`${CAMBIAR_CLAVE_ENDPOINT}/${doctorId}/password:change`, {
+      doctor_id: doctorId,
+      password: nuevaPassword
+    });
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al cambiar la contraseña';
+    throw new Error(msg);
   }
 };
 

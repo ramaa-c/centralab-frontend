@@ -72,7 +72,7 @@ export default function Registro() {
         <input
           type="text"
           placeholder="Ingresa tu Email"
-          {...register("Email", { required: true })}
+          {...register("email", { required: true })}
         />
         <br /><br />
 
@@ -101,10 +101,19 @@ export default function Registro() {
         </select>
         <br /><br />
 
+        <label>Especialidad:</label>
+        <select {...register("especialidad", { required: true })}>
+          <option value="">Selecciona una especialidad</option>
+          {especialidades.map((esp, i) => (
+            <option key={i} value={esp}>{esp}</option>
+          ))}
+        </select>
+        <br /><br />
+
         <input
           type="text"
           placeholder="Ingresa tu Matrícula"
-          {...register("Matricula", { required: true })}
+          {...register("matricula", { required: true })}
         />
         <br /><br />
 
