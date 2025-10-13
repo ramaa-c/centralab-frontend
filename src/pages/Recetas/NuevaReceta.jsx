@@ -1,83 +1,222 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
-// cuando tengas el endpoint real, importamos el servicio
-// import { crearReceta } from '../../services/authService';
+import { useNavigate, useLocation } from "react-router-dom";
+import { useApi } from "../../hooks/useApi";
+import { crearReceta } from "../../services/authService";
 
 export default function NuevaReceta() {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch } = useForm();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const pacienteRecibido = location.state?.paciente || null;
+
+  const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [dniPaciente, setDniPaciente] = useState("");
+
+  const coberturaSeleccionada = watch("Cobertura");
+
+  const { data: diagnosticos } = useApi("/api/diagnostics");
+  const { data: coberturas } = useApi("/api/private_healthcares");
+  const { data: practicas } = useApi("/api/tests/all");
+  const { data: pacientes } = useApi("/api/patients");
+
+  const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
+
+  useEffect(() => {
+    if (coberturaSeleccionada) {
+      fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
+    }
+  }, [coberturaSeleccionada]);
+
+  const handleAgregarPractica = (id) => {
+    const practica = practicas.find((p) => p.PracticaID === id);
+    if (!practica) return;
+    if (practicasSeleccionadas.some((p) => p.PracticaID === practica.PracticaID)) return;
+    setPracticasSeleccionadas([...practicasSeleccionadas, practica]);
+  };
+
+  const handleEliminarPractica = (id) => {
+    setPracticasSeleccionadas(practicasSeleccionadas.filter((p) => p.PracticaID !== id));
+  };
 
   const enviar = async (data) => {
-    console.log("Datos del formulario:", data);
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
-
     try {
-      // 📍 BOCETO: simulamos el envío al backend con un delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        Prescription: {
+          RecetaID: 0,
+          fchReceta: new Date().toISOString().slice(0, 19),
+          EstablecimientoID: 1,
+          MedicoID: 1,
+          PacienteID: parseInt(data.Paciente) || pacienteRecibido?.PacienteID || 0,
+          DiagnosticoID: parseInt(data.Diagnostico) || 0,
+          Notas: data.Notas || "",
+          NotasReceta: data.NotasReceta || "",
+          PrepagaPlanID: parseInt(data.Plan),
+          Activo: "1",
+          MomentoAlta: new Date().toISOString().slice(0, 19),
+        },
+        Credential: localStorage.getItem("token") || "credencial-temporal",
+        Tests: practicasSeleccionadas.map((p) => ({
+          PracticaID: p.PracticaID,
+          Comentario: p.Descripcion || "",
+        })),
+      };
 
-      // Si tuvieras la API real:
-      // await crearReceta(data);
-
-      console.log("Receta creada exitosamente (simulado)");
-      setSuccess(true);
-
-      // Redirigimos a perfil o donde quieras después de 1.5s
-      setTimeout(() => navigate('/perfil'), 1500);
-
+      const response = await crearReceta(payload);
+      alert(response.message || "Receta creada correctamente");
+      navigate("/prescripciones");
     } catch (err) {
-      setError(err.message || 'Error al crear la receta');
-    } finally {
-      setIsLoading(false);
+      console.error("Error al enviar la receta:", err);
+      setError(err.message);
     }
   };
 
   return (
-    <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1 className="main-title">Nueva Receta</h1>
+    <div className="container" style={{ textAlign: "center", marginTop: "40px" }}>
+      <h1 className="main-title">Registrar Receta</h1>
 
       <form className="Formulario" onSubmit={handleSubmit(enviar)}>
-        <input type="text" placeholder="Documento" {...register("documento", { required: true })} />
+        <label>Paciente:</label>
+        {pacienteRecibido ? (
+          <>
+            <p>
+              <strong>
+                {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
+              </strong>
+            </p>
+            <p>DNI: {pacienteRecibido.DNI}</p>
+            <input
+              type="hidden"
+              value={pacienteRecibido.PacienteID}
+              {...register("Paciente")}
+            />
+          </>
+        ) : (
+          <>
+            <select
+              {...register("Paciente", { required: true })}
+              onChange={(e) => {
+                const seleccionado = pacientes.find(
+                  (p) => p.PacienteID === parseInt(e.target.value)
+                );
+                setDniPaciente(seleccionado ? seleccionado.DNI : "");
+              }}
+            >
+              <option value="">Selecciona un paciente</option>
+              {pacientes.map((p) => (
+                <option key={p.PacienteID} value={p.PacienteID}>
+                  {p.Apellido} {p.Nombres}
+                </option>
+              ))}
+            </select>
+            {dniPaciente && <p>DNI: {dniPaciente}</p>}
+          </>
+        )}
         <br /><br />
 
-        <input type="text" placeholder="Paciente" {...register("paciente", { required: true })} />
+        <label>Fecha:</label>
+        <input type="date" {...register("Fecha", { required: true })} />
         <br /><br />
 
-        <input type="text" placeholder="Diagnóstico" {...register("diagnostico", { required: true })} />
+        <label>Diagnóstico:</label>
+        <select {...register("Diagnostico", { required: true })}>
+          <option value="">Selecciona un diagnóstico</option>
+          {diagnosticos.map((d) => (
+            <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
+              {d.Descripcion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="date" placeholder="Fecha" {...register("fecha", { required: true })} />
+        <label>Cobertura:</label>
+        <select {...register("Cobertura", { required: true })}>
+          <option value="">Selecciona una cobertura</option>
+          {coberturas.map((c) => (
+            <option key={c.PrepagaID} value={c.PrepagaID}>
+              {c.Denominacion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="text" placeholder="Cobertura" {...register("cobertura", { required: true })} />
+        <label>Plan:</label>
+        <select {...register("Plan", { required: true })} disabled={!planes.length}>
+          <option value="">Selecciona un plan</option>
+          {planes.map((p) => (
+            <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
+              {p.Denominacion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="text" placeholder="Plan" {...register("plan", { required: true })} />
-        <br /><br />
-
-        <input type="text" placeholder="Nro Afiliado" {...register("nroAfiliado", { required: true })} />
-        <br /><br />
-
-        <input type="text" placeholder="Prácticas" {...register("practicas", { required: true })} />
-        <br /><br />
-
-        <h3 className="main-title">Prácticas Seleccionadas</h3>
-        <input type="text" placeholder="Prácticas Seleccionadas" {...register("practicasSeleccionadas", { required: true })} />
-        <br /><br />
-
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>¡Receta creada exitosamente! Redirigiendo...</p>}
-
-        <button className="enviar" type="submit" disabled={isLoading}>
-          {isLoading ? 'Enviando...' : 'Enviar'}
+        <label>Prácticas:</label>
+        <select id="comboPracticas" {...register("PracticaTemp")}>
+          <option value="">Selecciona una práctica</option>
+          {practicas.map((p) => (
+            <option key={p.PracticaID} value={p.PracticaID}>
+              {p.Descripcion}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          style={{ marginLeft: "10px" }}
+          onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
+        >
+          <i className="fa-solid fa-plus"></i> Agregar
         </button>
+
+        <br /><br />
+
+        <h3>Prácticas seleccionadas:</h3>
+        {practicasSeleccionadas.length === 0 ? (
+          <p>No hay prácticas agregadas</p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {practicasSeleccionadas.map((p) => (
+              <li key={p.PracticaID}>
+                {p.Descripcion}{" "}
+                <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
+                  <i className="fa-solid fa-x"></i>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <br />
+        <label>Notas:</label>
+        <br />
+        <textarea
+          {...register("Notas")} placeholder="Nota de receta..." rows="3" style={{ width: "80%" }}
+        />
+        <br /><br />
+
+        <label>Observaciones al laboratorio:</label>
+        <textarea
+          {...register("NotasReceta")} placeholder="Nota al laboratorio..." rows="3" style={{ width: "80%" }}
+        />
+        <br /><br />
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <br />
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <button className="enviar" type="submit">
+            Registrar Receta
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/prescripciones")}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+          >
+            Volver
+          </button>
+        </div>
       </form>
     </div>
   );

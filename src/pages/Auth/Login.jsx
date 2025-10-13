@@ -63,7 +63,7 @@ export default function Login() {
                 {error && <p style={{ color: 'red' }}>{error}</p>}
 
                 <button className="enviar" type="submit" disabled={isLoading}>
-                    {isLoading ? 'Enviando...' : 'Enviar'}
+                    {isLoading ? 'Enviando...' : 'Entrar'}
                 </button>
                 <Link to="/registro">¿No tiene una cuenta?</Link>      
             </form>
