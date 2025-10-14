@@ -1,71 +1,172 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
-import { crearReceta } from '../../services/authService';
+import { useNavigate } from "react-router-dom";
+import { useApi } from "../../hooks/useApi";
+import { crearReceta } from "../../services/authService";
 
 export default function Receta() {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch } = useForm();
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
 
+  const coberturaSeleccionada = watch("Cobertura");
+
+  // Hooks reutilizables 👇
+  const { data: diagnosticos, error: errDiag } = useApi("/api/diagnostics");
+  const { data: coberturas, error: errCob } = useApi("/api/private_healthcares");
+  const { data: practicas, error: errPract } = useApi("/api/tests/all");
+
+  // Planes se cargan según la cobertura seleccionada (no automático)
+  const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
+
+  // 🔹 cargar planes solo cuando cambia la cobertura
+  useEffect(() => {
+    if (coberturaSeleccionada) {
+      fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
+    }
+  }, [coberturaSeleccionada]);
+
+  // 🔹 agregar práctica
+  const handleAgregarPractica = (id) => {
+    const practica = practicas.find((p) => p.PracticaID === parseInt(id));
+    if (!practica) return;
+    if (practicasSeleccionadas.some((p) => p.PracticaID === practica.PracticaID)) return;
+    setPracticasSeleccionadas([...practicasSeleccionadas, practica]);
+  };
+
+  // 🔹 eliminar práctica
+  const handleEliminarPractica = (id) => {
+    setPracticasSeleccionadas(practicasSeleccionadas.filter((p) => p.PracticaID !== id));
+  };
+
+  // 🔹 enviar receta
   const enviar = async (data) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const responseData = await crearReceta(data); // llamada simulada
-      console.log("Receta creada con éxito:", responseData);
+      const payload = {
+        Prescription: {
+          RecetaID: 0,
+          fchReceta: data.Fecha,
+          EstablecimientoID: 1,
+          MedicoID: 1,
+          PacienteID: parseInt(data.Paciente) || 0,
+          DiagnosticoID: parseInt(data.Diagnostico) || 0,
+          Notas: data.Notas || "",
+          NotasReceta: "Generada desde el portal web",
+          PrepagaPlanID: parseInt(data.Plan),
+          Activo: "1",
+          MomentoAlta: new Date().toISOString(),
+        },
+        Credential: localStorage.getItem("token") || "credencial-temporal",
+        Tests: practicasSeleccionadas.map((p) => ({
+          PracticaID: p.PracticaID,
+          Comentario: p.Descripcion || "",
+        })),
+      };
 
+      await crearReceta(payload);
       alert("Receta registrada correctamente ✅");
-      navigate('/perfil'); // ruta después del envío
-
+      navigate("/perfil");
     } catch (err) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1 className="main-title">Receta</h1>
+    <div className="container" style={{ textAlign: "center", marginTop: "40px" }}>
+      <h1 className="main-title">Registrar Receta</h1>
 
       <form className="Formulario" onSubmit={handleSubmit(enviar)}>
+        <label>Documento:</label>
         <input type="text" placeholder="Documento" {...register("Documento", { required: true })} />
         <br /><br />
 
-        <input type="text" placeholder="Paciente" {...register("Paciente", { required: true })} />
+        <label>Paciente:</label>
+        <input type="text" placeholder="Paciente (ID)" {...register("Paciente", { required: true })} />
         <br /><br />
 
-        <input type="text" placeholder="Diagnóstico" {...register("Diagnostico", { required: true })} />
+        <label>Diagnóstico:</label>
+        <select {...register("Diagnostico", { required: true })}>
+          <option value="">Selecciona un diagnóstico</option>
+          {diagnosticos.map((d) => (
+            <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
+              {d.Descripcion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="date" placeholder="Fecha" {...register("Fecha", { required: true })} />
+        <label>Fecha:</label>
+        <input type="date" {...register("Fecha", { required: true })} />
         <br /><br />
 
-        <input type="text" placeholder="Cobertura" {...register("Cobertura", { required: true })} />
+        <label>Cobertura:</label>
+        <select {...register("Cobertura", { required: true })}>
+          <option value="">Selecciona una cobertura</option>
+          {coberturas.map((c) => (
+            <option key={c.PrepagaID} value={c.PrepagaID}>
+              {c.Denominacion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="text" placeholder="Plan" {...register("Plan", { required: true })} />
+        <label>Plan:</label>
+        <select {...register("Plan", { required: true })} disabled={!planes.length}>
+          <option value="">Selecciona un plan</option>
+          {planes.map((p) => (
+            <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
+              {p.Denominacion}
+            </option>
+          ))}
+        </select>
         <br /><br />
 
-        <input type="text" placeholder="Nro Afiliado" {...register("NroAfiliado", { required: true })} />
+        <label>Prácticas:</label>
+        <select id="comboPracticas" {...register("PracticaTemp")}>
+          <option value="">Selecciona una práctica</option>
+          {practicas.map((p) => (
+            <option key={p.PracticaID} value={p.PracticaID}>
+              {p.Descripcion}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          style={{ marginLeft: "10px" }}
+          onClick={() => {
+            const select = document.getElementById("comboPracticas");
+            handleAgregarPractica(select.value);
+          }}
+        >
+          ➕ Agregar
+        </button>
+
         <br /><br />
 
-        <input type="text" placeholder="Prácticas" {...register("Practicas", { required: true })} />
-        <br /><br />
+        <h3>Prácticas seleccionadas:</h3>
+        {practicasSeleccionadas.length === 0 ? (
+          <p>No hay prácticas agregadas</p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {practicasSeleccionadas.map((p) => (
+              <li key={p.PracticaID}>
+                {p.Descripcion}{" "}
+                <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
+                  ❌
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
-        <h3 className="main-title">Prácticas Seleccionadas</h3>
-        <input type="text" placeholder="Prácticas Seleccionadas" {...register("PracticasSeleccionadas", { required: true })} />
-        <br /><br />
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-
-        <button className="enviar" type="submit" disabled={isLoading}>
-          {isLoading ? 'Enviando...' : 'Enviar'}
+        <br />
+        <button className="enviar" type="submit">
+          Registrar Receta
         </button>
       </form>
     </div>

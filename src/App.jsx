@@ -6,6 +6,7 @@ import Receta from './pages/Recetas/Receta.jsx';
 import NuevoPaciente from './pages/Pacientes/NuevoPaciente.jsx';
 import Paciente from './pages/Pacientes/Paciente.jsx';
 import UserProfile from './pages/Perfil/PerfilUsuario.jsx';
+import CambiarClave from './pages/Auth/CambiarClave';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/NuevoPaciente" element={<NuevoPaciente />} />
+        <Route path="/cambiarclave" element={<CambiarClave />} />
         <Route path="/NuevaReceta" element={<NuevaReceta />} />
         <Route path="/Receta" element={<Receta />} />
         <Route path="/Paciente" element={<Paciente />} />
