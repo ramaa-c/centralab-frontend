@@ -3,6 +3,8 @@ import {
   getDoctorById, updateDoctor, getDoctorEstablishments, getAllEstablishments, addDoctorEstablishment, removeDoctorEstablishment, getAllSpecialties
 } from "../../services/doctorService.js";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
+import "@fortawesome/fontawesome-free/css/all.min.css"; // Para los iconos
+import "../../styles/login.css"; // Para los estilos de la tarjeta
 
 export default function PerfilUsuario() {
   const user = JSON.parse(localStorage.getItem("user"));
