@@ -5,7 +5,10 @@ import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 
 export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
-
+  const user = JSON.parse(localStorage.getItem("user"));
+  const doctorId = user?.id || 0;
+  const establecimientoId = user?.establecimientoId || 1;
+  console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
   const { register, handleSubmit, watch, setValue } = useForm();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
@@ -16,7 +19,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: coberturas } = useApi("/api/private_healthcares");
   const { data: practicas } = useApi("/api/tests/all");
   const { data: pacientes } = useApi("/api/patients");
-
+  const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
 
   useEffect(() => {
@@ -30,6 +33,13 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       setValue("Paciente", pacienteRecibido.PacienteID);
     }
   }, [pacienteRecibido, setValue]);
+
+  useEffect(() => {
+  const pacienteId = pacienteRecibido?.PacienteID || watch("Paciente");
+  if (pacienteId) {
+    fetchCredencial(`/api/patients/${pacienteId}/credentials`);
+  }
+  }, [pacienteRecibido, watch("Paciente")]);
 
   const handleAgregarPractica = (id) => {
     const practica = practicas.find((p) => p.PracticaID === id);
@@ -48,8 +58,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         Prescription: {
           RecetaID: 0,
           fchReceta: new Date().toISOString().slice(0, 19),
-          EstablecimientoID: 1,
-          MedicoID: 1,
+          EstablecimientoID: establecimientoId,
+          MedicoID: doctorId,
           PacienteID: parseInt(data.Paciente) || pacienteRecibido?.PacienteID || 0,
           DiagnosticoID: parseInt(data.Diagnostico) || 0,
           Notas: data.Notas || "",
@@ -58,7 +68,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential: localStorage.getItem("token") || "credencial-temporal",
+        Credential:credencialData?.List?.[0]?.Credencial || "credencial-temporal",
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",

@@ -3,7 +3,23 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { login } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+
+console.log("--- Contenido del LocalStorage 1---");
+
+for (const key in localStorage) {
+  if (localStorage.hasOwnProperty(key)) {
+    const value = localStorage.getItem(key);
+    try {
+      console.log(`${key}:`, JSON.parse(value));
+    } catch (e) {
+      console.log(`${key}:`, value);
+    }
+  }
+}
+
+console.log("---------------------------------");
 
 export default function Login() {
   const { register, handleSubmit } = useForm();
@@ -12,27 +28,19 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  const { login } = useAuth();
 
   const enviar = async (data) => {
     setIsLoading(true);
     setError(null);
-
-        try {
-            const userData = await login(data);
-            console.log("Login exitoso:", userData);
-
-            if (userData.must_change_password) {
-                navigate('/CambiarClave'); 
-            } else {
-                navigate('/prescripciones');
-            }
-
-            } catch (err) {
-            setError(err.message);
-            console.error("Falló al ingresar:", err);
-            } finally {
-            setIsLoading(false);
-            }
+    try {
+      await login(data);
+    } catch (err) {
+      setError(err.message);
+      console.error("Falló al ingresar:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
     return (
