@@ -17,25 +17,26 @@ export const login = async (credentials) => {
   }
 
   const doctorId = searchResponse.data.List[0].MedicoID;
+  console.log("DoctorId:", doctorId);
+  console.log("Identificador dni o email:",identifier);
 
   const response = await api.post(LOGIN_ENDPOINT, {
     doctor_id: identifier,
     password: password
   });
 
-  const userData = response.data;
+  const apiResponseData  = response.data;
 
-  localStorage.setItem('token', userData.token);
-  localStorage.setItem('user', JSON.stringify({
+  const userToStore = {
     id: doctorId,
-    dni: userData.doctor_id,
-    name: userData.doctor_name,
-    email: userData.doctor_email,
-    specialty: userData.doctor_specialty,
-    must_change_password: userData.must_change_password
-  }));
+    dni: apiResponseData.doctor_id,
+    name: apiResponseData.doctor_name,
+    email: apiResponseData.doctor_email,
+    specialty: apiResponseData.doctor_specialty,
+    must_change_password: apiResponseData.must_change_password
+  };
 
-  return userData;
+  return { user: userToStore, token: apiResponseData.token };
 };
 
 export const cambiarClave = async (doctorId, newPassword) => {

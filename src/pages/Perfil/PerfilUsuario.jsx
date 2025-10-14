@@ -15,6 +15,7 @@ export default function PerfilUsuario() {
   const [establishments, setEstablishments] = useState([]);
   const [selectedEstablishment, setSelectedEstablishment] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [activeEstablishment, setActiveEstablishment] = useState(localStorage.getItem("activeEstablishment") || "");
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -29,6 +30,15 @@ export default function PerfilUsuario() {
   useEffect(() => {
     fetchData();
   }, [doctorId]);
+
+  useEffect(() => {
+    if (doctorEstablishments.length > 0) {
+      const savedActive = localStorage.getItem("activeEstablishment");
+      if (savedActive) {
+        setActiveEstablishment(savedActive);
+      }
+    }
+  }, [doctorEstablishments]);
 
   const fetchData = async () => {
     try {
@@ -116,13 +126,22 @@ export default function PerfilUsuario() {
     );
     removed.forEach((e) => apiCalls.push(removeDoctorEstablishment(doctorId, e.EstablecimientoID)));
 
-    if (apiCalls.length === 0) return;
-
     try {
       await Promise.all(apiCalls);
-      window.location.reload();
+
+      if (activeEstablishment) {
+        const value = String(activeEstablishment);
+        localStorage.setItem("activeEstablishment", value);
+
+        const updatedUser = { ...user, establecimientoId: Number(value) };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      setInitialDoctor(doctor);
+      setInitialDoctorEstablishments(doctorEstablishments);
+      console.log("Guardado correctamente. Establecimiento activo:", activeEstablishment);
     } catch (error) {
-      console.error(error);
+      console.error("Error al guardar perfil:", error);
     }
   };
 
@@ -206,7 +225,27 @@ export default function PerfilUsuario() {
               key={est.EstablecimientoID}
               className="flex justify-between items-center border p-2 rounded"
             >
-              <span>{est.Descripcion}</span>
+            <label
+              className={`flex items-center gap-2 ${
+                activeEstablishment === String(est.EstablecimientoID)
+                  ? "font-bold text-blue-600"
+                  : ""
+              }`}
+            >
+              <input
+                type="radio"
+                name="activeEstablishment"
+                value={String(est.EstablecimientoID)}
+                checked={activeEstablishment === String(est.EstablecimientoID)}
+                onChange={(e) => {
+                  const value = String(e.target.value);
+                  setActiveEstablishment(value);
+                  localStorage.setItem("activeEstablishment", value);
+                  console.log("Seleccionado establecimiento:", value);
+                }}
+              />
+              {est.Descripcion}
+            </label>
               <button
                 onClick={() => handleRemoveEstablishment(est.EstablecimientoID)}
                 className="text-red-600 hover:text-red-800"
@@ -216,7 +255,6 @@ export default function PerfilUsuario() {
             </li>
           ))}
         </ul>
-
         <div className="mt-4 flex gap-2 items-center">
           <select
             value={selectedEstablishment}
