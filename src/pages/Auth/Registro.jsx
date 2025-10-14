@@ -74,7 +74,7 @@ export default function Registro() {
             {/* 🚨 NOTA: Para estilizar el <select> en CSS de forma coherente, lo envolvemos. */}
             <div className="select-container identifier-container">
                 <i className="fa-solid fa-stethoscope input-icon"></i>
-                <label className="select-label">Especialidad:</label>
+                <label className="select-label"></label>
                 
                 {loadingEsp ? (
                   <select disabled className="select-input">
