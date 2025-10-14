@@ -2,135 +2,58 @@ import api from './api';
 
 const LOGIN_ENDPOINT = "/auth/login";
 const DOCTORS_ENDPOINT = "/doctors";
+const PACIENTES_ENDPOINT = "/patients";
+const RECETAS_ENDPOINT = "/prescriptions";
 
-export const login = async (identifier, password) => {
+export const login = async (credentials) => {
+  const { identifier, password } = credentials;
+
+  const isEmail = identifier.includes('@');
+  const queryParam = isEmail ? `Email=${identifier}` : `DNI=${identifier}`;
+  const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
+
+  if (!searchResponse.data || searchResponse.data.List?.length === 0) {
+    throw new Error('El DNI o Email no se encuentra registrado.');
+  }
+
+  const doctorId = searchResponse.data.List[0].MedicoID;
+
+  const response = await api.post(LOGIN_ENDPOINT, {
+    doctor_id: identifier,
+    password: password
+  });
+
+  const userData = response.data;
+
+  localStorage.setItem('token', userData.token);
+  localStorage.setItem('user', JSON.stringify({
+    id: doctorId,
+    dni: userData.doctor_id,
+    name: userData.doctor_name,
+    email: userData.doctor_email,
+    specialty: userData.doctor_specialty,
+    must_change_password: userData.must_change_password
+  }));
+
+  return userData;
+};
+
+export const cambiarClave = async (doctorId, newPassword) => {
   try {
-    const isEmail = identifier.includes('@');
-    const queryParam = isEmail ? `Email=${identifier}` : `DNI=${identifier}`;
-
-    const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
-
-    if (!searchResponse.data || searchResponse.data.List?.length === 0) {
-      throw new Error('El DNI o Email no se encuentra registrado.');
-    }
-
-    const doctorId = searchResponse.data.List[0].MedicoID;
-
-    const loginResponse = await api.post(LOGIN_ENDPOINT, {
+    console.log("cambio de clave con:", doctorId, newPassword);
+    const response = await api.put(`/doctors/${doctorId}/password:change`, {
       doctor_id: String(doctorId),
-      password: password,
+      password: newPassword,
     });
 
-    return loginResponse.data;
-
-  } catch (error) {
-    const msg = error.response?.data?.message || error.message || 'Error en el login';
-    throw new Error(msg);
-  }
-};
-
-// --- Crear Paciente ---
-const PACIENTE_ENDPOINT = "http://tu-servidor/api/pacientes"; // reemplazá con la real
-
-export const crearPaciente = async (pacienteData) => {
-  try {
-    console.log("Simulando creación de paciente con:", pacienteData);
-
-    // Simulación de respuesta
-    return {
-      id: 1,
-      ...pacienteData
-    };
-
-    // Para API real:
-    // const response = await api.post(PACIENTE_ENDPOINT, pacienteData);
-    // return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al crear el paciente';
-    throw new Error(msg);
-  }
-};
-
-// --- Crear Receta ---
-const RECETA_ENDPOINT = "http://tu-servidor/api/recetas"; // reemplazá con la real
-
-export const crearReceta = async (recetaData) => {
-  try {
-    console.log("Simulando creación de receta con:", recetaData);
-
-    // Simulación de respuesta
-    return {
-      id: 1,
-      ...recetaData
-    };
-
-    // Para API real:
-    // const response = await api.post(RECETA_ENDPOINT, recetaData);
-    // return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al crear la receta';
-    throw new Error(msg);
-  }
-};
-// ------------------- NUEVO PACIENTE -------------------
-const NUEVO_PACIENTE_ENDPOINT = "http://tu-servidor/api/pacientes"; // reemplazá con la real
-
-export const crearNuevoPaciente = async (pacienteData) => {
-  try {
-    console.log("Simulando creación de nuevo paciente con:", pacienteData);
-
-    // Simulación de respuesta
-    return {
-      id: 1,
-      ...pacienteData
-    };
-
-    // Para API real:
-    // const response = await api.post(NUEVO_PACIENTE_ENDPOINT, pacienteData);
-    // return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al crear el nuevo paciente';
-    throw new Error(msg);
-  }
-};
-
-// ------------------- NUEVA RECETA -------------------
-const NUEVA_RECETA_ENDPOINT = "http://tu-servidor/api/recetas"; // reemplazá con la real
-
-export const crearNuevaReceta = async (recetaData) => {
-  try {
-    console.log("Simulando creación de nueva receta con:", recetaData);
-
-    // Simulación de respuesta
-    return {
-      id: 1,
-      ...recetaData
-    };
-
-    // Para API real:
-    // const response = await api.post(NUEVA_RECETA_ENDPOINT, recetaData);
-    // return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al crear la nueva receta';
-    throw new Error(msg);
-  }
-};
-
-// ------------------- CAMBIAR CLAVE -------------------
-const CAMBIAR_CLAVE_ENDPOINT = "/doctors"; // base, completaremos con doctorId en la función
-
-export const cambiarClave = async (doctorId, nuevaPassword) => {
-  try {
-    const response = await api.put(`${CAMBIAR_CLAVE_ENDPOINT}/${doctorId}/password:change`, {
-      doctor_id: doctorId,
-      password: nuevaPassword
-    });
     return response.data;
   } catch (error) {
-    const msg = error.response?.data?.message || 'Error al cambiar la contraseña';
+    const msg =
+      error.response?.data?.message || "Error al cambiar la contraseña";
     throw new Error(msg);
   }
 };
+
 
 export const register = async (userData) => {
   try {
@@ -139,6 +62,29 @@ export const register = async (userData) => {
     return response.data;
   } catch (error) {
     const msg = error.response?.data?.message || 'Error en el registro';
+    throw new Error(msg);
+  }
+};
+
+export const crearPaciente = async (pacienteData) => {
+  try {
+    console.log("Creando paciente con:", pacienteData);
+    const response = await api.post(PACIENTES_ENDPOINT, pacienteData);
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al crear el paciente';
+    throw new Error(msg);
+  }
+};
+
+export const crearReceta = async (recetaData) => {
+  try {
+    console.log("Enviando receta:", recetaData);
+    const response = await api.post(RECETAS_ENDPOINT, recetaData);
+    return response.data;
+  } catch (error) {
+    console.error("Error en crearReceta:", error);
+    const msg = error.response?.data?.message || "Error al crear la receta";
     throw new Error(msg);
   }
 };

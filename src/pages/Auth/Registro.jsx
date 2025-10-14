@@ -1,31 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useApi } from '../../hooks/useApi';
 import { register as registerUser } from '../../services/authService';
 
 export default function Registro() {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
 
+  const { data: especialidades = [], error: errorEsp, loading: loadingEsp } = useApi("/api/specialties");
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [especialidades, setEspecialidades] = useState([]);
-
-  useEffect(() => {
-    const fetchEspecialidades = async () => {
-      try {
-        const response = await axios.get("/api/specialties");
-        setEspecialidades(response.data.List);
-      } catch (err) {
-        console.error("Error al cargar especialidades:", err);
-      }
-    };
-
-    fetchEspecialidades();
-  }, []);
 
   const enviar = async (data) => {
     console.log("Datos del formulario:", data);
@@ -49,15 +36,14 @@ export default function Registro() {
     };
 
     try {
-
       await registerUser(payload);
-
-      console.log("Registro simulado exitoso");
+      console.log("Registro exitoso");
       setSuccess(true);
 
-      setTimeout(() => navigate('/PerfilUsuario'), 1500);
+      setTimeout(() => navigate('/Login'), 1500);
 
     } catch (err) {
+      console.error("Error al registrar:", err);
       setError(err.message || 'Error en el registro');
     } finally {
       setIsLoading(false);
@@ -72,7 +58,7 @@ export default function Registro() {
         <input
           type="text"
           placeholder="Ingresa tu Email"
-          {...register("email", { required: true })}
+          {...register("Email", { required: true })}
         />
         <br /><br />
 
@@ -91,29 +77,32 @@ export default function Registro() {
         <br /><br />
 
         <label>Especialidad:</label>
-        <select {...register("EspecialidadID", { required: true })}>
-          <option value="">Selecciona una especialidad</option>
-          {especialidades.map((esp) => (
-            <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
-              {esp.Descripcion}
-            </option>
-          ))}
-        </select>
-        <br /><br />
-
-        <label>Especialidad:</label>
-        <select {...register("especialidad", { required: true })}>
-          <option value="">Selecciona una especialidad</option>
-          {especialidades.map((esp, i) => (
-            <option key={i} value={esp}>{esp}</option>
-          ))}
-        </select>
+        {loadingEsp ? (
+          <p>Cargando especialidades...</p>
+        ) : errorEsp ? (
+          <p style={{ color: 'red' }}>Error al cargar especialidades</p>
+        ) : (
+          <select {...register("EspecialidadID", { required: true })}>
+            <option value="">Selecciona una especialidad</option>
+            {especialidades.List
+              ? especialidades.List.map((esp) => (
+                  <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
+                    {esp.Descripcion}
+                  </option>
+                ))
+              : especialidades.map((esp) => (
+                  <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
+                    {esp.Descripcion}
+                  </option>
+                ))}
+          </select>
+        )}
         <br /><br />
 
         <input
           type="text"
           placeholder="Ingresa tu Matrícula"
-          {...register("matricula", { required: true })}
+          {...register("Matricula", { required: true })}
         />
         <br /><br />
 
@@ -129,7 +118,8 @@ export default function Registro() {
 
         <button className="enviar" type="submit" disabled={isLoading}>
           {isLoading ? 'Registrando...' : 'Enviar'}
-        </button><br /><br />
+        </button>
+        <br /><br />
         <Link to="/login">¿Ya tiene una cuenta?</Link>
       </form>
     </div>
