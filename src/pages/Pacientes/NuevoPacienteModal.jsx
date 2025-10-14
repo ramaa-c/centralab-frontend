@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { crearPaciente } from '../../services/authService';
 import { useApi } from '../../hooks/useApi';
 
-export default function NuevoPaciente() {
+
+export default function NuevoPacienteModal({ onClose, onSuccess }) {
   const { register, handleSubmit } = useForm();
-  const navigate = useNavigate();
 
   const { data: sexs, isLoading: loadingSexs, error: errorSexs } = useApi('/api/sexs');
   const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/api/identificationtypes');
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
 
   const enviar = async (formData) => {
-    console.log("Datos del formulario:", formData);
-
     setIsLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
       const payload = {
@@ -32,16 +28,12 @@ export default function NuevoPaciente() {
         fchNacimiento: `${formData.fechaNacimiento}T00:00:00`,
         Email: formData.email,
         TipoDocPacienteID: Number(formData.tipoDoc),
-        MomentoAlta: new Date().toISOString(),
+        MomentoAlta: new Date().toISOString().slice(0, 19),
       };
 
-      console.log("Payload final a enviar:", payload);
-
-      const response = await crearPaciente(payload);
-      console.log("Respuesta del backend:", response);
-
-      setSuccess(true);
-      setTimeout(() => navigate('/perfil'), 1500);
+      await crearPaciente(payload);
+      onSuccess();
+      onClose();
 
     } catch (err) {
       setError(err.message || 'Error al crear el paciente');
@@ -50,10 +42,11 @@ export default function NuevoPaciente() {
     }
   };
 
-  return (
-    <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1 className="main-title">Nuevo Paciente</h1>
-
+  return createPortal(
+<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full relative">
+    <button onClick={onClose} className="absolute top-2 right-4 text-2xl font-bold">&times;</button>
+    <h1 className="main-title">Nuevo Paciente</h1>
       <form className="Formulario" onSubmit={handleSubmit(enviar)}>
 
         <select {...register("tipoDoc", { required: true })} defaultValue="">
@@ -96,12 +89,12 @@ export default function NuevoPaciente() {
         <br /><br />
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>¡Paciente creado exitosamente! Redirigiendo...</p>}
-
         <button className="enviar" type="submit" disabled={isLoading}>
-          {isLoading ? 'Enviando...' : 'Enviar'}
+          {isLoading ? 'Creando...' : 'Crear Paciente'}
         </button>
-      </form>
-    </div>
+        </form>
+      </div>
+    </div>,
+    document.getElementById('modal-root')
   );
 }

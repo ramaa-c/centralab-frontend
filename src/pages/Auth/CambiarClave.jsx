@@ -11,7 +11,7 @@ export default function CambiarClave() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  const doctor = JSON.parse(localStorage.getItem('user')); // asumimos que doctor está guardado desde login
+  const doctor = JSON.parse(localStorage.getItem('user'));
 
   const enviar = async (data) => {
     setIsLoading(true);
@@ -22,10 +22,9 @@ export default function CambiarClave() {
       await cambiarClave(doctor.id, data.password);
       setSuccess(true);
 
-      // Actualizamos must_change_password para futuros logins
       localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: false }));
 
-      setTimeout(() => navigate('/perfil'), 1500); // redirigimos al perfil/dashboard
+      setTimeout(() => navigate('/perfil'), 1500);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,7 +45,7 @@ export default function CambiarClave() {
         <br /><br />
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>Contraseña cambiada correctamente ✅</p>}
+        {success && <p style={{ color: 'green' }}>Contraseña cambiada correctamente</p>}
 
         <button className="enviar" type="submit" disabled={isLoading}>
           {isLoading ? 'Cambiando...' : 'Cambiar contraseña'}

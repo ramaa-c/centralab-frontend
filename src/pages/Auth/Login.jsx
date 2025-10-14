@@ -18,22 +18,13 @@ export default function Login() {
     setError(null);
 
         try {
-            const userData = await login(data.identifier, data.password);
+            const userData = await login(data);
             console.log("Login exitoso:", userData);
-            
-            localStorage.setItem('token', userData.token);
-            localStorage.setItem('user', JSON.stringify({
-                id: userData.doctor_id,
-                name: userData.doctor_name,
-                email: userData.doctor_email,
-                specialty: userData.doctor_specialty 
-            }));
-
 
             if (userData.must_change_password) {
-                navigate('/CamiarClave'); 
+                navigate('/CambiarClave'); 
             } else {
-                navigate('/PerfilUsuario');
+                navigate('/prescripciones');
             }
 
             } catch (err) {

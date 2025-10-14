@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 
-export default function NuevaReceta() {
-  const { register, handleSubmit, watch } = useForm();
-  const navigate = useNavigate();
-  const location = useLocation();
+export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
-  const pacienteRecibido = location.state?.paciente || null;
-
+  const { register, handleSubmit, watch, setValue } = useForm();
+  const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
-  const [dniPaciente, setDniPaciente] = useState("");
-
+  const [dniPaciente, setDniPaciente] = useState(pacienteRecibido?.DNI || "");
   const coberturaSeleccionada = watch("Cobertura");
-
   const { data: diagnosticos } = useApi("/api/diagnostics");
   const { data: coberturas } = useApi("/api/private_healthcares");
   const { data: practicas } = useApi("/api/tests/all");
@@ -29,6 +24,12 @@ export default function NuevaReceta() {
       fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
     }
   }, [coberturaSeleccionada]);
+
+  useEffect(() => {
+    if (pacienteRecibido) {
+      setValue("Paciente", pacienteRecibido.PacienteID);
+    }
+  }, [pacienteRecibido, setValue]);
 
   const handleAgregarPractica = (id) => {
     const practica = practicas.find((p) => p.PracticaID === id);
@@ -66,14 +67,14 @@ export default function NuevaReceta() {
 
       const response = await crearReceta(payload);
       alert(response.message || "Receta creada correctamente");
-      navigate("/prescripciones");
+      onClose();
     } catch (err) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
     }
   };
 
-  return (
+  return createPortal(
     <div className="container" style={{ textAlign: "center", marginTop: "40px" }}>
       <h1 className="main-title">Registrar Receta</h1>
 
@@ -218,6 +219,7 @@ export default function NuevaReceta() {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.getElementById("modal-root")
   );
 }

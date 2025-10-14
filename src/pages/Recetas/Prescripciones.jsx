@@ -1,16 +1,31 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { useApi } from "../../hooks/useApi";
+import NuevaRecetaModal from "./NuevaRecetaModal";
+import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
+import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
 
 const Prescripciones = () => {
-  const navigate = useNavigate();
-
-  const { data: pacientes, loading: loadingPacientes, error: errorPacientes,} = useApi("/api/patients");
-
-  const {data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones,} = useApi("/api/prescriptions");
-
-  const handleNuevoPaciente = () => navigate("/paciente");
-  const handleNuevaPrescripcion = () => navigate("/receta");
+  const [showRecetaModal, setShowRecetaModal] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [showPacienteModal, setShowPacienteModal] = useState(false);
+  const [showEditarPacienteModal, setShowEditarPacienteModal] = useState(false);
+  const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/api/patients");
+  const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones } = useApi("/api/prescriptions");
+  const handleOpenRecetaModal = (paciente = null) => {
+    setSelectedPatient(paciente);
+    setShowRecetaModal(true);
+  };
+  const handleNuevoPaciente = () => setShowPacienteModal(true);
+  const handlePacienteCreado = () => {
+    fetchPacientes();
+  };
+  const handleEditarPaciente = (paciente) => {
+    setSelectedPatient(paciente);
+    setShowEditarPacienteModal(true);
+  };
+  const handlePacienteActualizado = () => {
+    fetchPacientes();
+  };
 
   return (
     <div className="p-6 space-y-10">
@@ -59,10 +74,16 @@ const Prescripciones = () => {
                       <td className="px-4 py-2">{p.fchNacimiento}</td>
                       <td className="px-4 py-2">
                       <button
-                          onClick={() => navigate("/receta", { state: { paciente: p } })}
-                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                        onClick={() => handleOpenRecetaModal(p)}
+                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
                       >
-                          + Receta
+                        + Receta
+                      </button>
+                      <button
+                        onClick={() => handleEditarPaciente(p)}
+                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+                      >
+                        Editar
                       </button>
                       </td>
 
@@ -79,7 +100,7 @@ const Prescripciones = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Prescripciones</h2>
           <button
-            onClick={handleNuevaPrescripcion}
+            onClick={() => handleOpenRecetaModal()}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
             + Nueva Prescripción
@@ -127,6 +148,25 @@ const Prescripciones = () => {
           </div>
         )}
       </section>
+      {showRecetaModal && (
+        <NuevaRecetaModal
+          paciente={selectedPatient}
+          onClose={() => setShowRecetaModal(false)}
+        />
+      )}
+      {showPacienteModal && (
+        <NuevoPacienteModal
+          onClose={() => setShowPacienteModal(false)}
+          onSuccess={handlePacienteCreado}
+        />
+      )}
+      {showEditarPacienteModal && (
+        <EditarPacienteModal
+          paciente={selectedPatient}
+          onClose={() => setShowEditarPacienteModal(false)}
+          onSuccess={handlePacienteActualizado}
+        />
+      )}
     </div>
   );
 };
