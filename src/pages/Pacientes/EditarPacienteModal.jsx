@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
 import { editarPaciente } from '../../services/patientService';
@@ -18,6 +18,31 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
         : '',
     }
   });
+
+  useEffect(() => {
+          // Bloquea el scroll y evita el salto visual
+          document.body.style.overflow = 'hidden'; 
+          document.body.style.paddingRight = '10px'; 
+          
+          // 1. Define el handler de la tecla Esc
+          const handleEscape = (event) => {
+              if (event.key === 'Escape') {
+                  onClose(); 
+              }
+          };
+  
+          // 2. Adjunta el escuchador
+          document.addEventListener('keydown', handleEscape);
+  
+          return () => {
+              // 3. Limpieza: Desbloquea scroll y elimina el escuchador
+              document.body.style.overflow = 'unset'; 
+              document.body.style.paddingRight = '0';
+              document.removeEventListener('keydown', handleEscape);
+          };
+      }, [onClose]);
+
+  
 
   const { data: sexs, isLoading: loadingSexs } = useApi('/api/sexs');
   const { data: tiposDoc, isLoading: loadingTipos } = useApi('/api/identificationtypes');
@@ -57,19 +82,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={onClose}
-          className="close-button"
-          style={{
-            position: 'absolute',
-            top: '15px',
-            right: '25px',
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-          }}
-        >
-          &times;
-        </button>
+        
 
         <h1 className="main-title" style={{ textAlign: 'center' }}>Editar Paciente</h1>
 
@@ -188,14 +201,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
               gap: '10px',
             }}
           >
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary-vol"
-              disabled={isLoading}
-            >
-              Cancelar
-            </button>
+           
             <button type="submit" className="enviar" disabled={isLoading}>
               {isLoading ? 'Guardando...' : 'Guardar Cambios'}
             </button>

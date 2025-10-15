@@ -1,3 +1,4 @@
+/* Elimina el flex de login-page si ya lo tenías, ahora solo es un wrapper */
 .login-page {
     position: relative;
     display: flex;
@@ -5,30 +6,37 @@
     align-items: center;
     min-height: 100vh;
     width: 100vw;
-    background-color: #f0f0f0;
-    overflow: hidden;
+    background-color: #f0f0f0; /* Fondo general, muy claro */
+    overflow: hidden; /* Para que las formas no causen barras de desplazamiento */
 }
+
+
+/* ⚠️ Las formas decorativas (Fondo) */
 .decorative-background {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: none; /* Ignora eventos de mouse */
 }
+
+
 .shape-top, .shape-bottom {
     position: absolute;
-    background-color: #0198CC;
+    background-color: #0198CC; /* Turquesa de CentraLab */
     border-radius: 50%;
-    opacity: 0.4;
+    opacity: 0.4; /* Para que no sea tan intenso */
 }
+
 .shape-top {
     top: -150px;
     right: -100px;
     width: 400px;
     height: 400px;
-    transform: rotate(45deg);
+    transform: rotate(45deg); /* Para darle una forma más orgánica */
 }
+
 .shape-bottom {
     bottom: -150px;
     left: -100px;
@@ -36,7 +44,7 @@
     height: 500px;
 }
 .login-card {
-    display: flex;
+    display: flex; /* Habilita las dos columnas */
     background: white;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -46,49 +54,78 @@
     overflow: hidden; 
     min-height: 450px;
 }
+/* CRÍTICO: Corrección del Link "¿Olvidó su contraseña?" */
 .forgot-password-link {
+    /* Mantenemos display: block para que se alinee a la derecha */
     display: block; 
     text-align: right; 
     font-size: 0.85rem;
+    
+    /* 🚨 CRÍTICO: Forzar el color a azul/blanco para que sea visible */
     color: #0198CC !important; 
     text-decoration: none;
+    
+    /* Ajustes de espacio: Reducimos el margen superior y el inferior */
     margin-top: 5px; 
-    margin-bottom: 5px;
+    margin-bottom: 5px; /* Reducimos a 5px para que ocupe menos espacio */
 }
+
+/* Opcional: Estilo al pasar el ratón */
 .forgot-password-link:hover {
     text-decoration: underline;
 }
+
+
+/* ========================
+   AJUSTE DE LOGO (Corrección de Posicionamiento)
+   ======================== */
+
+/* CRÍTICO: Asegurarte que el .login-card es el relativo para el logo */
 .logo-section {
-    position: absolute;
+    position: absolute; /* Posiciona el logo respecto a .login-card */
     top: 90px;
     left: 30px;
-    z-index: 100;
+    z-index: 100; /* Asegura que esté por encima */
     display: flex;
     align-items: center;
     background-color: white; 
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 10px 15px; /* Más padding para que el fondo sea visible */
+    border-radius: 8px; /* Bordes suaves */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
     
 }
+
+
+/* Columna Izquierda (Diseño de Curvas) */
 .card-left-column {
     width: 40%; 
     min-width: 300px;
     padding: 0; 
     position: relative; 
     overflow: hidden; 
+    
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center; /* Centramos el logo verticalmente en el nuevo fondo */
     align-items: center; 
+
+    /* 🚨 CRÍTICO: Aplicamos el degradado azul como en el ejemplo */
     background: linear-gradient(
         135deg, 
-        #0198CC,
-        #3498db 
+        #0198CC, /* Un azul medio */
+        #3498db  /* Un azul claro vibrante */
     );
+    
+    /* 🚨 CRÍTICO: Aplicamos una curva simple al lado derecho usando border-radius */
     border-top-right-radius: 50px; 
     border-bottom-right-radius: 50px;
+    
+    /* Asegúrate de que el logo tenga el color adecuado (blanco o muy claro) */
 }
+
+
+
+/* Columna Derecha (Título, Subtítulo y Formulario) */
 .card-right-column {
     width: 60%; 
     padding: 3rem 2rem;
@@ -97,31 +134,52 @@
     justify-content: center;
 }
 .card-title {
-    font-size: 2.2rem;
+    font-size: 2.2rem; /* Aumentar un poco el tamaño */
     color: #666;
     margin-bottom: 0.5rem;
-    font-weight: 500;
-    letter-spacing: -0.5px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    /* 🚨 Mejoras de Estilo 🚨 */
+    font-weight: 500; /* Asegurar que sea bien negrita */
+    letter-spacing: -0.5px; /* Reducir un poco el espacio entre letras para un look moderno */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Usar una fuente limpia y moderna */
 }
 .card-subtitle {
     font-size: 0.9rem;
     color: #666;
     margin-bottom: 2rem;
 }
+
+
+
+
+
+
 .password-container {
+    /* Ajusta tu contenedor de contraseña para que el link "Olvidó" se posicione bien */
     position: relative;
+    margin-bottom: 2rem; 
 }
+
+.forgot-password-link {
+    position: absolute;
+    right: 0;
+    bottom: -1.5rem; /* Colócalo debajo del input */
+    font-size: 0.8rem;
+    color: #0198CC;
+    text-decoration: none;
+}
+
 .button-group {
     display: flex;
     justify-content: space-between;
     gap: 15px;
     margin-top: 1rem;
 }
+
+/* CRÍTICO: Ajuste de Inputs para ocupar 100% del espacio disponible */
 .login-form input[type="text"],
-.login-form input[type="email"],
-.login-form .password-input { 
-    width: 100%;
+.login-form .password-input { /* CRÍTICO: Usa la clase .password-input para el input */
+    width: 100%; /* Ocupa el 100% del espacio de .login-form */
     padding: 12px 15px; 
     padding-right: 45px;
     padding-left: 40px; 
@@ -129,72 +187,101 @@
     border-radius: 5px;
     font-size: 1rem;
     box-sizing: border-box; 
-    margin-bottom: 15px;
-    background-color: white;
-    color: #333;
+    margin-bottom: 15px; /* Separación vertical entre inputs */
+     background-color: white;
+     color: #333;
+    /* El input de la contraseña necesitará un ajuste de margin-bottom en el sección 2 */
 }
+
 .identifier-container {
     position: relative;
-    margin-bottom: 0;
+    margin-bottom: 15px; /* Espacio igual al que tenía el input individual */
     width: 100%;
 }
+
 .input-icon {
     position: absolute;
-    top: 50%;
-    left: 15px;
+    top: 50%; /* Centrado vertical */
+    left: 15px; /* Separación del borde izquierdo del input */
     transform: translateY(-100%);
-    color: #888;
+    color: #888; /* Color gris suave para que no distraiga */
     font-size: 1.1rem;
-    z-index: 2;
-    pointer-events: none;
+    z-index: 2; /* Asegura que esté por encima del input */
+    pointer-events: none; /* Crucial: Permite hacer clic en el input a través del icono */
 }
+
+
+
+/* Ajuste fino del botón "ojo" */
 .toggle-password-btn {
     position: absolute;
     top: 50%; 
     right: 15px; 
+    
+    /* 🚨 CRÍTICO: Ajustamos el centrado vertical. El -50% es para el centrado base. 
+       Añadimos un ajuste manual extra de -2px a -4px para compensar la altura de la línea del input. */
     transform: translateY(calc(-50% + -9px)); 
+    
     background: none;
     border: none;
     cursor: pointer;
     z-index: 2; 
+    
     color: #555; 
     font-size: 1rem;
     padding: 0;
 }
+
 .toggle-password-btn:focus {
+    /* Esto es lo que elimina el borde que causa el movimiento */
     outline: 0 !important; 
     box-shadow: none !important;
     background: none;
 }
+
 .toggle-password-btn i {
-    width: 1.25em;
+    width: 1.25em; /* Asegura que ambos íconos (abierto/cerrado) ocupen el mismo espacio */
     display: inline-block;
     text-align: center;
 }
+/* ========================
+   AJUSTE DE BOTONES (Revisión)
+   ======================== */
+
 .button-group {
     display: flex;
+    /* Usamos space-between para distribuir el 60% y 40% */
     justify-content: space-between; 
     gap: 15px; 
     margin-top: 1.5rem; 
 }
+
+/* Botón principal (Ingresar) */
 .ingresar-btn {
+    /* 🚨 CRÍTICO: Reducir padding vertical (12px es alto, 10px es menor) */
     padding: 10px 25px; 
     border-radius: 8px;
     font-weight: 600;
+    
+    /* 🚨 CRÍTICO: Hacerlo más largo */
     width: 60%; 
+    
     background-color: #0198CC; 
     color: white;
     border: none;
     cursor: pointer;
 }
-.ingresar-btn:hover{
-    color: #333;
-}
+
+/* Botón secundario (Registrarse) */
 .registro-btn {
+    /* 🚨 CRÍTICO: Reducir padding vertical (12px a 10px) */
     padding: 10px 25px; 
     border-radius: 8px;
     font-weight: 600;
+    
+    /* 🚨 CRÍTICO: Hacerlo más corto */
     width: 40%; 
+    
     background-color: #e0e0e0; 
     color: #333; 
     border: none; 
@@ -204,41 +291,54 @@
     align-items: center;
     cursor: pointer;
 }
-.registro-btn:hover{
-    text-decoration: none;
-    color: #0198CC;
-}
+
+/* ========================
+   AJUSTES ESPECÍFICOS PARA EL REGISTRO
+   ======================== */
+
+/* 1. Ajustar el padding de la columna derecha para hacer espacio a más campos */
 .card-right-column.registration-mode {
+    /* Reducimos el padding vertical y usamos flex-start para alinear los campos arriba */
     padding: 1.5rem 2rem; 
     justify-content: flex-start;
-    overflow-y: auto;
+    overflow-y: auto; /* Permite desplazamiento si la pantalla es muy pequeña */
 }
+
+/* 2. Reducir el margen inferior de los inputs en general para que quepan más */
 .identifier-container {
-    margin-bottom: 0px;
+    margin-bottom: 10px; /* Reducimos de 15px a 10px */
 }
+
+/* 3. Estilizar el SELECT y el LABEL para que se parezcan a los inputs */
 .select-container {
     position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;
     margin-bottom: 10px;
+    padding-top: 5px; /* Pequeño ajuste si el label está encima */
 }
+
 .select-label {
     font-size: 0.8rem;
     color: #666;
     margin-bottom: 3px;
-    margin-left: 40px;
+    margin-left: 40px; /* Mismo padding que el input para alineación */
 }
+
 .select-input {
     width: 100%;
+    /* Mismo padding que los inputs, pero ajustado para el <select> */
     padding: 12px 15px; 
-    padding-left: 40px;
+    padding-left: 40px; /* Espacio para el icono */
+    
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
     box-sizing: border-box; 
     background-color: white;
-    color: #666;
+    color: #333;
+    /* Ajuste para que la flecha del select no se solape con el icono */
     appearance: none; 
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -247,151 +347,54 @@
     background-position: right 10px top 50%;
     background-size: 0.6em;
 }
+
+/* El icono del select se posiciona de forma normal con .input-icon */
+
+/* Ajuste del botón para el nuevo texto más largo */
 .ingresar-btn {
-    width: 65%;
+    width: 65%; /* Le damos más espacio al botón principal */
 }
+
 .registro-btn {
-    width: 35%;
+    width: 35%; /* El botón de volver es más pequeño */
 }
+
+/* Estilo para la tarjeta de una sola columna (Cambiar Clave) */
 .login-card.single-column {
+    /* Quita la división de columnas */
     display: block; 
+    
+    /* Asegura que la tarjeta no sea demasiado ancha, ej. 500px */
     max-width: 480px; 
+    
+    /* padding interno para centrar el contenido */
     padding: 30px 40px; 
 }
+
+/* Contenedor interno para centrar el contenido (si es necesario) */
 .card-center-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* Centra horizontalmente el contenido del formulario */
 }
-.field-wrapper {
-  position: relative;
-  padding-bottom: 12px;
-  margin-top: 10px;
-}
-.error-msg {
-  position: absolute;
-  bottom: 0;
-  left: 4px;
-  height: 22px;
-  line-height: 22px;
-  margin: 0;
 
-  color: #e63946;
-  font-size: 0.9rem;
+::-webkit-scrollbar {
+    width: 8px; /* Ancho de la barra */
 }
-.input-error {
-  border-color: #e63946 !important;
-}
-.select-container .input-icon {
 
-    transform: translateY(-50%);
-}
-/* Estilo para tarjetas de contenido (Pacientes y Prescripciones) */
-.content-card {
-    /* CRÍTICO: Asegura que el fondo sea blanco */
-    background-color: #FFFFFF; 
+/* 2. Estiliza el riel/pista (el fondo) */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Fondo muy claro, casi blanco */
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    padding: 24px;
 }
 
-/* Estilo para títulos de sección */
-.section-title {
-    font-size: 1.5rem; /* text-xl */
-    font-weight: 700; /* font-semibold */
-    color: #666;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* 3. Estiliza la manija/pulgar (la parte que se mueve) */
+::-webkit-scrollbar-thumb {
+    background: #4A90E2; /* 🚨 COLOR CELESTE/AZUL PRINCIPAL */
+    border-radius: 10px;
 }
 
-/* Estilo general de la tabla */
-.data-table {
-    width: 100%;
-    border-collapse: collapse; /* Elimina doble borde */
-    border: 1px solid #DDDCDC; /* $platinum */
-    border-radius: 8px;
-    overflow: hidden; /* Asegura que los bordes redondeados se vean */
-}
-
-/* Encabezado de la tabla */
-.data-table thead {
-    background-color: #F3F2F3; /* $white-smoke */
-    color: #333;
-}
-
-/* Celdas de encabezado */
-.data-table th {
-    padding: 12px 16px; /* px-4 py-2 */
-    text-align: left;
-    border-bottom: 2px solid #DDDCDC; /* $platinum */
-}
-
-/* Celdas del cuerpo */
-.data-table td {
-    padding: 12px 16px;
-    border-top: 1px solid #F3F2F3; /* $white-smoke */
-    color: #444;
-    transition: background-color 0.2s;
-}
-
-/* Efecto hover en filas */
-.data-table tbody tr:hover {
-    background-color: #F3F2F3; /* $white-smoke */
-}
-
-/* Botón principal (Nuevo Paciente / Nueva Prescripción) */
-.btn-primary {
-    padding: 10px 16px;
-    background-color: #0198CC; /* $celestial-blue */
-    color: white;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-.btn-primary:hover {
-    background-color: #007bff; /* Un azul ligeramente más oscuro */
-}
-
-/* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
-.btn-action-receta {
-    padding: 6px 12px;
-    margin-right: 8px; 
-    background-color: #0198CC; /* 👈 Celestial Blue */
-    color: white;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-.btn-action-receta:hover {
-    background-color: #0198CC; /* Un azul ligeramente más oscuro */
-}
-
-/* Botón de acción: Editar (Usamos un color neutral/atención, ej. amarillo) */
-.btn-action-editar {
-    padding: 6px 12px;
-    background-color: #DDDCDC; /* 👈 Platinum */
-    color: #333; /* Texto oscuro para contraste */
-    border-radius: 6px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-.btn-action-editar:hover {
-    background-color: #c4c4c4;
-}
-
-/* Nuevo contenedor para la vista de Pacientes/Prescripciones */
-.prescriptions-view-bg {
-    background-color: #F3F2F3 !important;
-    
-    /* 🚨 CRÍTICO: Eliminamos todos los márgenes y paddings externos. */
-    margin: 0 !important; 
-    padding: 0 !important; 
-    
-    width: 100%; 
-    min-height: 100vh;
-}
-/* 🚨 RESET GLOBAL CRÍTICO */
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 100%;
+/* Opcional: Estilo de la manija al pasar el mouse (hover) */
+::-webkit-scrollbar-thumb:hover {
+    background: #357ABD; /* Un celeste un poco más oscuro al pasar el mouse */
 }

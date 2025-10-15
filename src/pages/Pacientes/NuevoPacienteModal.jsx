@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
 import { crearPaciente } from '../../services/authService';
@@ -11,7 +11,32 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const enviar = async (formData) => {
+        useEffect(() => {
+                // Bloquea el scroll y evita el salto visual
+                document.body.style.overflow = 'hidden'; 
+                document.body.style.paddingRight = '10px'; 
+                
+                // 1. Define el handler de la tecla Esc
+                const handleEscape = (event) => {
+                    if (event.key === 'Escape') {
+                        onClose(); 
+                    }
+                };
+        
+                // 2. Adjunta el escuchador
+                document.addEventListener('keydown', handleEscape);
+        
+                return () => {
+                    // 3. Limpieza: Desbloquea scroll y elimina el escuchador
+                    document.body.style.overflow = 'unset'; 
+                    document.body.style.paddingRight = '0';
+                    document.removeEventListener('keydown', handleEscape);
+                };
+            }, [onClose]);
+    
+     
+       
+     const enviar = async (formData) => {
         setIsLoading(true);
         setError(null);
 

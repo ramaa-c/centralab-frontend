@@ -19,10 +19,13 @@
 /* Estilo general de la tabla */
 .data-table {
     width: 100%;
-    border-collapse: collapse; /* Elimina doble borde */
-    border: 1px solid #DDDCDC; /* $platinum */
+    border-collapse: collapse;
+    border: 1px solid #DDDCDC;
     border-radius: 8px;
-    overflow: hidden; /* Asegura que los bordes redondeados se vean */
+    overflow: hidden;
+    
+    /* 🚨 CRÍTICO: Usar layout fijo para controlar el ancho de las columnas */
+    table-layout: fixed; 
 }
 
 /* Encabezado de la tabla */
@@ -31,19 +34,21 @@
     color: #333;
 }
 
-/* Celdas de encabezado */
-.data-table th {
-    padding: 12px 16px; /* px-4 py-2 */
-    text-align: left;
-    border-bottom: 2px solid #DDDCDC; /* $platinum */
-}
-
-/* Celdas del cuerpo */
+.data-table th,
 .data-table td {
-    padding: 12px 16px;
-    border-top: 1px solid #F3F2F3; /* $white-smoke */
-    color: #444;
-    transition: background-color 0.2s;
+    padding: 12px 10px;
+    text-align: left;
+    white-space: nowrap; /* Evita que el texto se envuelva, forzando el desbordamiento si es necesario */
+    overflow: hidden; /* Oculta el texto que excede el ancho de la celda */
+    text-overflow: ellipsis; /* Muestra puntos suspensivos para el texto oculto */
+    color: #444 ; 
+    .data-table thead tr th:nth-child(1) { width: 12%; } /* DNI */
+.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI (antes 8%) */
+.data-table thead tr th:nth-child(2) { width: 22%; } /* 🚨 Apellido (Aumentado) */
+.data-table thead tr th:nth-child(3) { width: 22%; } /* 🚨 Nombre (Aumentado) */
+/* (La columna 4 'Email' fue eliminada) */
+.data-table thead tr th:nth-child(4) { width: 18%; } /* 🚨 Nacimiento (Ahora es la 4ta columna) */
+.data-table thead tr th:nth-child(5) { width: 28%; } /* 🚨 ACCIONES (Ahora es la 5ta columna, Máximo espacio) */
 }
 
 /* Efecto hover en filas */
@@ -66,8 +71,8 @@
 
 /* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
 .btn-action-receta {
-    padding: 6px 12px;
-    margin-right: 8px; 
+    padding: 6px 10px; 
+    margin-right: 4px;
     background-color: #0198CC; /* 👈 Celestial Blue */
     color: white;
     border-radius: 6px;
@@ -80,7 +85,10 @@
 
 /* Botón de acción: Editar (Usamos un color neutral/atención, ej. amarillo) */
 .btn-action-editar {
-    padding: 6px 12px;
+    opacity: 1 ;  
+    visibility: visible ;
+    padding: 6px 10px;
+    margin-left: 8px !important; 
     background-color: #DDDCDC; /* 👈 Platinum */
     color: #333; /* Texto oscuro para contraste */
     border-radius: 6px;
@@ -226,7 +234,7 @@ html, body {
     padding: 10px 15px;
     border-radius: 8px;
     font-weight: 600;
-    background-color: #28a745; /* Verde para la acción de añadir */
+    background-color: #0198CC; /* Verde para la acción de añadir */
     color: white;
     border: none;
     cursor: pointer;
@@ -340,6 +348,76 @@ html, body {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
+}
+/* Contenedor Flex para la vista de dos columnas */
+.main-content-wrapper {
+    display: flex;
+    gap: 20px; 
+    width: 100%;
+    /* Ajuste para que el contenido ocupe el alto de la ventana */
+    min-height: calc(100vh - 48px); 
+}
+
+/* Estilo de las Columnas Individuales */
+.patients-column {
+    flex-basis: 55%; 
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.prescriptions-column {
+    flex-basis: 45%; 
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Asegura que las tarjetas crezcan y las tablas internas se desplacen */
+.content-card {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+}
+.content-card .overflow-x-auto {
+    flex-grow: 1;
+    overflow-y: auto; 
+}
+
+/* =======================================
+   ESTILO DE SCROLLBAR DEL MODAL (Webkit)
+   ======================================= */
+
+.modal-content {
+    /* ... (Mantener tus estilos existentes) ... */
+    
+    /* 🚨 La base del scrollbar - Fondo gris claro */
+    scrollbar-color: #0198CC #F3F2F3; /* Firefox - track thumb */
+}
+
+/* 1. Definición del ancho de la barra de scroll */
+.modal-content::-webkit-scrollbar {
+    width: 10px; /* Ancho de la barra de scroll vertical */
+    height: 10px; /* Alto de la barra de scroll horizontal */
+}
+
+/* 2. Estilo del "Track" (el camino por donde se mueve el pulgar) */
+.modal-content::-webkit-scrollbar-track {
+    background: #F3F2F3; /* $white-smoke (Fondo del scrollbar) */
+    border-radius: 10px;
+}
+
+/* 3. Estilo del "Thumb" (el pulgar o barra que se mueve) */
+.modal-content::-webkit-scrollbar-thumb {
+    /* 🚨 Color Celestial Blue para el pulgar */
+    background-color: #0198CC; 
+    border-radius: 10px;
+    border: 2px solid #F3F2F3; /* Borde que simula un padding dentro del track */
+}
+
+/* Opcional: Estilo al pasar el ratón por el pulgar */
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background-color: #007bff; /* Un azul ligeramente más oscuro */
 }
 .select-input p{
     color: #222;

@@ -23,7 +23,34 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/api/patients");
   const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredPacientes = pacientes?.filter(p => {
+    const term = searchTerm.toLowerCase();
+    const fullName = `${p.Apellido} ${p.Nombres}`.toLowerCase();
+    return (
+      p.DNI?.toString().includes(term) || 
+      fullName.includes(term)
+    );
+  }) || [];
 
+  useEffect(() => {
+        document.body.style.overflow = 'hidden'; 
+        document.body.style.paddingRight = '10px'; 
+        
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                onClose(); 
+            }
+        };
+
+        document.addEventListener('keydown', handleEscape);
+
+        return () => {
+            document.body.style.overflow = 'unset'; 
+            document.body.style.paddingRight = '0';
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [onClose]);
   useEffect(() => {
     if (coberturaSeleccionada) {
       fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
@@ -84,7 +111,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
     }
+
   };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+        onClose();
+    }
+};
 
   const previewData = useMemo(() => {
     const selectedPaciente = pacientes.find(p => p.PacienteID === parseInt(watchedValues.Paciente)) || pacienteRecibido;
@@ -129,46 +163,64 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
 
           {/* Paciente */}
-          <div className="field-wrapper">
-            <label>Paciente:</label>
-            {pacienteRecibido ? (
-              <>
-                <p className="nombre-apellido">
-                  <strong>
-                    {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                  </strong>
-                </p>
-                <p className="nombre-apellido">DNI: {pacienteRecibido.DNI}</p>
+<div className="field-wrapper">
+    <label>Paciente:</label>
+    {pacienteRecibido ? (
+        <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            padding: '10px', 
+            backgroundColor: '#f9f9f9',
+            borderRadius: '5px',
+            color: '#333'
+        }}>
+            <strong style={{ fontSize: '1.1em' }}>
+                {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
+            </strong>
+            <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
+            <input
+                type="hidden"
+                value={pacienteRecibido.PacienteID}
+                {...register("Paciente")}
+            />
+        </div>
+    ) : (
+        <>
+            <div className="field-wrapper" style={{ marginBottom: '5px' }}>
                 <input
-                  type="hidden"
-                  value={pacienteRecibido.PacienteID}
-                  {...register("Paciente")}
+                    type="text"
+                    placeholder="Buscar por DNI o Nombre/Apellido"
+                    className="select-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </>
-            ) : (
-              <>
+            </div>
+            
+            <div className="select-container">
                 <select
-                  {...register("Paciente", { required: "Campo obligatorio" })}
-                  className={`select-input ${errors.Paciente ? "input-error" : ""}`}
-                  onChange={(e) => {
-                    const seleccionado = pacientes.find(
-                      (p) => p.PacienteID === parseInt(e.target.value)
-                    );
-                    setDniPaciente(seleccionado ? seleccionado.DNI : "");
-                  }}
+                    {...register("Paciente", { required: "Selecciona un paciente" })}
+                    className={`select-input ${errors.Paciente ? "input-error" : ""}`}
+                    onChange={(e) => {
+                        const seleccionado = pacientes?.find((p) => p.PacienteID === parseInt(e.target.value));
+                        setDniPaciente(seleccionado ? seleccionado.DNI : "");
+                        setValue("Paciente", e.target.value); // Asigna el valor del paciente seleccionado
+                    }}
                 >
-                  <option value="">Selecciona un paciente</option>
-                  {pacientes.map((p) => (
-                    <option key={p.PacienteID} value={p.PacienteID}>
-                      {p.Apellido} {p.Nombres}
-                    </option>
-                  ))}
+                    <option value="">Selecciona un paciente</option>
+                    {/* Usamos la lista filtrada */}
+                    {filteredPacientes.map((p) => (
+                        <option key={p.PacienteID} value={p.PacienteID}>
+                            {p.Apellido} {p.Nombres} (DNI: {p.DNI})
+                        </option>
+                    ))}
                 </select>
                 {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
-                {dniPaciente && <p>DNI: {dniPaciente}</p>}
-              </>
-            )}
-          </div>
+                {dniPaciente && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>DNI: {dniPaciente}</p>}
+            </div>
+        </>
+    )}
+</div>
 
           {/* Fecha */}
           <div className="field-wrapper">
@@ -232,22 +284,23 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
             </div>
 
-            <label>Prácticas:</label>
-            <select id="comboPracticas" {...register("PracticaTemp")}>
-              <option value="">Selecciona una práctica</option>
-              {practicas.map((p) => (
-                <option key={p.PracticaID} value={p.PracticaID}>
-                  {p.Descripcion}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              style={{ marginLeft: "10px" }}
-              onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
-            >
-              <i className="fa-solid fa-plus"></i> Agregar
-            </button>
+          <label>Prácticas:</label>
+          <select id="comboPracticas" {...register("PracticaTemp")}>
+            <option value="">Selecciona una práctica</option>
+            {practicas.map((p) => (
+              <option key={p.PracticaID} value={p.PracticaID}>
+                {p.Descripcion}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            style={{ marginLeft: "10px" }}
+            className="add-practice-btn" 
+            onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
+          >
+            <i className="fa-solid fa-plus"></i> Agregar
+          </button>
 
             <br /><br />
 
