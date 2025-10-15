@@ -5,11 +5,9 @@ import { crearPaciente } from '../../services/authService';
 import { useApi } from '../../hooks/useApi';
 
 export default function NuevoPacienteModal({ onClose, onSuccess }) {
-    const { register, handleSubmit } = useForm();
-
+    const { register, handleSubmit, formState: { errors } } = useForm();
     const { data: sexs, isLoading: loadingSexs, error: errorSexs } = useApi('/api/sexs');
     const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/api/identificationtypes');
-
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -42,77 +40,117 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
     };
 
     return createPortal(
-        // 1. Contenedor principal del modal/fondo oscuro (modal-backdrop)
-        // 💡 onClick={onClose} en el backdrop permite cerrar al hacer clic fuera del formulario
-        <div className="modal-backdrop" onClick={onClose}>
-            {/* 2. Contenedor del contenido del modal (modal-content) */}
-            {/* 💡 e.stopPropagation() previene que el clic en el contenido cierre el modal */}
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                
-                {/* Botón de Cerrar: Usamos la clase close-button y estilo absoluto */}
-                <button 
-                    onClick={onClose} 
-                    className="close-button" 
-                    style={{ position: 'absolute', top: '15px', right: '25px', fontSize: '1.5rem', fontWeight: 'bold' }}
-                >&times;</button>
-                
-                <h1 className="main-title">Nuevo Paciente</h1>
-                
-                <form className="Formulario" onSubmit={handleSubmit(enviar)} style={{ textAlign: 'left' }}>
 
-                    {/* Nota: Hemos quitado los <br /><br /> y confiamos en el margin-bottom del CSS para el espaciado */}
-                    
-                    <label>Tipo de Documento:</label>
-                    <select {...register("tipoDoc", { required: true })} defaultValue="">
+        <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h1 className="main-title">Nuevo Paciente</h1>
+                <form className="Formulario" onSubmit={handleSubmit(enviar)} style={{ textAlign: 'left' }}>                    
+                    {/* Tipo de Documento */}
+                    <div className="field-wrapper">
+                    <label>Tipo de Documento</label>
+                    <select
+                        {...register("tipoDoc", { required: "Campo obligatorio" })}
+                        defaultValue=""
+                        className={`select-input ${errors.tipoDoc ? 'input-error' : ''}`}
+                    >
                         <option value="" disabled>Seleccione tipo de documento</option>
                         {loadingTipos && <option>Cargando...</option>}
                         {errorTipos && <option>Error al cargar tipos</option>}
                         {tiposDoc?.map(tipo => (
-                            <option key={tipo.TipoDocPacienteID} value={tipo.TipoDocPacienteID}>
-                                {tipo.Descripcion}
-                            </option>
+                        <option key={tipo.TipoDocPacienteID} value={tipo.TipoDocPacienteID}>
+                            {tipo.Descripcion}
+                        </option>
                         ))}
                     </select>
+                    {errors.tipoDoc && <p className="error-msg">{errors.tipoDoc.message}</p>}
+                    </div>
 
-                    <label>Número de Documento:</label>
-                    <input type="text" placeholder="Documento" {...register("documento", { required: true })} />
+                    {/* Número de Documento */}
+                    <div className="field-wrapper">
+                    <label>Número de Documento</label>
+                    <input
+                        type="text"
+                        placeholder="Documento"
+                        className={errors.documento ? 'input-error' : ''}
+                        {...register("documento", { required: "Campo obligatorio" })}
+                    />
+                    {errors.documento && <p className="error-msg">{errors.documento.message}</p>}
+                    </div>
 
-                    <label>Email:</label>
-                    <input type="text" placeholder="Email" {...register("email", { required: true })} />
+                    {/* Email */}
+                    <div className="field-wrapper">
+                    <label>Email</label>
+                    <input
+                        type="text"
+                        placeholder="Email"
+                        className={errors.email ? 'input-error' : ''}
+                        {...register("email", { required: "Campo obligatorio" })}
+                    />
+                    {errors.email && <p className="error-msg">{errors.email.message}</p>}
+                    </div>
 
-                    <label>Apellido:</label>
-                    <input type="text" placeholder="Apellido" {...register("apellido", { required: true })} />
+                    {/* Apellido */}
+                    <div className="field-wrapper">
+                    <label>Apellido</label>
+                    <input
+                        type="text"
+                        placeholder="Apellido"
+                        className={errors.apellido ? 'input-error' : ''}
+                        {...register("apellido", { required: "Campo obligatorio" })}
+                    />
+                    {errors.apellido && <p className="error-msg">{errors.apellido.message}</p>}
+                    </div>
 
-                    <label>Nombre:</label>
-                    <input type="text" placeholder="Nombre" {...register("nombre", { required: true })} />
+                    {/* Nombre */}
+                    <div className="field-wrapper">
+                    <label>Nombre</label>
+                    <input
+                        type="text"
+                        placeholder="Nombre"
+                        className={errors.nombre ? 'input-error' : ''}
+                        {...register("nombre", { required: "Campo obligatorio" })}
+                    />
+                    {errors.nombre && <p className="error-msg">{errors.nombre.message}</p>}
+                    </div>
 
-                    <label>Sexo:</label>
-                    <select {...register("sexo", { required: true })} defaultValue="">
+                    {/* Sexo */}
+                    <div className="field-wrapper">
+                    <label>Sexo</label>
+                    <select
+                        {...register("sexo", { required: "Campo obligatorio" })}
+                        defaultValue=""
+                        className={`select-input ${errors.sexo ? 'input-error' : ''}`}
+                    >
                         <option value="" disabled>Seleccione sexo</option>
                         {loadingSexs && <option>Cargando...</option>}
                         {errorSexs && <option>Error al cargar sexos</option>}
                         {sexs?.map(sexo => (
-                            <option key={sexo.SexoID} value={sexo.SexoID}>
-                                {sexo.Descripcion}
-                            </option>
+                        <option key={sexo.SexoID} value={sexo.SexoID}>
+                            {sexo.Descripcion}
+                        </option>
                         ))}
                     </select>
+                    {errors.sexo && <p className="error-msg">{errors.sexo.message}</p>}
+                    </div>
 
-                    <label>Fecha de Nacimiento:</label>
-                    <input type="date" placeholder="Fecha de nacimiento" {...register("fechaNacimiento", { required: true })} />
+                    {/* Fecha de Nacimiento */}
+                    <div className="field-wrapper">
+                    <label>Fecha de Nacimiento</label>
+                    <input
+                        type="text"
+                        placeholder="Seleccionar fecha"
+                        readOnly
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                        onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                        {...register("fechaNacimiento", { required: "Campo obligatorio" })}
+                        className={`select-input ${errors.fechaNacimiento ? 'input-error' : ''}`}
+                    />
+                    {errors.fechaNacimiento && <p className="error-msg">{errors.fechaNacimiento.message}</p>}
+                    </div>
 
                     {error && <p style={{ color: 'red', marginTop: '15px' }}>{error}</p>}
                     
                     <div className="modal-footer" style={{ borderTop: '1px solid #eee', paddingTop: '20px', textAlign: 'right', marginTop: '30px' }}>
-                        <button 
-                          type="button" 
-                          className="btn-secondary-vol" 
-                          onClick={onClose} 
-                          disabled={isLoading}
-                          style={{ marginRight: '10px' }}
-                        >
-                            Cancelar
-                        </button>
                         <button className="enviar" type="submit" disabled={isLoading}>
                             {isLoading ? 'Creando...' : 'Crear Paciente'}
                         </button>

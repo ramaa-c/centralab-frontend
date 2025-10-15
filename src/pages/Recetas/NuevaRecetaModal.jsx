@@ -9,7 +9,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const doctorId = user?.id || 0;
   const establecimientoId = user?.establecimientoId || 1;
   console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
-  const { register, handleSubmit, watch, setValue } = useForm();
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
@@ -99,80 +99,110 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         <h1 className="main-title">Registrar Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
-          <label>Paciente:</label>
-          {pacienteRecibido ? (
-            <>
-              <p>
-                <strong>
-                  {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                </strong>
-              </p>
-              <p>DNI: {pacienteRecibido.DNI}</p>
-              <input
-                type="hidden"
-                value={pacienteRecibido.PacienteID}
-                {...register("Paciente")}
-              />
-            </>
-          ) : (
-            <>
-              <select
-                {...register("Paciente", { required: true })}
-                onChange={(e) => {
-                  const seleccionado = pacientes.find(
-                    (p) => p.PacienteID === parseInt(e.target.value)
-                  );
-                  setDniPaciente(seleccionado ? seleccionado.DNI : "");
-                }}
-              >
-                <option value="">Selecciona un paciente</option>
-                {pacientes.map((p) => (
-                  <option key={p.PacienteID} value={p.PacienteID}>
-                    {p.Apellido} {p.Nombres}
-                  </option>
-                ))}
-              </select>
-              {dniPaciente && <p>DNI: {dniPaciente}</p>}
-            </>
-          )}
-          <br /><br />
 
-          <label>Fecha:</label>
-          <input type="date" {...register("Fecha", { required: true })} />
-          <br /><br />
+          {/* Paciente */}
+          <div className="field-wrapper">
+            <label>Paciente:</label>
+            {pacienteRecibido ? (
+              <>
+                <p>
+                  <strong>
+                    {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
+                  </strong>
+                </p>
+                <p>DNI: {pacienteRecibido.DNI}</p>
+                <input
+                  type="hidden"
+                  value={pacienteRecibido.PacienteID}
+                  {...register("Paciente")}
+                />
+              </>
+            ) : (
+              <>
+                <select
+                  {...register("Paciente", { required: "Campo obligatorio" })}
+                  className={`select-input ${errors.Paciente ? "input-error" : ""}`}
+                  onChange={(e) => {
+                    const seleccionado = pacientes.find(
+                      (p) => p.PacienteID === parseInt(e.target.value)
+                    );
+                    setDniPaciente(seleccionado ? seleccionado.DNI : "");
+                  }}
+                >
+                  <option value="">Selecciona un paciente</option>
+                  {pacientes.map((p) => (
+                    <option key={p.PacienteID} value={p.PacienteID}>
+                      {p.Apellido} {p.Nombres}
+                    </option>
+                  ))}
+                </select>
+                {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
+                {dniPaciente && <p>DNI: {dniPaciente}</p>}
+              </>
+            )}
+          </div>
 
-          <label>Diagnóstico:</label>
-          <select {...register("Diagnostico", { required: true })}>
-            <option value="">Selecciona un diagnóstico</option>
-            {diagnosticos.map((d) => (
-              <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
-                {d.Descripcion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Fecha */}
+          <div className="field-wrapper">
+            <label>Fecha:</label>
+            <input
+              type="date"
+              className={`select-input ${errors.Fecha ? "input-error" : ""}`}
+              {...register("Fecha", { required: "Campo obligatorio" })}
+            />
+            {errors.Fecha && <p className="error-msg">{errors.Fecha.message}</p>}
+          </div>
 
-          <label>Cobertura:</label>
-          <select {...register("Cobertura", { required: true })}>
-            <option value="">Selecciona una cobertura</option>
-            {coberturas.map((c) => (
-              <option key={c.PrepagaID} value={c.PrepagaID}>
-                {c.Denominacion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Diagnóstico */}
+          <div className="field-wrapper">
+            <label>Diagnóstico:</label>
+            <select
+              {...register("Diagnostico", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Diagnostico ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona un diagnóstico</option>
+              {diagnosticos.map((d) => (
+                <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
+                  {d.Descripcion}
+                </option>
+              ))}
+            </select>
+            {errors.Diagnostico && <p className="error-msg">{errors.Diagnostico.message}</p>}
+          </div>
 
-          <label>Plan:</label>
-          <select {...register("Plan", { required: true })} >
-            <option value="">Selecciona un plan</option>
-            {planes.map((p) => (
-              <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
-                {p.Denominacion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Cobertura */}
+          <div className="field-wrapper">
+            <label>Cobertura:</label>
+            <select
+              {...register("Cobertura", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Cobertura ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona una cobertura</option>
+              {coberturas.map((c) => (
+                <option key={c.PrepagaID} value={c.PrepagaID}>
+                  {c.Denominacion}
+                </option>
+              ))}
+            </select>
+            {errors.Cobertura && <p className="error-msg">{errors.Cobertura.message}</p>}
+          </div>
+
+          {/* Plan */}
+          <div className="field-wrapper">
+            <label>Plan:</label>
+            <select
+              {...register("Plan", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Plan ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona un plan</option>
+              {planes.map((p) => (
+                <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
+                  {p.Denominacion}
+                </option>
+              ))}
+            </select>
+            {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
+          </div>
 
           <label>Prácticas:</label>
           <select id="comboPracticas" {...register("PracticaTemp")}>

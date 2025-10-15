@@ -263,7 +263,29 @@
     flex-direction: column;
     align-items: center;
 }
+.field-wrapper {
+  position: relative;
+  padding-bottom: 12px;
+  margin-top: 10px;
+}
+.error-msg {
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  height: 22px;
+  line-height: 22px;
+  margin: 0;
 
+  color: #e63946;
+  font-size: 0.9rem;
+}
+.input-error {
+  border-color: #e63946 !important;
+}
+.select-container .input-icon {
+
+    transform: translateY(-50%);
+}
 /* Estilo para tarjetas de contenido (Pacientes y Prescripciones) */
 .content-card {
     /* CRÍTICO: Asegura que el fondo sea blanco */
