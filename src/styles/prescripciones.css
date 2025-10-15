@@ -419,3 +419,29 @@ html, body {
 .modal-content::-webkit-scrollbar-thumb:hover {
     background-color: #007bff; /* Un azul ligeramente más oscuro */
 }
+.select-input p{
+    color: #222;
+}
+.modal-content.wide {
+  max-width: 1200px; /* O el ancho que necesites */
+  width: 90%;
+}
+
+.modal-body-split {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.form-column {
+  flex: 1; /* Ocupa la mitad del espacio */
+  overflow-y: auto; /* Permite scroll si el form es muy largo */
+}
+
+.preview-column {
+  flex: 1; /* Ocupa la otra mitad */
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}

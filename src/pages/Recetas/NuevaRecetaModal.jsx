@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
+import RecetaPreview from '../../components/RecetaPreview.jsx';
 
 export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -10,6 +11,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const establecimientoId = user?.establecimientoId || 1;
   console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
+  const watchedValues = watch();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
@@ -32,22 +34,18 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   }) || [];
 
   useEffect(() => {
-        // Bloquea el scroll y evita el salto visual
         document.body.style.overflow = 'hidden'; 
         document.body.style.paddingRight = '10px'; 
         
-        // 1. Define el handler de la tecla Esc
         const handleEscape = (event) => {
             if (event.key === 'Escape') {
                 onClose(); 
             }
         };
 
-        // 2. Adjunta el escuchador
         document.addEventListener('keydown', handleEscape);
 
         return () => {
-            // 3. Limpieza: Desbloquea scroll y elimina el escuchador
             document.body.style.overflow = 'unset'; 
             document.body.style.paddingRight = '0';
             document.removeEventListener('keydown', handleEscape);
@@ -117,29 +115,49 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   };
 
   const handleBackdropClick = (e) => {
-    // Si el clic ocurrió directamente en el fondo (y no en un hijo)
     if (e.target === e.currentTarget) {
         onClose();
     }
 };
 
+  const previewData = useMemo(() => {
+    const selectedPaciente = pacientes.find(p => p.PacienteID === parseInt(watchedValues.Paciente)) || pacienteRecibido;
+    const selectedDiagnostico = diagnosticos.find(d => d.DiagnosticoID === parseInt(watchedValues.Diagnostico));
+    const selectedCobertura = coberturas.find(c => c.PrepagaID === parseInt(watchedValues.Cobertura));
+    const selectedPlan = planes.find(p => p.PrepagaPlanID === parseInt(watchedValues.Plan));
+
+    return {
+      paciente: selectedPaciente ? {
+          NombreCompleto: `${selectedPaciente.Apellido} ${selectedPaciente.Nombres}`,
+          DNI: selectedPaciente.DNI
+      } : null,
+      fecha: watchedValues.Fecha 
+        ? new Date(watchedValues.Fecha + 'T00:00:00').toLocaleDateString('es-AR') 
+        : '',
+      diagnostico: selectedDiagnostico,
+      cobertura: selectedCobertura,
+      plan: selectedPlan,
+      practicas: practicasSeleccionadas,
+      notas: watchedValues.Notas,
+      notasReceta: watchedValues.NotasReceta,
+      doctorName: `${user?.apellido} ${user?.nombres}`
+    };
+  }, [
+    watchedValues, 
+    practicasSeleccionadas, 
+    pacientes, 
+    diagnosticos, 
+    coberturas, 
+    planes, 
+    pacienteRecibido, 
+    user
+  ]);
 
   return createPortal(
-  // 1. Contenedor del fondo (Backdrop)
-  
-  // Aquí se aplican estilos para que ocupe toda la pantalla y tenga el fondo oscuro.
-  <div className="modal-backdrop"onClick={handleBackdropClick}>
-     
-    
-        
-    {/* 2. Contenedor del contenido (Modal Content)
-        Aquí se aplican estilos para el color de fondo (blanco) y el tamaño del modal. */}
-    <div className="modal-content"onClick={(e) => e.stopPropagation()}>
-
-      {/* 3. Tu contenido original */}
-      {/* Se mantiene la clase 'container' pero se recomienda quitar el 'marginTop'
-          ya que el centrado ahora lo maneja 'modal-backdrop' */}
-      <div className="container" style={{ textAlign: "center" }}>
+  <div className="modal-backdrop">
+    <div className="modal-content wide">
+      <div className="modal-body-split">
+        <div className="container" style={{ textAlign: "center" }}>
         <h1 className="main-title">Registrar Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
@@ -148,15 +166,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 <div className="field-wrapper">
     <label>Paciente:</label>
     {pacienteRecibido ? (
-        // 🚨 BLOQUE 1: Paciente Recibido por Props (No requiere búsqueda)
         <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center', 
             padding: '10px', 
-            backgroundColor: '#f9f9f9', /* Fondo gris claro */
+            backgroundColor: '#f9f9f9',
             borderRadius: '5px',
-            color: '#333' /* Texto oscuro asegurado */
+            color: '#333'
         }}>
             <strong style={{ fontSize: '1.1em' }}>
                 {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
@@ -169,20 +186,17 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             />
         </div>
     ) : (
-        // 🚨 BLOQUE 2: Selección de Paciente (CON BÚSQUEDA)
         <>
-            {/* 🚨 CRÍTICO: 1. Campo de Búsqueda por DNI/Nombre */}
             <div className="field-wrapper" style={{ marginBottom: '5px' }}>
                 <input
                     type="text"
                     placeholder="Buscar por DNI o Nombre/Apellido"
                     className="select-input"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)} // Actualiza el estado de búsqueda
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
             
-            {/* 🚨 CRÍTICO: 2. Combo de selección FILTRADO */}
             <div className="select-container">
                 <select
                     {...register("Paciente", { required: "Selecciona un paciente" })}
@@ -268,7 +282,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               ))}
             </select>
             {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
-          </div>
+            </div>
 
           <label>Prácticas:</label>
           <select id="comboPracticas" {...register("PracticaTemp")}>
@@ -288,50 +302,61 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             <i className="fa-solid fa-plus"></i> Agregar
           </button>
 
-          <br /><br />
+            <br /><br />
 
-          <h3>Prácticas seleccionadas:</h3>
-          {practicasSeleccionadas.length === 0 ? (
-            <p>No hay prácticas agregadas</p>
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {practicasSeleccionadas.map((p) => (
-                <li key={p.PracticaID}>
-                  {p.Descripcion}{" "}
-                  <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
-                    <i className="fa-solid fa-x"></i>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+            <h3>Prácticas seleccionadas:</h3>
+            {practicasSeleccionadas.length === 0 ? (
+              <p>No hay prácticas agregadas</p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {practicasSeleccionadas.map((p) => (
+                  <li key={p.PracticaID}>
+                    {p.Descripcion}{" "}
+                    <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
+                      <i className="fa-solid fa-x"></i>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-          <br />
-          <label>Notas:</label>
-          <br />
-          <textarea
-            {...register("Notas")} placeholder="Nota de receta..." rows="3" 
-          />
-          <br /><br />
+            <br />
+            <label>Notas:</label>
+            <br />
+            <textarea
+              {...register("Notas")} placeholder="Nota de receta..." rows="3" 
+            />
+            <br /><br />
 
-          <label>Observaciones al laboratorio:</label>
-          <textarea
-            {...register("NotasReceta")} placeholder="Nota al laboratorio..." rows="3" 
-          />
-          <br /><br />
+            <label>Observaciones al laboratorio:</label>
+            <textarea
+              {...register("NotasReceta")} placeholder="Nota al laboratorio..." rows="3" 
+            />
+            <br /><br />
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
-          <br />
-          <div style={{ display: "center", justifyContent: "center", gap: "10px" }}>
-            <button className="enviar" type="submit">
-              Registrar Receta
-            </button>
-            
+            <br />
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+              <button className="enviar" type="submit">
+                Registrar Receta
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+              >
+                Volver
+              </button>
+            </div>
+          </form>
+        </div>
+          <div className="preview-column">
+              <div className="preview-column">
+                  <RecetaPreview data={previewData} />
+              </div>
           </div>
-        </form>
       </div>
-
     </div>
   </div>,
   document.getElementById("modal-root")
