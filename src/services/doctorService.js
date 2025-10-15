@@ -1,5 +1,3 @@
-// CÓDIGO CORREGIDO PARA doctorService.js
-
 import api from "./api";
 import apiAuthenticated from './apiAuthenticated'; 
 
@@ -8,8 +6,7 @@ const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
 
 export const getDoctorById = async (doctorId) => {
   try {
-    // 🚨 CORREGIDO: Usando comillas invertidas (backticks)
-    const response = await api.get(`/doctors/${doctorId}`); 
+    const response = await api.get(`/doctors/${doctorId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching doctor by ID:", error);
@@ -17,12 +14,19 @@ export const getDoctorById = async (doctorId) => {
   }
 };
 
-// ... (getAllEstablishments está bien) ...
+export const getAllEstablishments = async () => {
+  try {
+    const response = await api.get(ESTABLECIMIENTOS_ENDPOINT);
+    return response.data.List || [];
+  } catch (error) {
+    console.error("Error fetching establishments:", error);
+    throw error;
+  }
+};
 
 export const getDoctorEstablishments = async (doctorId) => {
   try {
-    // 🚨 CORREGIDO: Usando comillas invertidas (backticks)
-    const response = await api.get(`/doctors/${doctorId}/establishments`); 
+    const response = await api.get(`/doctors/${doctorId}/establishments`);
     return response.data.List || [];
   } catch (error) {
     console.error("Error fetching doctor establishments:", error);
@@ -32,7 +36,6 @@ export const getDoctorEstablishments = async (doctorId) => {
 
 export const addDoctorEstablishment = async (doctorId, establishmentId) => {
   try {
-    // 🚨 CORREGIDO: Usando comillas invertidas (backticks)
     const response = await api.post(
       `/doctors/${doctorId}/establishments/${establishmentId}`
     );
@@ -45,7 +48,6 @@ export const addDoctorEstablishment = async (doctorId, establishmentId) => {
 
 export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
   try {
-    // 🚨 CORREGIDO: Usando comillas invertidas (backticks)
     const response = await api.delete(
       `/doctors/${doctorId}/establishments/${establishmentId}`
     );
@@ -55,8 +57,6 @@ export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
     throw error;
   }
 };
-
-// ... (updateDoctor y getAllSpecialties están bien) ...
 
 export const updateDoctor = async (doctorData) => {
   try {

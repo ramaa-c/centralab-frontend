@@ -18,6 +18,39 @@ export default function Registro() {
   const [success, setSuccess] = useState(false);
 
   const enviar = async (data) => {
+    console.log("Datos del formulario:", data);
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    const payload = {
+      MedicoID: 0,
+      Email: data.Email,
+      DNI: data.DNI,
+      Denominacion: data.Denominacion,
+      EspecialidadID: parseInt(data.EspecialidadID, 10),
+      Matricula: data.Matricula,
+      FirmaTexto: data.FirmaTexto,
+      FirmaImagen: "",
+      HashSeguridad: "",
+      DebeCambiarClave: "0",
+      MomentoAlta: new Date().toISOString().slice(0, 19),
+    };
+
+    try {
+      await registerUser(payload);
+      console.log("Registro exitoso");
+      setSuccess(true);
+
+      setTimeout(() => navigate('/Login'), 1500);
+
+    } catch (err) {
+      console.error("Error al registrar:", err);
+      setError(err.message || 'Error en el registro');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

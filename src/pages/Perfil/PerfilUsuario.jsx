@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-/*import {
+import {
   getDoctorById, updateDoctor, getDoctorEstablishments, getAllEstablishments, addDoctorEstablishment, removeDoctorEstablishment, getAllSpecialties
 } from "../../services/doctorService.js";
-import ConfirmModal from "../../components/ConfirmModal.jsx";*/
+import ConfirmModal from "../../components/ConfirmModal.jsx";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Para los iconos
 import "../../styles/login.css"; // Para los estilos de la tarjeta
 
@@ -17,6 +17,7 @@ export default function PerfilUsuario() {
   const [establishments, setEstablishments] = useState([]);
   const [selectedEstablishment, setSelectedEstablishment] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [activeEstablishment, setActiveEstablishment] = useState(localStorage.getItem("activeEstablishment") || "");
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -31,6 +32,15 @@ export default function PerfilUsuario() {
   useEffect(() => {
     fetchData();
   }, [doctorId]);
+
+  useEffect(() => {
+    if (doctorEstablishments.length > 0) {
+      const savedActive = localStorage.getItem("activeEstablishment");
+      if (savedActive) {
+        setActiveEstablishment(savedActive);
+      }
+    }
+  }, [doctorEstablishments]);
 
   const fetchData = async () => {
     try {
@@ -118,174 +128,170 @@ export default function PerfilUsuario() {
     );
     removed.forEach((e) => apiCalls.push(removeDoctorEstablishment(doctorId, e.EstablecimientoID)));
 
-    if (apiCalls.length === 0) return;
-
     try {
       await Promise.all(apiCalls);
-      window.location.reload();
+
+      if (activeEstablishment) {
+        const value = String(activeEstablishment);
+        localStorage.setItem("activeEstablishment", value);
+
+        const updatedUser = { ...user, establecimientoId: Number(value) };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      setInitialDoctor(doctor);
+      setInitialDoctorEstablishments(doctorEstablishments);
+      console.log("Guardado correctamente. Establecimiento activo:", activeEstablishment);
     } catch (error) {
-      console.error(error);
+      console.error("Error al guardar perfil:", error);
     }
   };
 
   if (isLoading || !doctor) return <div className="p-4">Cargando perfil...</div>;
 
   return (
-    // 🚨 CRÍTICO: Usamos un único div padre para envolver todo (Perfil + Modal)
-    <div className="login-page" style={{ padding: '40px 0' }}> 
-        
-        {/* Fondo decorativo (las bolas celestes) */}
-        <div className="decorative-background">
-          <div className="shape-top"></div>
-          <div className="shape-bottom"></div>
+    <>
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow">
+      <h2 className="text-2xl font-semibold mb-4">Perfil del Médico</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="font-medium">Email</label>
+          <input
+            name="Email"
+            value={doctor.Email || ""}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
         </div>
 
-        {/* Tarjeta principal - Estilo login-card pero ancho completo */}
-        {/* Usamos el layout de tarjeta simple que definimos anteriormente */}
-        <div className="login-card full-width-card"> 
-          
-          <div className="profile-content p-6 w-full">
-            <h2 className="card-title" style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#333' }}>Perfil del Médico</h2>
+        <div>
+          <label className="font-medium">Especialidad:</label>
+          <select
+            name="EspecialidadID"
+            value={doctor.EspecialidadID || ""}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            {especialidades.map((esp) => (
+              <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
+                {esp.Descripcion}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            {/* Bloque de Formulario y Campos (Grid) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* Campo: Email */}
-              <div>
-                <label className="font-medium card-subtitle">Email</label>
-                <input
-                  name="Email"
-                  value={doctor.Email || ""}
-                  onChange={handleChange}
-                  // Añadimos la clase de estilo de input de login para consistencia
-                  className="w-full border p-2 rounded login-form-input" 
-                />
-              </div>
+        <div>
+          <label className="font-medium">Matrícula</label>
+          <input
+            name="Matricula"
+            value={doctor.Matricula || ""}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
+        </div>
 
-              {/* Campo: Especialidad */}
-              <div>
-                <label className="font-medium card-subtitle">Especialidad:</label>
-                <select
-                  name="EspecialidadID"
-                  value={doctor.EspecialidadID || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded login-form-input" 
-                >
-                  {especialidades.map((esp) => (
-                    <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
-                      {esp.Descripcion}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Campo: Matrícula */}
-              <div>
-                <label className="font-medium card-subtitle">Matrícula</label>
-                <input
-                  name="Matricula"
-                  value={doctor.Matricula || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded login-form-input"
-                />
-              </div>
+        <div>
+          <label className="font-medium">Firma Texto</label>
+          <input
+            name="FirmaTexto"
+            value={doctor.FirmaTexto || ""}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
+        </div>
 
-              {/* Campo: Firma Texto */}
-              <div>
-                <label className="font-medium card-subtitle">Firma Texto</label>
-                <input
-                  name="FirmaTexto"
-                  value={doctor.FirmaTexto || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded login-form-input"
-                />
-              </div>
+        <div>
+          <label className="font-medium">Firma Imagen</label>
+          <input type="file" onChange={handleFileChange} />
+          {doctor.FirmaImagen && (
+            <img
+              src={
+                doctor.FirmaImagen.startsWith("data:")
+                  ? doctor.FirmaImagen
+                  : `data:image/png;base64,${doctor.FirmaImagen}`
+              }
+              alt="Firma actual"
+              className="mt-2 h-16 border rounded"
+            />
+          )}
+        </div>
+      </div>
 
-              {/* Campo: Firma Imagen */}
-              <div className="md:col-span-2"> 
-                <label className="font-medium card-subtitle">Firma Imagen</label>
-                <input type="file" onChange={handleFileChange} className="w-full p-2" />
-                {doctor.FirmaImagen && (
-                  <img
-                    src={
-                      doctor.FirmaImagen.startsWith("data:")
-                        ? doctor.FirmaImagen
-                        : `data:image/png;base64,${doctor.FirmaImagen}`
-                    }
-                    alt="Firma actual"
-                    className="mt-2 h-16 border rounded"
-                    style={{ maxWidth: '200px' }} 
-                  />
-                )}
-              </div>
-            </div> {/* Fin de Grid */}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold mb-2">Establecimientos vinculados</h3>
 
-            {/* Sección Establecimientos */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-3 card-subtitle">Establecimientos vinculados</h3>
-
-              {/* Lista de Establecimientos */}
-              <ul className="space-y-3">
-                {doctorEstablishments.map((est) => (
-                  <li
-                    key={est.EstablecimientoID}
-                    className="flex justify-between items-center border p-3 rounded"
-                  >
-                    <span className="font-medium">{est.Descripcion}</span>
-                    <button
-                      onClick={() => handleRemoveEstablishment(est.EstablecimientoID)}
-                      className="text-red-600 hover:text-red-800 button-secondary"
-                    >
-                      Eliminar
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Selector para Agregar */}
-              <div className="mt-4 flex gap-3 items-center">
-                <select
-                  value={selectedEstablishment}
-                  onChange={(e) => setSelectedEstablishment(e.target.value)}
-                  className="border p-2 rounded flex-1 login-form-input"
-                >
-                  <option value="">Seleccionar establecimiento</option>
-                  {establishments.map((est) => (
-                    <option key={est.EstablecimientoID} value={est.EstablecimientoID}>
-                      {est.Descripcion}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  onClick={handleAddEstablishment}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ingresar-btn" 
-                  style={{ width: 'auto', backgroundColor: '#0198CC' }} 
-                >
-                  Agregar
-                </button>
-              </div>
-            </div>
-            
-            {/* Botón Guardar (Guardar cambios) */}
-            <button
-              onClick={() => setShowConfirmModal(true)}
-              className="mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 ingresar-btn" 
-              style={{ width: '100%', fontSize: '1.1rem' }}
+        <ul className="space-y-2">
+          {doctorEstablishments.map((est) => (
+            <li
+              key={est.EstablecimientoID}
+              className="flex justify-between items-center border p-2 rounded"
             >
-              Guardar cambios
-            </button>
+            <label
+              className={`flex items-center gap-2 ${
+                activeEstablishment === String(est.EstablecimientoID)
+                  ? "font-bold text-blue-600"
+                  : ""
+              }`}
+            >
+              <input
+                type="radio"
+                name="activeEstablishment"
+                value={String(est.EstablecimientoID)}
+                checked={activeEstablishment === String(est.EstablecimientoID)}
+                onChange={(e) => {
+                  const value = String(e.target.value);
+                  setActiveEstablishment(value);
+                  localStorage.setItem("activeEstablishment", value);
+                  console.log("Seleccionado establecimiento:", value);
+                }}
+              />
+              {est.Descripcion}
+            </label>
+              <button
+                onClick={() => handleRemoveEstablishment(est.EstablecimientoID)}
+                className="text-red-600 hover:text-red-800"
+              >
+                Eliminar
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4 flex gap-2 items-center">
+          <select
+            value={selectedEstablishment}
+            onChange={(e) => setSelectedEstablishment(e.target.value)}
+            className="border p-2 rounded flex-1"
+          >
+            <option value="">Seleccionar establecimiento</option>
+            {establishments.map((est) => (
+              <option key={est.EstablecimientoID} value={est.EstablecimientoID}>
+                {est.Descripcion}
+              </option>
+            ))}
+          </select>
 
-          </div> {/* Fin de profile-content */}
-        </div> {/* Fin de login-card */}
-        
-        {/* Modal: Ahora es un hijo directo del div padre */}
-        <ConfirmModal
-          isOpen={showConfirmModal}
-          message="¿Desea guardar los cambios realizados en su perfil?"
-          onConfirm={handleSave}
-          onCancel={() => setShowConfirmModal(false)}
-        />
-    </div> 
+          <button
+            onClick={handleAddEstablishment}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Agregar
+          </button>
+        </div>
+      </div>
+      <button
+        onClick={() => setShowConfirmModal(true)}
+        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+          Guardar cambios
+      </button>
+    </div>
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        message="¿Desea guardar los cambios realizados en su perfil?"
+        onConfirm={handleSave}
+        onCancel={() => setShowConfirmModal(false)}
+      />
+    </>
   );
 }

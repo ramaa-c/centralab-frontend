@@ -378,5 +378,112 @@
     align-items: center; /* Centra horizontalmente el contenido del formulario */
 }
 
+/* Estilo para tarjetas de contenido (Pacientes y Prescripciones) */
+.content-card {
+    /* CRÍTICO: Asegura que el fondo sea blanco */
+    background-color: #FFFFFF; 
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+}
 
+/* Estilo para títulos de sección */
+.section-title {
+    font-size: 1.5rem; /* text-xl */
+    font-weight: 700; /* font-semibold */
+    color: #666;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+/* Estilo general de la tabla */
+.data-table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina doble borde */
+    border: 1px solid #DDDCDC; /* $platinum */
+    border-radius: 8px;
+    overflow: hidden; /* Asegura que los bordes redondeados se vean */
+}
+
+/* Encabezado de la tabla */
+.data-table thead {
+    background-color: #F3F2F3; /* $white-smoke */
+    color: #333;
+}
+
+/* Celdas de encabezado */
+.data-table th {
+    padding: 12px 16px; /* px-4 py-2 */
+    text-align: left;
+    border-bottom: 2px solid #DDDCDC; /* $platinum */
+}
+
+/* Celdas del cuerpo */
+.data-table td {
+    padding: 12px 16px;
+    border-top: 1px solid #F3F2F3; /* $white-smoke */
+    color: #444;
+    transition: background-color 0.2s;
+}
+
+/* Efecto hover en filas */
+.data-table tbody tr:hover {
+    background-color: #F3F2F3; /* $white-smoke */
+}
+
+/* Botón principal (Nuevo Paciente / Nueva Prescripción) */
+.btn-primary {
+    padding: 10px 16px;
+    background-color: #0198CC; /* $celestial-blue */
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.btn-primary:hover {
+    background-color: #007bff; /* Un azul ligeramente más oscuro */
+}
+
+/* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
+.btn-action-receta {
+    padding: 6px 12px;
+    margin-right: 8px; 
+    background-color: #0198CC; /* 👈 Celestial Blue */
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-action-receta:hover {
+    background-color: #0198CC; /* Un azul ligeramente más oscuro */
+}
+
+/* Botón de acción: Editar (Usamos un color neutral/atención, ej. amarillo) */
+.btn-action-editar {
+    padding: 6px 12px;
+    background-color: #DDDCDC; /* 👈 Platinum */
+    color: #333; /* Texto oscuro para contraste */
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-action-editar:hover {
+    background-color: #c4c4c4;
+}
+
+/* Nuevo contenedor para la vista de Pacientes/Prescripciones */
+.prescriptions-view-bg {
+    background-color: #F3F2F3 !important;
+    
+    /* 🚨 CRÍTICO: Eliminamos todos los márgenes y paddings externos. */
+    margin: 0 !important; 
+    padding: 0 !important; 
+    
+    width: 100%; 
+    min-height: 100vh;
+}
+/* 🚨 RESET GLOBAL CRÍTICO */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+}

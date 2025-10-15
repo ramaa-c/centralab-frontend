@@ -1,0 +1,313 @@
+@import url("./login.css"); 
+/* Estilo para tarjetas de contenido (Pacientes y Prescripciones) */
+.content-card {
+    /* CRÍTICO: Asegura que el fondo sea blanco */
+    background-color: #FFFFFF; 
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+}
+
+/* Estilo para títulos de sección */
+.section-title {
+    font-size: 1.5rem; /* text-xl */
+    font-weight: 700; /* font-semibold */
+    color: #666;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilo general de la tabla */
+.data-table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina doble borde */
+    border: 1px solid #DDDCDC; /* $platinum */
+    border-radius: 8px;
+    overflow: hidden; /* Asegura que los bordes redondeados se vean */
+}
+
+/* Encabezado de la tabla */
+.data-table thead {
+    background-color: #F3F2F3; /* $white-smoke */
+    color: #333;
+}
+
+/* Celdas de encabezado */
+.data-table th {
+    padding: 12px 16px; /* px-4 py-2 */
+    text-align: left;
+    border-bottom: 2px solid #DDDCDC; /* $platinum */
+}
+
+/* Celdas del cuerpo */
+.data-table td {
+    padding: 12px 16px;
+    border-top: 1px solid #F3F2F3; /* $white-smoke */
+    color: #444;
+    transition: background-color 0.2s;
+}
+
+/* Efecto hover en filas */
+.data-table tbody tr:hover {
+    background-color: #F3F2F3; /* $white-smoke */
+}
+
+/* Botón principal (Nuevo Paciente / Nueva Prescripción) */
+.btn-primary {
+    padding: 10px 16px;
+    background-color: #0198CC; /* $celestial-blue */
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.btn-primary:hover {
+    background-color: #007bff; /* Un azul ligeramente más oscuro */
+}
+
+/* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
+.btn-action-receta {
+    padding: 6px 12px;
+    margin-right: 8px; 
+    background-color: #0198CC; /* 👈 Celestial Blue */
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-action-receta:hover {
+    background-color: #0198CC; /* Un azul ligeramente más oscuro */
+}
+
+/* Botón de acción: Editar (Usamos un color neutral/atención, ej. amarillo) */
+.btn-action-editar {
+    padding: 6px 12px;
+    background-color: #DDDCDC; /* 👈 Platinum */
+    color: #333; /* Texto oscuro para contraste */
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-action-editar:hover {
+    background-color: #c4c4c4;
+}
+
+/* Nuevo contenedor para la vista de Pacientes/Prescripciones */
+.prescriptions-view-bg {
+    background-color: #F3F2F3 !important;
+    
+    /* 🚨 CRÍTICO: Eliminamos todos los márgenes y paddings externos. */
+    margin: 0 !important; 
+    padding: 0 !important; 
+    
+    width: 100%; 
+    min-height: 100vh;
+}
+/* 🚨 RESET GLOBAL CRÍTICO */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+}
+
+/* =======================================
+   1. ESTILO DEL FONDO (BACKDROP)
+   Usamos un fondo más claro y coherente con el $white-smoke de tu paleta.
+   ======================================= */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* 🚨 AJUSTADO: Fondo blanco humo semi-transparente */
+    background-color: rgba(243, 242, 243, 0.95); /* $white-smoke con alta opacidad */
+    z-index: 1000;
+}
+
+/* =======================================
+   2. ESTILO DEL CONTENIDO DEL MODAL (LA "TARJETA")
+   Coherencia con .login-card.
+   ======================================= */
+.modal-content {
+    background: white;
+    border-radius: 10px;
+    /* 🚨 COHERENCIA: Usamos la sombra de tu .login-card */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+    width: 95%;
+    max-width: 750px; /* Le damos un poco más de espacio */
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    z-index: 1001;
+    text-align: left; /* Aseguramos que el contenido fluya a la izquierda */
+    position: relative; /* Para posicionar el botón de cerrar */
+}
+
+/* Estilo para el título principal dentro del modal */
+.modal-content .main-title {
+    font-size: 2rem;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+    
+    /* 🚨 COHERENCIA: Usamos #0198CC para el detalle */
+    border-bottom: 2px solid #0198CC; 
+    padding-bottom: 10px;
+    text-align: center; /* Centramos el título */
+}
+
+/* -------------------------------------------------- */
+/* 3. ESTILOS DEL FORMULARIO Y SUS ELEMENTOS */
+/* -------------------------------------------------- */
+
+/* Estilo general para labels */
+.Formulario label {
+    display: block;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+/* Estilo para SELECTs, INPUTs (Fecha) y TEXTAREA */
+.Formulario select,
+.Formulario input[type="date"],
+.Formulario input[type="text"], /* Incluimos texto para consistencia */
+.Formulario textarea {
+    width: 100%;
+    /* 🚨 COHERENCIA: Padding similar a tu input de login (12px en lugar de 10px) */
+    padding: 12px 15px; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box; 
+    background-color: #f9f9f9; 
+    color: #222;
+    transition: border-color 0.2s;
+    /* 👈 AÑADE O MODIFICA ESTO PARA CAMBIAR LA FUENTE */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Usar una fuente limpia y legible */
+    font-size: 1rem; /* Asegurar un buen tamaño */
+    line-height: 1.5; /* Mejorar la legibilidad con espaciado */
+    color: #333; /* Color de texto oscuro */
+}
+
+
+
+.Formulario select:focus,
+.Formulario input[type="date"]:focus,
+.Formulario textarea:focus,
+.Formulario input[type="text"]:focus {
+    /* 🚨 COHERENCIA: Usamos $celestial-blue al enfocar */
+    border-color: #0198CC; 
+    box-shadow: 0 0 0 1px #0198CC;
+    outline: none;
+    background-color: white;
+}
+
+/* Estilo específico para el selector de prácticas (para que se parezca al select) */
+.Formulario select#comboPracticas {
+    width: 80%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px; /* Espacio para el botón de agregar */
+}
+
+/* Estilo para el botón de Agregar (Lo estilizamos como botón de acción) */
+.Formulario button[type="button"].add-practice-btn { 
+    /* Esta clase debe ser aplicada en el JSX */
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    background-color: #28a745; /* Verde para la acción de añadir */
+    color: white;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Estilos para la lista de prácticas seleccionadas */
+.Formulario h3 {
+    /* 🚨 COHERENCIA: Usamos turquesa como acento */
+    color: #0198CC; 
+    border-left: 4px solid #0198CC;
+    padding-left: 10px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.Formulario ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Fondo muy claro de la práctica usando tu paleta */
+    background-color: #F3F2F3; /* $white-smoke */
+    border: 1px solid #DDDCDC; /* $platinum */
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    color: #333;
+}
+
+.Formulario ul li button {
+    background: none;
+    border: none;
+    color: #dc3545; /* Rojo de eliminar */
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+}
+
+/* -------------------------------------------------- */
+/* 4. ESTILOS DE LOS BOTONES INFERIORES */
+/* -------------------------------------------------- */
+
+/* Botón principal (Registrar Receta) - Estilo .ingresar-btn */
+.Formulario .enviar {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: auto; 
+    background-color: #0198CC; /* $celestial-blue */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Botón secundario (Volver/Cerrar) - Estilo .registro-btn */
+.Formulario .btn-secondary-vol { /* Clase auxiliar para el botón de volver */
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: auto; 
+    background-color: #DDDCDC; /* $platinum */
+    color: #333;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.Formulario .btn-secondary-vol:hover {
+    background-color: #c4c4c4;
+}
+.modal-content .Formulario p {
+    color: #333; /* Un gris oscuro, coherente con tu paleta */
+    
+    margin: 5px 0;
+    text-align: center; /* Asegura que el texto no esté centrado */
+    padding-left: 5px; /* Alineación con los labels */
+}
+
+.modal-content .Formulario p strong {
+    font-size: 1.2rem; 
+    color: #0198CC; /* Opcional: Resaltar el nombre en turquesa */
+    font-weight: 600;
+}
