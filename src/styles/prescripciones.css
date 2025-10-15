@@ -192,7 +192,7 @@ html, body {
     background-color: #f9f9f9; 
     color: #222;
     transition: border-color 0.2s;
-    /* 👈 AÑADE O MODIFICA ESTO PARA CAMBIAR LA FUENTE */
+    position: relative;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Usar una fuente limpia y legible */
     font-size: 1rem; /* Asegurar un buen tamaño */
     line-height: 1.5; /* Mejorar la legibilidad con espaciado */
@@ -298,16 +298,46 @@ html, body {
 .Formulario .btn-secondary-vol:hover {
     background-color: #c4c4c4;
 }
-.modal-content .Formulario p {
-    color: #333; /* Un gris oscuro, coherente con tu paleta */
-    
-    margin: 5px 0;
-    text-align: center; /* Asegura que el texto no esté centrado */
-    padding-left: 5px; /* Alineación con los labels */
+
+.field-wrapper {
+  position: relative;
+  margin-bottom: 18px;
+  margin-top: 10px;
+  flex-direction: column;
 }
 
-.modal-content .Formulario p strong {
-    font-size: 1.2rem; 
-    color: #0198CC; /* Opcional: Resaltar el nombre en turquesa */
-    font-weight: 600;
+.field-wrapper input,
+.field-wrapper select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+.error-msg {
+  position: absolute;
+  bottom: -10px;
+  left: 4px;
+  height: 22px;
+  line-height: 22px;
+  margin: 0;
+  color: #e63946;
+  font-size: 0.9rem;
+}
+.input-error {
+  border-color: #e63946 !important;
+}
+.Formulario input[type="date"]::-webkit-calendar-picker-indicator {
+    display: block;
+    opacity: 1;
+    cursor: pointer;
+    filter: brightness(0);
+    padding: 5px;
+    border: 2px solid black;
+    border-radius: 3px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
 }
