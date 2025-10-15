@@ -9,7 +9,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const doctorId = user?.id || 0;
   const establecimientoId = user?.establecimientoId || 1;
   console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
-  const { register, handleSubmit, watch, setValue } = useForm();
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
@@ -21,7 +21,38 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/api/patients");
   const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredPacientes = pacientes?.filter(p => {
+    const term = searchTerm.toLowerCase();
+    const fullName = `${p.Apellido} ${p.Nombres}`.toLowerCase();
+    return (
+      p.DNI?.toString().includes(term) || 
+      fullName.includes(term)
+    );
+  }) || [];
 
+  useEffect(() => {
+        // Bloquea el scroll y evita el salto visual
+        document.body.style.overflow = 'hidden'; 
+        document.body.style.paddingRight = '10px'; 
+        
+        // 1. Define el handler de la tecla Esc
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                onClose(); 
+            }
+        };
+
+        // 2. Adjunta el escuchador
+        document.addEventListener('keydown', handleEscape);
+
+        return () => {
+            // 3. Limpieza: Desbloquea scroll y elimina el escuchador
+            document.body.style.overflow = 'unset'; 
+            document.body.style.paddingRight = '0';
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [onClose]);
   useEffect(() => {
     if (coberturaSeleccionada) {
       fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
@@ -82,15 +113,28 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
     }
+
   };
+
+  const handleBackdropClick = (e) => {
+    // Si el clic ocurrió directamente en el fondo (y no en un hijo)
+    if (e.target === e.currentTarget) {
+        onClose();
+    }
+};
+
 
   return createPortal(
   // 1. Contenedor del fondo (Backdrop)
+  
   // Aquí se aplican estilos para que ocupe toda la pantalla y tenga el fondo oscuro.
-  <div className="modal-backdrop">
+  <div className="modal-backdrop"onClick={handleBackdropClick}>
+     
+    
+        
     {/* 2. Contenedor del contenido (Modal Content)
         Aquí se aplican estilos para el color de fondo (blanco) y el tamaño del modal. */}
-    <div className="modal-content">
+    <div className="modal-content"onClick={(e) => e.stopPropagation()}>
 
       {/* 3. Tu contenido original */}
       {/* Se mantiene la clase 'container' pero se recomienda quitar el 'marginTop'
@@ -99,80 +143,132 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         <h1 className="main-title">Registrar Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
-          <label>Paciente:</label>
-          {pacienteRecibido ? (
-            <>
-              <p>
-                <strong>
-                  {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                </strong>
-              </p>
-              <p>DNI: {pacienteRecibido.DNI}</p>
-              <input
+
+          {/* Paciente */}
+<div className="field-wrapper">
+    <label>Paciente:</label>
+    {pacienteRecibido ? (
+        // 🚨 BLOQUE 1: Paciente Recibido por Props (No requiere búsqueda)
+        <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            padding: '10px', 
+            backgroundColor: '#f9f9f9', /* Fondo gris claro */
+            borderRadius: '5px',
+            color: '#333' /* Texto oscuro asegurado */
+        }}>
+            <strong style={{ fontSize: '1.1em' }}>
+                {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
+            </strong>
+            <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
+            <input
                 type="hidden"
                 value={pacienteRecibido.PacienteID}
                 {...register("Paciente")}
-              />
-            </>
-          ) : (
-            <>
-              <select
-                {...register("Paciente", { required: true })}
-                onChange={(e) => {
-                  const seleccionado = pacientes.find(
-                    (p) => p.PacienteID === parseInt(e.target.value)
-                  );
-                  setDniPaciente(seleccionado ? seleccionado.DNI : "");
-                }}
-              >
-                <option value="">Selecciona un paciente</option>
-                {pacientes.map((p) => (
-                  <option key={p.PacienteID} value={p.PacienteID}>
-                    {p.Apellido} {p.Nombres}
-                  </option>
-                ))}
-              </select>
-              {dniPaciente && <p>DNI: {dniPaciente}</p>}
-            </>
-          )}
-          <br /><br />
+            />
+        </div>
+    ) : (
+        // 🚨 BLOQUE 2: Selección de Paciente (CON BÚSQUEDA)
+        <>
+            {/* 🚨 CRÍTICO: 1. Campo de Búsqueda por DNI/Nombre */}
+            <div className="field-wrapper" style={{ marginBottom: '5px' }}>
+                <input
+                    type="text"
+                    placeholder="Buscar por DNI o Nombre/Apellido"
+                    className="select-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)} // Actualiza el estado de búsqueda
+                />
+            </div>
+            
+            {/* 🚨 CRÍTICO: 2. Combo de selección FILTRADO */}
+            <div className="select-container">
+                <select
+                    {...register("Paciente", { required: "Selecciona un paciente" })}
+                    className={`select-input ${errors.Paciente ? "input-error" : ""}`}
+                    onChange={(e) => {
+                        const seleccionado = pacientes?.find((p) => p.PacienteID === parseInt(e.target.value));
+                        setDniPaciente(seleccionado ? seleccionado.DNI : "");
+                        setValue("Paciente", e.target.value); // Asigna el valor del paciente seleccionado
+                    }}
+                >
+                    <option value="">Selecciona un paciente</option>
+                    {/* Usamos la lista filtrada */}
+                    {filteredPacientes.map((p) => (
+                        <option key={p.PacienteID} value={p.PacienteID}>
+                            {p.Apellido} {p.Nombres} (DNI: {p.DNI})
+                        </option>
+                    ))}
+                </select>
+                {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
+                {dniPaciente && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>DNI: {dniPaciente}</p>}
+            </div>
+        </>
+    )}
+</div>
 
-          <label>Fecha:</label>
-          <input type="date" {...register("Fecha", { required: true })} />
-          <br /><br />
+          {/* Fecha */}
+          <div className="field-wrapper">
+            <label>Fecha:</label>
+            <input
+              type="date"
+              className={`select-input ${errors.Fecha ? "input-error" : ""}`}
+              {...register("Fecha", { required: "Campo obligatorio" })}
+            />
+            {errors.Fecha && <p className="error-msg">{errors.Fecha.message}</p>}
+          </div>
 
-          <label>Diagnóstico:</label>
-          <select {...register("Diagnostico", { required: true })}>
-            <option value="">Selecciona un diagnóstico</option>
-            {diagnosticos.map((d) => (
-              <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
-                {d.Descripcion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Diagnóstico */}
+          <div className="field-wrapper">
+            <label>Diagnóstico:</label>
+            <select
+              {...register("Diagnostico", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Diagnostico ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona un diagnóstico</option>
+              {diagnosticos.map((d) => (
+                <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
+                  {d.Descripcion}
+                </option>
+              ))}
+            </select>
+            {errors.Diagnostico && <p className="error-msg">{errors.Diagnostico.message}</p>}
+          </div>
 
-          <label>Cobertura:</label>
-          <select {...register("Cobertura", { required: true })}>
-            <option value="">Selecciona una cobertura</option>
-            {coberturas.map((c) => (
-              <option key={c.PrepagaID} value={c.PrepagaID}>
-                {c.Denominacion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Cobertura */}
+          <div className="field-wrapper">
+            <label>Cobertura:</label>
+            <select
+              {...register("Cobertura", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Cobertura ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona una cobertura</option>
+              {coberturas.map((c) => (
+                <option key={c.PrepagaID} value={c.PrepagaID}>
+                  {c.Denominacion}
+                </option>
+              ))}
+            </select>
+            {errors.Cobertura && <p className="error-msg">{errors.Cobertura.message}</p>}
+          </div>
 
-          <label>Plan:</label>
-          <select {...register("Plan", { required: true })} >
-            <option value="">Selecciona un plan</option>
-            {planes.map((p) => (
-              <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
-                {p.Denominacion}
-              </option>
-            ))}
-          </select>
-          <br /><br />
+          {/* Plan */}
+          <div className="field-wrapper">
+            <label>Plan:</label>
+            <select
+              {...register("Plan", { required: "Campo obligatorio" })}
+              className={`select-input ${errors.Plan ? "input-error" : ""}`}
+            >
+              <option value="">Selecciona un plan</option>
+              {planes.map((p) => (
+                <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
+                  {p.Denominacion}
+                </option>
+              ))}
+            </select>
+            {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
+          </div>
 
           <label>Prácticas:</label>
           <select id="comboPracticas" {...register("PracticaTemp")}>
@@ -186,6 +282,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           <button
             type="button"
             style={{ marginLeft: "10px" }}
+            className="add-practice-btn" 
             onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
           >
             <i className="fa-solid fa-plus"></i> Agregar
@@ -226,17 +323,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <br />
-          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <div style={{ display: "center", justifyContent: "center", gap: "10px" }}>
             <button className="enviar" type="submit">
               Registrar Receta
             </button>
-            <button
-              type="button"
-              onClick={onClose} // CAMBIO CLAVE: Usa onClose para cerrar el modal
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-            >
-              Volver
-            </button>
+            
           </div>
         </form>
       </div>
