@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
+import RecetaPreview from '../../components/RecetaPreview.jsx';
 
 export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -10,6 +11,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const establecimientoId = user?.establecimientoId || 1;
   console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
+  const watchedValues = watch();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
@@ -84,18 +86,44 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     }
   };
 
-  return createPortal(
-  // 1. Contenedor del fondo (Backdrop)
-  // Aquí se aplican estilos para que ocupe toda la pantalla y tenga el fondo oscuro.
-  <div className="modal-backdrop">
-    {/* 2. Contenedor del contenido (Modal Content)
-        Aquí se aplican estilos para el color de fondo (blanco) y el tamaño del modal. */}
-    <div className="modal-content">
+  const previewData = useMemo(() => {
+    const selectedPaciente = pacientes.find(p => p.PacienteID === parseInt(watchedValues.Paciente)) || pacienteRecibido;
+    const selectedDiagnostico = diagnosticos.find(d => d.DiagnosticoID === parseInt(watchedValues.Diagnostico));
+    const selectedCobertura = coberturas.find(c => c.PrepagaID === parseInt(watchedValues.Cobertura));
+    const selectedPlan = planes.find(p => p.PrepagaPlanID === parseInt(watchedValues.Plan));
 
-      {/* 3. Tu contenido original */}
-      {/* Se mantiene la clase 'container' pero se recomienda quitar el 'marginTop'
-          ya que el centrado ahora lo maneja 'modal-backdrop' */}
-      <div className="container" style={{ textAlign: "center" }}>
+    return {
+      paciente: selectedPaciente ? {
+          NombreCompleto: `${selectedPaciente.Apellido} ${selectedPaciente.Nombres}`,
+          DNI: selectedPaciente.DNI
+      } : null,
+      fecha: watchedValues.Fecha 
+        ? new Date(watchedValues.Fecha + 'T00:00:00').toLocaleDateString('es-AR') 
+        : '',
+      diagnostico: selectedDiagnostico,
+      cobertura: selectedCobertura,
+      plan: selectedPlan,
+      practicas: practicasSeleccionadas,
+      notas: watchedValues.Notas,
+      notasReceta: watchedValues.NotasReceta,
+      doctorName: `${user?.apellido} ${user?.nombres}`
+    };
+  }, [
+    watchedValues, 
+    practicasSeleccionadas, 
+    pacientes, 
+    diagnosticos, 
+    coberturas, 
+    planes, 
+    pacienteRecibido, 
+    user
+  ]);
+
+  return createPortal(
+  <div className="modal-backdrop">
+    <div className="modal-content wide">
+      <div className="modal-body-split">
+        <div className="container" style={{ textAlign: "center" }}>
         <h1 className="main-title">Registrar Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
@@ -105,12 +133,12 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             <label>Paciente:</label>
             {pacienteRecibido ? (
               <>
-                <p>
+                <p className="nombre-apellido">
                   <strong>
                     {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
                   </strong>
                 </p>
-                <p>DNI: {pacienteRecibido.DNI}</p>
+                <p className="nombre-apellido">DNI: {pacienteRecibido.DNI}</p>
                 <input
                   type="hidden"
                   value={pacienteRecibido.PacienteID}
@@ -202,75 +230,80 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               ))}
             </select>
             {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
-          </div>
+            </div>
 
-          <label>Prácticas:</label>
-          <select id="comboPracticas" {...register("PracticaTemp")}>
-            <option value="">Selecciona una práctica</option>
-            {practicas.map((p) => (
-              <option key={p.PracticaID} value={p.PracticaID}>
-                {p.Descripcion}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            style={{ marginLeft: "10px" }}
-            onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
-          >
-            <i className="fa-solid fa-plus"></i> Agregar
-          </button>
-
-          <br /><br />
-
-          <h3>Prácticas seleccionadas:</h3>
-          {practicasSeleccionadas.length === 0 ? (
-            <p>No hay prácticas agregadas</p>
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {practicasSeleccionadas.map((p) => (
-                <li key={p.PracticaID}>
-                  {p.Descripcion}{" "}
-                  <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
-                    <i className="fa-solid fa-x"></i>
-                  </button>
-                </li>
+            <label>Prácticas:</label>
+            <select id="comboPracticas" {...register("PracticaTemp")}>
+              <option value="">Selecciona una práctica</option>
+              {practicas.map((p) => (
+                <option key={p.PracticaID} value={p.PracticaID}>
+                  {p.Descripcion}
+                </option>
               ))}
-            </ul>
-          )}
-
-          <br />
-          <label>Notas:</label>
-          <br />
-          <textarea
-            {...register("Notas")} placeholder="Nota de receta..." rows="3" 
-          />
-          <br /><br />
-
-          <label>Observaciones al laboratorio:</label>
-          <textarea
-            {...register("NotasReceta")} placeholder="Nota al laboratorio..." rows="3" 
-          />
-          <br /><br />
-
-          {error && <p style={{ color: "red" }}>{error}</p>}
-
-          <br />
-          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-            <button className="enviar" type="submit">
-              Registrar Receta
-            </button>
+            </select>
             <button
               type="button"
-              onClick={onClose} // CAMBIO CLAVE: Usa onClose para cerrar el modal
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+              style={{ marginLeft: "10px" }}
+              onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
             >
-              Volver
+              <i className="fa-solid fa-plus"></i> Agregar
             </button>
-          </div>
-        </form>
-      </div>
 
+            <br /><br />
+
+            <h3>Prácticas seleccionadas:</h3>
+            {practicasSeleccionadas.length === 0 ? (
+              <p>No hay prácticas agregadas</p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {practicasSeleccionadas.map((p) => (
+                  <li key={p.PracticaID}>
+                    {p.Descripcion}{" "}
+                    <button type="button" onClick={() => handleEliminarPractica(p.PracticaID)}>
+                      <i className="fa-solid fa-x"></i>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <br />
+            <label>Notas:</label>
+            <br />
+            <textarea
+              {...register("Notas")} placeholder="Nota de receta..." rows="3" 
+            />
+            <br /><br />
+
+            <label>Observaciones al laboratorio:</label>
+            <textarea
+              {...register("NotasReceta")} placeholder="Nota al laboratorio..." rows="3" 
+            />
+            <br /><br />
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            <br />
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+              <button className="enviar" type="submit">
+                Registrar Receta
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+              >
+                Volver
+              </button>
+            </div>
+          </form>
+        </div>
+          <div className="preview-column">
+              <div className="preview-column">
+                  <RecetaPreview data={previewData} />
+              </div>
+          </div>
+      </div>
     </div>
   </div>,
   document.getElementById("modal-root")
