@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import {
-  getDoctorById, updateDoctor, getDoctorEstablishments, getAllEstablishments, addDoctorEstablishment, removeDoctorEstablishment, getAllSpecialties
+  getDoctorById, updateDoctor, getDoctorEstablishments, getAllEstablishments, addDoctorEstablishment, removeDoctorEstablishment, getAllSpecialties,setActiveEstablishmentForDoctor
 } from "../../services/doctorService.js";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
-import "@fortawesome/fontawesome-free/css/all.min.css"; // Para los iconos
-import "../../styles/login.css"; // Para los estilos de la tarjeta
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "../../styles/login.css";
 
 export default function PerfilUsuario() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -20,6 +21,7 @@ export default function PerfilUsuario() {
   const [activeEstablishment, setActiveEstablishment] = useState(localStorage.getItem("activeEstablishment") || "");
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { updateActiveEstablishment } = useAuth();
 
   const toBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -132,11 +134,8 @@ export default function PerfilUsuario() {
       await Promise.all(apiCalls);
 
       if (activeEstablishment) {
-        const value = String(activeEstablishment);
-        localStorage.setItem("activeEstablishment", value);
-
-        const updatedUser = { ...user, establecimientoId: Number(value) };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        await setActiveEstablishmentForDoctor(doctorId, activeEstablishment);
+        updateActiveEstablishment(activeEstablishment);
       }
 
       setInitialDoctor(doctor);
@@ -242,8 +241,8 @@ export default function PerfilUsuario() {
                 onChange={(e) => {
                   const value = String(e.target.value);
                   setActiveEstablishment(value);
-                  localStorage.setItem("activeEstablishment", value);
-                  console.log("Seleccionado establecimiento:", value);
+                  updateActiveEstablishment(value);
+                  console.log("Establecimiento seleccionado:", value);
                 }}
               />
               {est.Descripcion}
