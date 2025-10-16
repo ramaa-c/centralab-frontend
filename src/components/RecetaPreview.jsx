@@ -1,8 +1,6 @@
-// src/components/RecetaPreview.jsx
 import React from 'react';
-import '../styles/RecetaPreview.css'; // Crea un CSS para darle estilo como en la imagen
+import '../styles/RecetaPreview.css';
 
-// Este componente recibe los datos ya procesados
 export default function RecetaPreview({ data }) {
   return (
     <div className="preview-container">
@@ -36,8 +34,18 @@ export default function RecetaPreview({ data }) {
         <p>{data.notasReceta || '...'}</p>
       </div>
       <div className="preview-footer">
-        {/* Aquí podrías mostrar el nombre del doctor logueado */}
-        <p>Firma: Dr. {data.doctorName}</p>
+        <p><strong>Firma:</strong></p>
+        {data.firmaImagen && (
+          <img
+            src={
+              data.firmaImagen.startsWith("data:")
+                ? data.firmaImagen
+                : `data:image/png;base64,${data.firmaImagen}`
+            }
+            alt="Firma del médico"
+            className="firma-img"
+          />
+        )}
       </div>
     </div>
   );
