@@ -181,7 +181,7 @@ html, body {
     font-size: 0.9rem;
     color: #333;
     font-weight: 500;
-    margin-top: 15px;
+    margin-top: 25px;
     margin-bottom: 5px;
 }
 
@@ -220,25 +220,31 @@ html, body {
     background-color: white;
 }
 
-/* Estilo específico para el selector de prácticas (para que se parezca al select) */
-.Formulario select#comboPracticas {
-    width: 80%;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 10px; /* Espacio para el botón de agregar */
+/* 1. Estilos para el nuevo contenedor Flexbox */
+.Formulario .practice-input-group {
+  display: flex;          /* Activa Flexbox */
+  align-items: center;    /* Alinea verticalmente el select y el botón */
+  gap: 10px;              /* Espacio moderno y consistente entre los elementos */
 }
 
-/* Estilo para el botón de Agregar (Lo estilizamos como botón de acción) */
-.Formulario button[type="button"].add-practice-btn { 
-    /* Esta clase debe ser aplicada en el JSX */
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-weight: 600;
-    background-color: #0198CC; /* Verde para la acción de añadir */
-    color: white;
-    border: none;
-    cursor: pointer;
-    vertical-align: middle;
+/* 2. El select ahora es flexible y ocupa el espacio sobrante */
+.Formulario .practice-input-group select {
+  flex: 1;                /* ¡La clave! Hace que el select crezca para llenar el espacio disponible */
+  min-width: 0;           /* Necesario para que el flexbox pueda encoger el elemento correctamente */
+  /* Ya no necesitas width, display, vertical-align, ni margin-right */
+}
+
+/* 3. Estilos del botón (se mantienen casi igual) */
+.Formulario .practice-input-group .add-practice-btn {
+  padding: 12px 15px;      /* Un poco más de padding horizontal para que respire */
+  border-radius: 8px;
+  font-weight: 600;
+  background-color: #0198CC;
+  color: white;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;     /* Evita que el texto del botón se parta en dos líneas */
+  /* Ya no necesitas vertical-align */
 }
 
 /* Estilos para la lista de prácticas seleccionadas */
@@ -325,9 +331,8 @@ html, body {
 }
 .error-msg {
   position: absolute;
-  bottom: -10px;
-  left: 4px;
-  height: 22px;
+  bottom: -20px;
+  left: 2px;
   line-height: 22px;
   margin: 0;
   color: #e63946;
@@ -431,6 +436,7 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: 20px;
+  height: 100%;
 }
 
 .form-column {
@@ -444,4 +450,124 @@ html, body {
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #dee2e6;
+  overflow-y: auto;
+}
+
+.form-wrapper {
+flex:1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: none; 
+  margin: 0;
+  padding: 0; 
+}
+
+/* Opcional: Centrar el título dentro del nuevo wrapper */
+.form-wrapper .main-title {
+  text-align: center;
+}
+/* --- Base para todas las filas del formulario --- */
+.form-row {
+  display: flex;
+  align-items: flex-start; /* Alinea los labels en la parte superior */
+  gap: 20px;              /* Espacio entre los campos de la fila */
+}
+
+/* Para evitar doble margen, quitamos el margen inferior de los wrappers DENTRO de una fila */
+.form-row .field-wrapper {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* --- Estilos para la proporción 50/50 --- */
+.cober-plan .field-wrapper {
+  flex: 1; /* Ambos elementos crecen por igual, ocupando 50% cada uno */
+  min-width: 0; /* Permite que los elementos se encojan correctamente */
+}
+
+
+/* --- Estilos para la proporción 80/20 --- */
+/* El primer hijo (Diagnóstico) toma 4 partes del espacio */
+.diag-calendar .field-wrapper:first-child {
+  flex: 4; 
+  min-width: 0;
+}
+
+/* El segundo hijo (Fecha) toma 1 parte del espacio */
+.diag-calendar .field-wrapper:last-child {
+  flex: 1;
+  min-width: 0;
+}
+/* --- 1. Contenedor Principal (Con alineación corregida) --- */
+.practice-double-list {
+  display: flex;
+  align-items: flex-start; /* ¡CLAVE! Alinea las columnas arriba para un layout asimétrico */
+  gap: 20px;               /* Espacio entre las dos columnas */
+}
+
+/* --- 2. Estilo de cada Columna --- */
+.practice-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- 3. Estilo de cada Fila/Item (Refinado) --- */
+.practice-item {
+  position: relative; /* Necesario para posicionar el fondo de color */
+  background-color: #fff; /* El fondo principal ahora es blanco */
+  border-bottom: 1px solid #f0f0f0; /* Línea divisoria sutil */
+}
+
+/* --- 4. Alineación del Checkbox y el Texto (Con padding reducido) --- */
+.practice-item label {
+  display: flex;
+  align-items: center;
+  position: relative; /* Para que el label y su contenido estén sobre el fondo de color */
+  z-index: 1;
+  cursor: pointer;
+  color: #333; /* Texto oscuro estándar */
+  font-weight: 500;
+}
+
+/* --- 5. Estilo del Checkbox Personalizado (Sin bordes negros) --- */
+.practice-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  
+  /* Borde sutil en lugar de negro grueso */
+  border: 1px solid #adb5bd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+/* Estilo cuando el checkbox está seleccionado */
+.practice-item input[type="checkbox"]:checked {
+  background-color: #0198CC; /* Usamos tu color principal */
+  border-color: #0198CC;
+}
+
+/* La marca de verificación (tick) */
+.practice-item input[type="checkbox"]::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em white;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.practice-item input[type="checkbox"]:checked::before {
+  transform: scale(1);
 }
