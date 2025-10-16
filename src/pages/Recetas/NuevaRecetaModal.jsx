@@ -177,71 +177,89 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   return createPortal(
   <div className="modal-backdrop">
     <div className="modal-content wide">
+      
+    
+    <button 
+        type="button" 
+        onClick={onClose} 
+        style={{ 
+            position: 'absolute', 
+            top: '-10px', 
+            right: '-10px', 
+            background: 'none', 
+            border: 'none', 
+            fontSize: '1.5rem', 
+            color: '#666', 
+            cursor: 'pointer',
+            zIndex: 100 
+        }}
+    >
+        &times;
+    </button>
       <div className="modal-body-split">
         <div className="form-wrapper" style={{ textAlign: "center" }}>
         <h1 className="main-title">Nueva Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
 
-          {/* Paciente */}
-          <div className="field-wrapper">
-              <label>Paciente:</label>
-              {pacienteRecibido ? (
-                  <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      padding: '10px', 
-                      backgroundColor: '#f9f9f9',
-                      borderRadius: '5px',
-                      color: '#333'
-                  }}>
-                      <strong style={{ fontSize: '1.1em' }}>
-                          {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                      </strong>
-                      <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
-                      <input
-                          type="hidden"
-                          value={pacienteRecibido.PacienteID}
-                          {...register("Paciente")}
-                      />
-                  </div>
-              ) : (
-                  <>
-                      <div className="field-wrapper" style={{ marginBottom: '5px' }}>
-                          <input
-                              type="text"
-                              placeholder="Buscar por DNI o Nombre/Apellido"
-                              className="select-input"
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                      </div>
-                      
-                      <div className="select-container">
-                          <select
-                              {...register("Paciente", { required: "Selecciona un paciente" })}
-                              className={`select-input ${errors.Paciente ? "input-error" : ""}`}
-                              onChange={(e) => {
-                                  const seleccionado = pacientes?.find((p) => p.PacienteID === parseInt(e.target.value));
-                                  setDniPaciente(seleccionado ? seleccionado.DNI : "");
-                                  setValue("Paciente", e.target.value); // Asigna el valor del paciente seleccionado
-                              }}
-                          >
-                              <option value="">Selecciona un paciente</option>
-                              {/* Usamos la lista filtrada */}
-                              {filteredPacientes.map((p) => (
-                                  <option key={p.PacienteID} value={p.PacienteID}>
-                                      {p.Apellido} {p.Nombres} (DNI: {p.DNI})
-                                  </option>
-                              ))}
-                          </select>
-                          {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
-                          {dniPaciente && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>DNI: {dniPaciente}</p>}
-                      </div>
-                  </>
-              )}
-          </div>
+          <div className="field-wrapper" style={{ marginBottom: '15px' }}>
+    <label>Paciente:</label>
+    {pacienteRecibido ? (
+        // Bloque 1: Paciente Recibido por Props (Se mantiene)
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '5px', color: '#333' }}>
+            <strong style={{ fontSize: '1.1em' }}>{pacienteRecibido.Apellido} {pacienteRecibido.Nombres}</strong>
+            <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
+            <input type="hidden" value={pacienteRecibido.PacienteID} {...register("Paciente")} />
+        </div>
+    ) : (
+        // 🚨 BLOQUE 2: BÚSQUEDA Y SELECCIÓN UNIFICADA 🚨
+        <div style={{ position: 'relative' }}>
+            {/* Campo de Búsqueda que almacena el nombre/DNI del paciente seleccionado */}
+            <input
+                type="text"
+                placeholder="Escriba DNI o Nombre/Apellido"
+                className="select-input"
+                value={searchTerm} // 👈 Muestra lo que el usuario escribe
+                onChange={(e) => setSearchTerm(e.target.value)}
+                
+                
+                autoComplete="off" // Deshabilita el autocompletar del navegador
+            />
+            {/* Lista de Resultados Filtrados (Simulación de Dropdown) */}
+            {searchTerm.length > 2 &&  !watch("Paciente")&& (
+                <ul className="autocomplete-list">
+                  <ul className="autocomplete-list">
+                  {/* ... mapeo de <li> elementos ... */}
+                  {/* Este mensaje también debe estar dentro del condicional de arriba */}
+                  {filteredPacientes.length === 0 && <li>No se encontraron pacientes.</li>}
+                </ul>
+                    {filteredPacientes.slice(0, 10).map((p) => ( // Muestra un máximo de 10 resultados
+                        <li 
+                            key={p.PacienteID} 
+                            onClick={() => {
+                                // 1. Asignar el ID al campo oculto para el submit
+                                setValue("Paciente", p.PacienteID); 
+                                // 2. Mostrar el nombre completo en el campo de texto (para el UX)
+                                setSearchTerm(`${p.Apellido} ${p.Nombres} (DNI: ${p.DNI})`); 
+                                // 3. Limpiar la lista
+                                setDniPaciente(p.DNI);
+                            }}
+                        >
+                            {p.Apellido} {p.Nombres} (DNI: {p.DNI})
+                        </li>
+                    ))}
+                    {filteredPacientes.length === 0 && <li>No se encontraron pacientes.</li>}
+                </ul>
+            )}
+            
+            {/* Campo Oculto para almacenar el PacienteID requerido por useForm */}
+            <input type="hidden" {...register("Paciente", { required: true })} />
+            {/* Mensajes de error */}
+            {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
+            {dniPaciente && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>DNI: {dniPaciente}</p>}
+        </div>
+    )}
+</div>
 
           <div className="form-row diag-calendar">
           {/* Diagnóstico */}
@@ -353,17 +371,12 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-              <button className="enviar" type="submit">
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "20px"}}>
+              <button className="enviar" type="submit"style={{ width: '200px' }}>
+                
                 Registrar Receta
               </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                Volver
-              </button>
+              
             </div>
           </form>
         </div>

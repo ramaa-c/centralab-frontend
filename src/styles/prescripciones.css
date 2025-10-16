@@ -193,6 +193,8 @@ html, body {
     width: 100%;
     /* 🚨 COHERENCIA: Padding similar a tu input de login (12px en lugar de 10px) */
     padding: 12px 15px; 
+    padding-left: 1px !important; 
+    padding-right: 30px !important;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
@@ -798,4 +800,38 @@ html, body {
 .modal-footer {
     margin-top: 15px !important; /* Reducir de 30px a 15px para acercar los botones */
     padding-top: 15px !important;
+}
+/* Estilo de la Lista de Autocompletado */
+.autocomplete-list {
+    position: absolute;
+    top: 100%; /* Aparece justo debajo del input */
+    left: 0;
+    right: 0;
+    z-index: 10;
+    
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none; /* Para que se pegue visualmente al input */
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.autocomplete-list li {
+    padding: 10px 15px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-list li:hover {
+    background-color: #0198CC; /* Celestial Blue al pasar el mouse */
+    color: white;
 }
