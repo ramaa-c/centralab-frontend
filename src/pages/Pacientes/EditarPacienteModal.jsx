@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
 import { editarPaciente } from '../../services/patientService';
 import { useApi } from '../../hooks/useApi';
+import ConfirmModal from "../../components/ConfirmModal.jsx";
 
 export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
+  
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       tipoDoc: paciente.TipoDocPacienteID,
@@ -46,45 +48,56 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
 
   const { data: sexs, isLoading: loadingSexs } = useApi('/api/sexs');
   const { data: tiposDoc, isLoading: loadingTipos } = useApi('/api/identificationtypes');
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const handleOpenConfirm = (formData) => {
+            // Si handleSubmit llama a esta función, significa que la validación pasó.
+            setShowConfirm(true); 
+            // Guardamos los datos validados temporalmente
+            // No es necesario guardarlos aquí si confiamos en que handleSubmit los pasará
+        };
 
-  const enviar = async (formData) => {
-    setIsLoading(true);
-    setError(null);
 
-    try {
-      const payload = {
-        PacienteID: paciente.PacienteID,
-        DNI: formData.documento,
-        Apellido: formData.apellido,
-        Nombres: formData.nombre,
-        SexoID: Number(formData.sexo),
-        fchNacimiento: `${formData.fechaNacimiento}T00:00:00`,
-        Email: formData.email,
-        TipoDocPacienteID: Number(formData.tipoDoc),
-        MomentoAlta: new Date().toISOString().slice(0, 19),
-      };
+  const handleSave = async (formData) => {
+        setIsLoading(true);
+        setError(null);
+        
+        // 🚨 CRÍTICO: Cierra el modal de confirmación inmediatamente antes de la API
+        setShowConfirm(false); 
 
-      console.log("Contenido payload:", payload);
-      await editarPaciente(payload);
+        try {
+            const payload = {
+                PacienteID: paciente.PacienteID,
+                DNI: formData.documento,
+                Apellido: formData.apellido,
+                Nombres: formData.nombre,
+                SexoID: Number(formData.sexo),
+                fchNacimiento: `${formData.fechaNacimiento}T00:00:00`,
+                Email: formData.email,
+                TipoDocPacienteID: Number(formData.tipoDoc),
+                MomentoAlta: new Date().toISOString().slice(0, 19),
+            };
 
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Error al actualizar el paciente');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+            console.log("Contenido payload:", payload);
+            await editarPaciente(payload);
 
-  const handleMouseDown = (e) => {
-    // Si el clic se inicia y finaliza directamente en el fondo
-    if (e.target === e.currentTarget) {
-        onClose();
-    }
-};
+            onSuccess();
+            onClose();
+        } catch (err) {
+            setError(err.message || 'Error al actualizar el paciente');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleMouseDown = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
 
   return createPortal(
     <div className="modal-backdrop" onMouseDown={handleMouseDown}>
@@ -109,7 +122,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
 
         <h1 className="main-title" style={{ textAlign: 'center' }}>Editar Paciente</h1>
 
-        <form className="Formulario" onSubmit={handleSubmit(enviar)}>
+        <form className="Formulario" onSubmit={handleSubmit(handleOpenConfirm)}>
 
           {/* Tipo de Documento */}
           <div className="field-wrapper">
@@ -231,6 +244,15 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
           </div>
         </form>
       </div>
+      {showConfirm && (
+                <ConfirmModal 
+                    isOpen={showConfirm}
+                    message="¿Está seguro de querer guardar los cambios realizados en el perfil?"
+                    // 🚨 CRÍTICO: onConfirm llama a handleSubmit(handleSave) para ejecutar la API
+                    onConfirm={handleSubmit(handleSave)} 
+                    onCancel={() => setShowConfirm(false)}
+                />
+            )}
     </div>,
     document.getElementById('modal-root')
   );

@@ -1,0 +1,49 @@
+@import url("./login.css"); 
+
+/* ------------------------------------- */
+/* ESTILOS ESPECÍFICOS DE LA VISTA DE REGISTRO */
+/* ------------------------------------- */
+
+/* 1. Ajustar el padding de la columna derecha para hacer espacio a más campos */
+.card-right-column.registration-mode {
+    padding: 1.5rem 2rem; 
+    justify-content: flex-start;
+    overflow-y: auto;
+}
+
+/* 2. Reducir el margen inferior del contenedor de campo */
+.identifier-container {
+    margin-bottom: 10px; 
+}
+
+/* 🚨 3. ESTILO BASE DE INPUTS DE REGISTRO (Nueva Clase) */
+.reg-input { 
+    width: 100%;
+    padding: 12px 15px; 
+    padding-left: 40px; /* Espacio para el icono */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box; 
+    
+    /* 🚨 CRÍTICO: Margen superior para alinear el SELECT y los INPUTS */
+    margin-top: 1px; 
+    margin-bottom: 15px; /* Separación vertical */
+    
+    background-color: white; /* Aseguramos el fondo blanco */
+    color: #333;
+}
+
+/* 🚨 4. CORRECCIÓN DEL ICONO (Para alinear en el centro del SELECT/INPUT) */
+.input-icon {
+    /* 🚨 CRÍTICO: Sobrescribir transform: translateY para un centrado base */
+    transform: translateY(-85%) !important; 
+    top: 50%; /* Aseguramos que se posicione a la mitad */
+    /* El resto de las propiedades se heredan de login.css */
+}
+
+/* 5. Ajuste del SELECT para la flecha */
+.select-container .reg-input {
+    /* Aseguramos que el select no tenga un margen extra */
+    margin-top: 1px; 
+}

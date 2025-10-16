@@ -3,6 +3,9 @@ import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
 import { crearPaciente } from '../../services/authService';
 import { useApi } from '../../hooks/useApi';
+import ConfirmModal from "../../components/ConfirmModal.jsx";
+
+
 
 export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -10,6 +13,10 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/api/identificationtypes');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    
+
+
 
         useEffect(() => {
                 // Bloquea el scroll y evita el salto visual
@@ -33,6 +40,14 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     document.removeEventListener('keydown', handleEscape);
                 };
             }, [onClose]);
+
+        
+         const handleOpenConfirm = (formData) => {
+            // Si handleSubmit llama a esta función, significa que la validación pasó.
+            setShowConfirm(true); 
+            // Guardamos los datos validados temporalmente
+            // No es necesario guardarlos aquí si confiamos en que handleSubmit los pasará
+        };
     
      
        
@@ -52,6 +67,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                 TipoDocPacienteID: Number(formData.tipoDoc),
                 MomentoAlta: new Date().toISOString().slice(0, 19),
             };
+            setShowConfirm(false);
 
             await crearPaciente(payload);
             onSuccess();
@@ -69,6 +85,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
         onClose();
     }
     };
+    
 
     return createPortal(
 
@@ -91,7 +108,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     &times;
                 </button>
                 <h1 className="main-title">Nuevo Paciente</h1>
-                <form className="Formulario" onSubmit={handleSubmit(enviar)} style={{ textAlign: 'left' }}>                    
+                <form className="Formulario" onSubmit={handleSubmit(handleOpenConfirm)} style={{ textAlign: 'left' }}>                    
                     {/* Tipo de Documento */}
                     <div className="field-wrapper">
                     <label>Tipo de Documento</label>
@@ -183,12 +200,9 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     {/* Fecha de Nacimiento */}
                     <div className="field-wrapper">
                     <label>Fecha de Nacimiento</label>
-                    <input
-                        type="text"
+                   <input
+                        type="date" // 👈 CAMBIAR AQUÍ
                         placeholder="Seleccionar fecha"
-                        readOnly
-                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                        onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                         {...register("fechaNacimiento", { required: "Campo obligatorio" })}
                         className={`select-input ${errors.fechaNacimiento ? 'input-error' : ''}`}
                     />
@@ -202,8 +216,18 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                             {isLoading ? 'Creando...' : 'Crear Paciente'}
                         </button>
                     </div>
+                    </form>
+                    {showConfirm && (
+                <ConfirmModal 
+                    isOpen={showConfirm}
+                    message="¿Está seguro de querer crear este nuevo paciente?"
+                    // 🚨 CRÍTICO: onConfirm llama a handleSubmit(enviar) para revalidar y ejecutar la API
+                    onConfirm={handleSubmit(enviar)} 
+                    onCancel={() => setShowConfirm(false)}
+                />
+            )}
 
-                </form>
+                
             </div>
         </div>,
         document.getElementById('modal-root')

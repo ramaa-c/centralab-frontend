@@ -59,7 +59,11 @@
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 0.95rem;
+    background-color: #FFFFFF;
+    color: #333;
 }
+
+
 
 /* Botón de acción Buscar */
 .btn-filter-action {

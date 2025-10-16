@@ -90,9 +90,9 @@ export default function Login() {
                 </p>
               )}
             </div>
-            <a href="/forgot-password" className="forgot-password-link">
-              ¿Olvidó su contraseña?
-            </a>
+            <Link to="/forgot-password" className="forgot-password-link">
+              ¿Olvidó su contraseña?
+            </Link>
 
             <div className="button-group">
               <button className="ingresar-btn" type="submit" disabled={isLoading}>

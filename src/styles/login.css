@@ -161,12 +161,30 @@
 }
 
 .forgot-password-link {
-    position: absolute;
-    right: 0;
-    bottom: -1.5rem; /* Colócalo debajo del input */
-    font-size: 0.8rem;
-    color: #0198CC;
+    /* Mantenemos display: block para que se alinee a la derecha */
+    display: block; 
+    text-align: right; 
+    font-size: 0.85rem;
+    
+    color: #0198CC !important; 
     text-decoration: none;
+    
+    /* 🚨 CRÍTICO: ELIMINAR O SOBRESCRIBIR EL ABSOLUTE */
+    position: relative !important; /* Cambiamos a relativo para que se quede en el flujo */
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    /* 🚨 Ajuste de margen para pegarlo al input y separarlo de los botones */
+    margin-top: -10px !important; /* Mover hacia arriba para pegarse al input */
+    margin-bottom: 20px !important; /* Separar de los botones */
+    
+    z-index: 10; /* Asegurar que esté visible */
+}
+
+.login-form .field-wrapper {
+    /* 🚨 CRÍTICO: Aseguramos que haya espacio para el error Y el enlace */
+    margin-bottom: 30px !important; /* El espacio reservado */
 }
 
 .button-group {
@@ -292,61 +310,7 @@
     cursor: pointer;
 }
 
-/* ========================
-   AJUSTES ESPECÍFICOS PARA EL REGISTRO
-   ======================== */
 
-/* 1. Ajustar el padding de la columna derecha para hacer espacio a más campos */
-.card-right-column.registration-mode {
-    /* Reducimos el padding vertical y usamos flex-start para alinear los campos arriba */
-    padding: 1.5rem 2rem; 
-    justify-content: flex-start;
-    overflow-y: auto; /* Permite desplazamiento si la pantalla es muy pequeña */
-}
-
-/* 2. Reducir el margen inferior de los inputs en general para que quepan más */
-.identifier-container {
-    margin-bottom: 10px; /* Reducimos de 15px a 10px */
-}
-
-/* 3. Estilizar el SELECT y el LABEL para que se parezcan a los inputs */
-.select-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin-bottom: 10px;
-    padding-top: 5px; /* Pequeño ajuste si el label está encima */
-}
-
-.select-label {
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 3px;
-    margin-left: 40px; /* Mismo padding que el input para alineación */
-}
-
-.select-input {
-    width: 100%;
-    /* Mismo padding que los inputs, pero ajustado para el <select> */
-    padding: 12px 15px; 
-    padding-left: 40px; /* Espacio para el icono */
-    
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    box-sizing: border-box; 
-    background-color: white;
-    color: #333;
-    /* Ajuste para que la flecha del select no se solape con el icono */
-    appearance: none; 
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="#888" d="M287 197.8L153.9 64.7c-4.4-4.4-11.4-4.4-15.8 0L0 197.8h287z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px top 50%;
-    background-size: 0.6em;
-}
 
 /* El icono del select se posiciona de forma normal con .input-icon */
 

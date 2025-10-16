@@ -1,31 +1,41 @@
 import { createPortal } from "react-dom";
 
 export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center relative z-[10000]">
-        <p className="text-gray-800 mb-6">{message}</p>
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={onConfirm}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Confirmar
-          </button>
-          <button
-            onClick={() => {
-              onCancel();
-              window.location.reload();
-            }}
-            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.getElementById("modal-root") 
-  );
+    const portalRoot = document.getElementById("modal-root") || document.body;
+
+    return createPortal(
+        // Usamos el backdrop y content que ya tienes
+        <div className="modal-backdrop" onClick={onCancel}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px', padding: '30px', textAlign: 'center' }}>
+                
+                <h2 className="card-title" style={{ fontSize: '1.5rem', marginBottom: '20px' }}>Confirmación</h2>
+                
+                <p style={{ marginBottom: '30px', color: '#333' }}>{message}</p>
+                
+                <div className="button-group" style={{ display: 'flex', justifyContent: 'center', gap: '15px', width: '100%' }}>
+                    
+                    {/* Botón ACEPTAR (Llama a la acción final) */}
+                    <button
+                        onClick={onConfirm} 
+                        className="ingresar-btn" 
+                        style={{ width: '50%', padding: '10px 15px' }}
+                    >
+                        Aceptar
+                    </button>
+                    
+                    {/* 🚨 BOTÓN CANCELAR CORREGIDO: Solo llama a onCancel */}
+                    <button
+                        onClick={onCancel} 
+                        className="registro-btn" 
+                        style={{ width: '50%', padding: '10px 15px' }}
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>,
+        portalRoot 
+    );
 }
