@@ -45,7 +45,6 @@ export function AuthProvider({ children }) {
     const updatedUser = { ...user, establecimientoId: Number(newEstablishmentId) };
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
-    localStorage.setItem("activeEstablishment", String(newEstablishmentId));
 
     setUser(updatedUser);
   };

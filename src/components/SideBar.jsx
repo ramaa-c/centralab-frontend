@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import centraLabLogo from "../../assets/images/centraLab_nuevo.png";
-import "../../styles/login.css"; 
+import centraLabLogo from "../assets/images/centraLab_nuevo.png";
+import "../styles/login.css"; 
 
 export default function SideBar({ children }) {
     
