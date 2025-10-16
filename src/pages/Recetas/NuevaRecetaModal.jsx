@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
+import { getDoctorById } from "../../services/doctorService";
 
 export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -22,6 +23,19 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: practicas } = useApi("/api/tests/all");
   const { data: practicasNormales } = useApi("/api/RD/PrescriptionOrder");
   const { data: pacientes } = useApi("/api/patients");
+  const [doctorData, setDoctorData] = useState(null);
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const data = await getDoctorById(doctorId);
+        setDoctorData(data);
+      } catch (error) {
+        console.error("Error al obtener datos del doctor:", error);
+      }
+    };
+    if (doctorId) fetchDoctor();
+  }, [doctorId]);
 
   const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
@@ -137,8 +151,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           NombreCompleto: `${selectedPaciente.Apellido} ${selectedPaciente.Nombres}`,
           DNI: selectedPaciente.DNI
       } : null,
-      fecha: watchedValues.Fecha 
-        ? new Date(watchedValues.Fecha + 'T00:00:00').toLocaleDateString('es-AR') 
+      fecha: watchedValues.Fecha
+        ? new Date(watchedValues.Fecha + 'T00:00:00').toLocaleDateString('es-AR')
         : '',
       diagnostico: selectedDiagnostico,
       cobertura: selectedCobertura,
@@ -146,16 +160,18 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       practicas: practicasSeleccionadas,
       notas: watchedValues.Notas,
       notasReceta: watchedValues.NotasReceta,
-      doctorName: `${user?.apellido} ${user?.nombres}`
+      doctorName: `${user?.apellido} ${user?.nombres}`,
+      firmaImagen: doctorData?.FirmaImagen || null,
     };
   }, [
-    watchedValues, 
-    practicasSeleccionadas, 
-    pacientes, 
-    diagnosticos, 
-    coberturas, 
-    planes, 
-    pacienteRecibido, 
+    watchedValues,
+    practicasSeleccionadas,
+    pacientes,
+    diagnosticos,
+    coberturas,
+    planes,
+    pacienteRecibido,
+    doctorData,
     user
   ]);
 

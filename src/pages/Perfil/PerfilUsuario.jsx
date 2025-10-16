@@ -8,8 +8,9 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/login.css";
 
 export default function PerfilUsuario() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user, updateActiveEstablishment } = useAuth();
   const doctorId = user?.id;
+  const [draftActiveEstablishment, setDraftActiveEstablishment] = useState("");
   const [doctor, setDoctor] = useState(null);
   const [doctorEstablishments, setDoctorEstablishments] = useState([]);
   const [initialDoctor, setInitialDoctor] = useState(null);
@@ -18,10 +19,8 @@ export default function PerfilUsuario() {
   const [establishments, setEstablishments] = useState([]);
   const [selectedEstablishment, setSelectedEstablishment] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [activeEstablishment, setActiveEstablishment] = useState(localStorage.getItem("activeEstablishment") || "");
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { updateActiveEstablishment } = useAuth();
 
   const toBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -34,15 +33,6 @@ export default function PerfilUsuario() {
   useEffect(() => {
     fetchData();
   }, [doctorId]);
-
-  useEffect(() => {
-    if (doctorEstablishments.length > 0) {
-      const savedActive = localStorage.getItem("activeEstablishment");
-      if (savedActive) {
-        setActiveEstablishment(savedActive);
-      }
-    }
-  }, [doctorEstablishments]);
 
   const fetchData = async () => {
     try {
@@ -62,6 +52,14 @@ export default function PerfilUsuario() {
       console.error("Error loading profile:", error);
     } finally {
       setIsLoading(false);
+      const userEst = user?.establecimientoId;
+      if (userEst !== undefined && userEst !== null) {
+        setDraftActiveEstablishment(String(userEst));
+      } else {
+        if (Array.isArray(estData) && estData.length > 0) {
+          setDraftActiveEstablishment(String(estData[0].EstablecimientoID));
+        }
+      }
     }
   };
 
@@ -92,9 +90,12 @@ export default function PerfilUsuario() {
   };
 
   const handleRemoveEstablishment = (idToRemove) => {
-    setDoctorEstablishments(
-      doctorEstablishments.filter((est) => est.EstablecimientoID !== idToRemove)
-    );
+    const nuevaLista = doctorEstablishments.filter((est) => est.EstablecimientoID !== idToRemove);
+    setDoctorEstablishments(nuevaLista);
+
+    if (String(idToRemove) === draftActiveEstablishment) {
+      setDraftActiveEstablishment("");
+    }
   };
 
   const handleSave = async () => {
@@ -133,14 +134,14 @@ export default function PerfilUsuario() {
     try {
       await Promise.all(apiCalls);
 
-      if (activeEstablishment) {
-        await setActiveEstablishmentForDoctor(doctorId, activeEstablishment);
-        updateActiveEstablishment(activeEstablishment);
+      if (draftActiveEstablishment) {
+        updateActiveEstablishment(Number(draftActiveEstablishment));
+        console.log("Establecimiento activo actualizado en sesión:", draftActiveEstablishment);
       }
 
       setInitialDoctor(doctor);
       setInitialDoctorEstablishments(doctorEstablishments);
-      console.log("Guardado correctamente. Establecimiento activo:", activeEstablishment);
+      console.log("Guardado correctamente. Establecimiento activo:", draftActiveEstablishment );
     } catch (error) {
       console.error("Error al guardar perfil:", error);
     }
@@ -228,7 +229,7 @@ export default function PerfilUsuario() {
             >
             <label
               className={`flex items-center gap-2 ${
-                activeEstablishment === String(est.EstablecimientoID)
+                draftActiveEstablishment  === String(est.EstablecimientoID)
                   ? "font-bold text-blue-600"
                   : ""
               }`}
@@ -237,11 +238,10 @@ export default function PerfilUsuario() {
                 type="radio"
                 name="activeEstablishment"
                 value={String(est.EstablecimientoID)}
-                checked={activeEstablishment === String(est.EstablecimientoID)}
+                checked={draftActiveEstablishment  === String(est.EstablecimientoID)}
                 onChange={(e) => {
                   const value = String(e.target.value);
-                  setActiveEstablishment(value);
-                  updateActiveEstablishment(value);
+                  setDraftActiveEstablishment(value);
                   console.log("Establecimiento seleccionado:", value);
                 }}
               />

@@ -37,7 +37,7 @@
 
 /* --- Info del Paciente --- */
 .preview-patient-info {
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 .preview-patient-info p {
@@ -47,7 +47,7 @@
 
 /* --- Cuerpo: Diagnóstico y Prácticas --- */
 .preview-body p {
-  margin: 5px 0;
+  margin: 0 0;
 }
 
 /* Para resaltar los títulos como "Paciente:", "Diagnóstico:", etc. */
@@ -75,7 +75,7 @@
 .preview-footer {
   margin-top: auto; /* Esto empuja el footer al final del contenedor flex */
   padding-top: 20px;
-  text-align: center;
+  text-align: left;
   font-size: 13px;
   color: #495057;
 }
@@ -90,5 +90,13 @@
 hr {
   border: none;
   border-top: 1px solid #f0f0f0;
-  margin: 15px 0;
+  margin: 5px 0;
+}
+.firma-img {
+  margin-top: 10px;
+  max-height: 160px;
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+  margin-left: auto; 
 }

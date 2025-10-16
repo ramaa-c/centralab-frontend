@@ -6,7 +6,7 @@ import CambiarClave from './pages/Auth/CambiarClave';
 import PerfilUsuario from './pages/Perfil/PerfilUsuario';
 import Prescripciones from "./pages/Recetas/Prescripciones";
 import ProtectedRoute from './components/ProtectedRoute';
-import SideBar from "./pages/Recetas/SideBar";
+import SideBar from "./components/SideBar.jsx";
 import Resultados from './pages/Perfil/resultados';
 
 function App() {
