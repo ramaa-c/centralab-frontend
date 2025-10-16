@@ -39,8 +39,19 @@ export function AuthProvider({ children }) {
     navigate("/login");
   };
 
+  const updateActiveEstablishment = (newEstablishmentId) => {
+    if (!user) return;
+
+    const updatedUser = { ...user, establecimientoId: Number(newEstablishmentId) };
+
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    localStorage.setItem("activeEstablishment", String(newEstablishmentId));
+
+    setUser(updatedUser);
+  };
+
   const isLoggedIn = !!user;
-  const value = { user, isLoggedIn, login, logout };
+  const value = { user, isLoggedIn, login, logout, updateActiveEstablishment  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

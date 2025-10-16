@@ -158,22 +158,28 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     pacienteRecibido, 
     user
   ]);
-  
-  const practicasOrdenadas = [...(practicasNormales || [])]
-  .sort((a, b) => {
-    if (a.Columna !== b.Columna) return a.Columna - b.Columna;
-    return a.Orden - b.Orden;
-  });
 
-  const columna1 = practicasOrdenadas.filter(p => p.Columna === 1);
-  const columna2 = practicasOrdenadas.filter(p => p.Columna === 2);
+  const NUM_COLUMNAS = 3;
+
+  const practicasOrdenadas = [...(practicasNormales || [])]
+    .sort((a, b) => {
+      if (a.Columna !== b.Columna) return a.Columna - b.Columna;
+      return a.Orden - b.Orden;
+    });
+
+  const columnas = Array.from({ length: NUM_COLUMNAS }, () => []);
+
+  practicasOrdenadas.forEach((p, index) => {
+    const columnaIndex = index % NUM_COLUMNAS;
+    columnas[columnaIndex].push(p);
+  });
 
   return createPortal(
   <div className="modal-backdrop">
     <div className="modal-content wide">
       <div className="modal-body-split">
         <div className="form-wrapper" style={{ textAlign: "center" }}>
-        <h1 className="main-title">Registrar Receta</h1>
+        <h1 className="main-title">Nueva Receta</h1>
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
 
@@ -305,55 +311,33 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
           {/* Practicas */}
           <div className="field-wrapper">
-            <label>Prácticas normales:</label>
-
-            <div className="practice-double-list">
-              <div className="practice-column">
-                {columna1.map(p => (
-                  <div key={p.PracticaID} className="practice-item">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={practicasSeleccionadas.some(sel => sel.PracticaID === p.PracticaID)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setPracticasSeleccionadas([...practicasSeleccionadas, p]);
-                          } else {
-                            setPracticasSeleccionadas(
-                              practicasSeleccionadas.filter(sel => sel.PracticaID !== p.PracticaID)
-                            );
-                          }
-                        }}
-                      />
-                      {p.Descripcion}
-                    </label>
+            <label>Prácticas:</label>
+              <div className="practice-list" style={{ display: 'flex', gap: '1rem' }}>
+                {columnas.map((columna, i) => (
+                  <div key={i} className="practice-column" style={{ flex: 1 }}>
+                    {columna.map((p) => (
+                      <div key={p.PracticaID} className="practice-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={practicasSeleccionadas.some(sel => sel.PracticaID === p.PracticaID)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setPracticasSeleccionadas([...practicasSeleccionadas, p]);
+                              } else {
+                                setPracticasSeleccionadas(
+                                  practicasSeleccionadas.filter(sel => sel.PracticaID !== p.PracticaID)
+                                );
+                              }
+                            }}
+                          />
+                          {p.Descripcion}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
-
-              <div className="practice-column">
-                {columna2.map(p => (
-                  <div key={p.PracticaID} className="practice-item">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={practicasSeleccionadas.some(sel => sel.PracticaID === p.PracticaID)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setPracticasSeleccionadas([...practicasSeleccionadas, p]);
-                          } else {
-                            setPracticasSeleccionadas(
-                              practicasSeleccionadas.filter(sel => sel.PracticaID !== p.PracticaID)
-                            );
-                          }
-                        }}
-                      />
-                      {p.Descripcion}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Notas */}

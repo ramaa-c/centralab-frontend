@@ -27,12 +27,17 @@ export const login = async (credentials) => {
 
   const apiResponseData  = response.data;
 
+  const establishmentsResponse = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
+  const establecimientos = establishmentsResponse.data?.List || [];
+  const establecimientoActivo = establecimientos.find(e => String(e.Activo) === "1");
+
   const userToStore = {
     id: doctorId,
     dni: apiResponseData.doctor_id,
     name: apiResponseData.doctor_name,
     email: apiResponseData.doctor_email,
     specialty: apiResponseData.doctor_specialty,
+    establecimientoId: establecimientoActivo?.EstablecimientoID || null,
     must_change_password: apiResponseData.must_change_password
   };
 
@@ -42,7 +47,7 @@ export const login = async (credentials) => {
 export const cambiarClave = async (doctorId, newPassword) => {
   try {
     console.log("cambio de clave con:", doctorId, newPassword);
-    const response = await api.put(`/doctors/${doctorId}/password:change`, {
+    const response = await api.put(`${DOCTORS_ENDPOINT}/${doctorId}/password:change`, {
       doctor_id: String(doctorId),
       password: newPassword,
     });

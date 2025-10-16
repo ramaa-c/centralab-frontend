@@ -6,7 +6,7 @@ const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
 
 export const getDoctorById = async (doctorId) => {
   try {
-    const response = await api.get(`/doctors/${doctorId}`);
+    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching doctor by ID:", error);
@@ -26,7 +26,7 @@ export const getAllEstablishments = async () => {
 
 export const getDoctorEstablishments = async (doctorId) => {
   try {
-    const response = await api.get(`/doctors/${doctorId}/establishments`);
+    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
     return response.data.List || [];
   } catch (error) {
     console.error("Error fetching doctor establishments:", error);
@@ -36,8 +36,7 @@ export const getDoctorEstablishments = async (doctorId) => {
 
 export const addDoctorEstablishment = async (doctorId, establishmentId) => {
   try {
-    const response = await api.post(
-      `/doctors/${doctorId}/establishments/${establishmentId}`
+    const response = await api.post(`${DOCTORS_ENDPOINT}/${doctorId}/establishments/${establishmentId}`
     );
     return response.data;
   } catch (error) {
@@ -48,8 +47,7 @@ export const addDoctorEstablishment = async (doctorId, establishmentId) => {
 
 export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
   try {
-    const response = await api.delete(
-      `/doctors/${doctorId}/establishments/${establishmentId}`
+    const response = await api.delete(`${DOCTORS_ENDPOINT}/${doctorId}/establishments/${establishmentId}`
     );
     return response.data;
   } catch (error) {
@@ -75,6 +73,28 @@ export const getAllSpecialties = async () => {
     return response.data;
   } catch (error) {
     console.error("Error al obtener especialidades:", error);
+    throw error;
+  }
+};
+export const setActiveEstablishmentForDoctor = async (doctorId, activeEstablishmentId) => {
+  try {
+    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
+    const allEstablishments = response.data?.List || [];
+
+    const updateCalls = allEstablishments.map((est) => {
+      const isActive = est.EstablecimientoID === Number(activeEstablishmentId);
+      return api.post(
+        `${DOCTORS_ENDPOINT}/${doctorId}/establishments/${est.EstablecimientoID}`,
+        { Activo: isActive ? 1 : 0 }
+      );
+    });
+
+    await Promise.all(updateCalls);
+    console.log("Establecimiento activo actualizado correctamente en la base de datos.");
+
+    return true;
+  } catch (error) {
+    console.error("Error al cambiar establecimiento activo:", error);
     throw error;
   }
 };
