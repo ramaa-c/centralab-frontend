@@ -200,6 +200,25 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   return createPortal(
   <div className="modal-backdrop">
     <div className="modal-content wide">
+      
+    
+    <button 
+        type="button" 
+        onClick={onClose} 
+        style={{ 
+            position: 'absolute', 
+            top: '-10px', 
+            right: '-10px', 
+            background: 'none', 
+            border: 'none', 
+            fontSize: '1.5rem', 
+            color: '#666', 
+            cursor: 'pointer',
+            zIndex: 100 
+        }}
+    >
+        &times;
+    </button>
       <div className="modal-body-split">
         <div className="form-wrapper" style={{ textAlign: "center" }}>
         <h1 className="main-title">Nueva Receta</h1>
@@ -379,17 +398,12 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-              <button className="enviar" type="submit">
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "20px"}}>
+              <button className="enviar" type="submit"style={{ width: '200px' }}>
+                
                 Registrar Receta
               </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                Volver
-              </button>
+              
             </div>
           </form>
         </div>
