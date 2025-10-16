@@ -1,0 +1,137 @@
+/* =========================================
+   ESTRUCTURA GENERAL DE RESULTADOS
+   ========================================= */
+
+.results-view-container {
+    padding: 20px;
+    width: 100%;
+}
+
+.results-main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; /* Alinea los paneles en la parte superior */
+}
+
+/* Título de la vista */
+.results-view-container .view-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* -----------------------------------------
+   1. PANEL DE FILTROS (IZQUIERDA)
+   ----------------------------------------- */
+.results-filter-panel {
+    flex-shrink: 0; /* No permite que se encoja */
+    width: 250px; /* Ancho fijo para el panel de filtros */
+    padding: 20px;
+    /* content-card ya le da fondo y sombra */
+}
+
+.results-filter-panel .filter-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #0198CC; /* Celestial Blue */
+    margin-bottom: 15px;
+    border-bottom: 1px solid #DDDCDC;
+    padding-bottom: 5px;
+}
+
+.results-filter-panel .filter-group {
+    margin-bottom: 15px;
+}
+
+.results-filter-panel label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.filter-input, .filter-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+/* Botón de acción Buscar */
+.btn-filter-action {
+    width: 100%;
+    padding: 10px;
+    background-color: #0198CC;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* -----------------------------------------
+   2. TABLA DE RESULTADOS (DERECHA)
+   ----------------------------------------- */
+.results-table-panel {
+    flex-grow: 1;
+    min-width: 0;
+    /* content-card ya le da fondo */
+}
+
+/* Controles de encabezado (Botones y Título) */
+.table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Botones de control (Historia, Ver, Descargar) */
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+.header-btn {
+    padding: 8px 12px;
+    background-color: #DDDCDC; /* Platinum/Gris */
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+.header-btn i {
+    margin-right: 5px;
+    color: #0198CC; /* Iconos en Celestial Blue */
+}
+
+/* Estilo para el estado de la petición */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Colores por estado (puedes ajustar estos hex codes) */
+.status-En { /* En Proceso */
+    background-color: #ffe0b2;
+    color: #ff9800;
+}
+.status-Parcial {
+    background-color: #bbdefb;
+    color: #2196f3;
+}
+.status-Finalizado {
+    background-color: #c8e6c9;
+    color: #4caf50;
+}
