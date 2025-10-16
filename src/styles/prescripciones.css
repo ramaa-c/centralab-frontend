@@ -234,6 +234,8 @@ html, body {
   /* Ya no necesitas width, display, vertical-align, ni margin-right */
 }
 
+
+
 /* 3. Estilos del botón (se mantienen casi igual) */
 .Formulario .practice-input-group .add-practice-btn {
   padding: 12px 15px;      /* Un poco más de padding horizontal para que respire */
@@ -296,6 +298,7 @@ html, body {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 
 /* Botón secundario (Volver/Cerrar) - Estilo .registro-btn */
 .Formulario .btn-secondary-vol { /* Clase auxiliar para el botón de volver */
@@ -572,4 +575,227 @@ html, body {
 
 .practice-item input[type="checkbox"]:checked::before {
   transform: scale(1);
+}
+/* =========================================
+   ESTILOS GENERALES DE LA BARRA LATERAL
+   ========================================= */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #F3F2F3; /* Fondo de la app (gris claro) */
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    
+    /* 🚨 Fondo Curvo y Degradado CELESTE (Estilo que pediste) */
+    background: linear-gradient(
+        135deg, 
+        #0198CC, /* Celestial Blue */
+        #3498db /* Azul claro */
+    );
+    
+    border-top-right-radius: 50px; 
+    border-bottom-right-radius: 50px;
+    
+    color: white; /* Color de texto base para el menú */
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    /* Padding general: Aumentamos el superior para que el logo esté más centrado */
+    padding: 30px 10px 20px 10px; 
+}
+
+/* ----------------------------------------- */
+/* 1. SECCIÓN DEL LOGO (Contenedor Blanco Flotante) */
+/* ----------------------------------------- */
+
+.sidebar .sidebar-logo-container {
+    /* 🚨 Fondo blanco flotante para que el logo destaque sobre el azul */
+    background-color: white; 
+    padding: 20px 35px;
+    border-radius: 8px;
+    margin-bottom: 30px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+    
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+}
+
+/* Estilo de la imagen del logo (color corporativo) */
+.sidebar .card-logo {
+    filter: none !important; /* Mantiene el color original (celeste/azul) */
+    width: 160px; /* Tamaño ajustado */
+    height: auto;
+    margin-bottom: 5px;
+}
+
+/* Estilo del texto "CentraLab" */
+.sidebar .logo-text {
+    color: #333 !important; /* Texto oscuro sobre el fondo blanco */
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: block; 
+}
+
+/* ---------------------------------
+   2. ÁREA DE PERFIL DE USUARIO (Sobre el fondo azul)
+   --------------------------------- */
+
+.sidebar .user-profile-info {
+    width: 100%;
+    padding: 0 10px 20px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* Línea divisoria blanca/transparente */
+    margin-bottom: 20px;
+    color: white; 
+    text-align: center;
+}
+
+.sidebar .profile-icon {
+    font-size: 3rem; 
+    color: white; /* Icono blanco sobre fondo azul */
+}
+
+.sidebar .name-and-logout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; 
+    margin-bottom: 5px;
+}
+
+.sidebar .profile-name {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: white;
+}
+.sidebar .logout-compact-icon {
+    color: white;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.sidebar .profile-email,
+.sidebar .profile-specialty {
+    color: #b3e5fc; /* Gris claro/Celeste suave */
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: block;
+}
+
+.sidebar .user-establishment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.15); /* Fondo oscuro transparente */
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+}
+.sidebar .user-establishment i {
+    margin-right: 8px;
+    color: white;
+}
+
+/* ---------------------------------
+   3. NAVEGACIÓN (Enlaces)
+   --------------------------------- */
+
+.sidebar .sidebar-nav {
+    width: 100%;
+    padding: 0 5px;
+}
+
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    color: white; /* Enlaces blancos */
+    text-align: left;
+    gap: 10px; 
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2); /* Fondo blanco semi-transparente en hover/activo */
+    color: white;
+    font-weight: 600;
+}
+.sidebar .nav-icon {
+    color: white; /* Iconos blancos */
+    font-size: 1.1rem;
+}
+
+.sidebar .nav-link.logout-btn {
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    padding-top: 15px;
+    margin-top: 30px;
+}
+
+/* ----------------------------------------- */
+/* CONTENIDO PRINCIPAL (CONTENT AREA) */
+/* ----------------------------------------- */
+.content-area {
+    margin-left: 250px; 
+    flex-grow: 1;
+    padding: 20px;
+    width: calc(100% - 250px);
+}
+/* 🚨 Nuevo Layout Grid para Formulario de Paciente/Edición */
+.Formulario .grid-form-layout {
+    display: grid;
+    /* Divide el espacio en dos columnas de igual ancho */
+    grid-template-columns: 1fr 1fr; 
+    
+    /* 🚨 MÍNIMO ESPACIO HORIZONTAL entre columnas */
+    gap: 10px; 
+    
+    /* 🚨 MÍNIMO ESPACIO VERTICAL entre filas */
+    row-gap: 10px; /* Reducido a 10px para ahorrar espacio */
+    
+    margin-bottom: 20px;
+}
+
+/* Reducir el margen interno de los contenedores de campo */
+.Formulario .field-wrapper {
+    /* CRÍTICO: Asegurarse de que el wrapper no añada margen inferior, 
+       ya que el row-gap del grid lo maneja. */
+    margin-bottom: 0 !important; 
+    margin-top: 0 !important; /* Anular cualquier margen superior */
+}
+
+/* 🚨 Ajuste Fino: Reducir el margen inferior de los labels (acercar el label al input) */
+.Formulario label {
+    margin-top: 0 !important;
+    margin-bottom: 3px !important; /* Reducido para ahorrar espacio vertical */
+    font-size: 0.95rem; /* Asegura que no sean demasiado grandes */
+}
+
+/* Ajuste general de los inputs (Reducir padding vertical) */
+.Formulario select,
+.Formulario input[type="text"],
+.Formulario input[type="date"] {
+    /* 🚨 Reducimos un poco la altura total de los campos */
+    padding: 10px 15px; /* De 12px a 10px para reducir altura total */
+}
+
+/* Opcional: Reducir el margen superior e inferior del footer */
+.modal-footer {
+    margin-top: 15px !important; /* Reducir de 30px a 15px para acercar los botones */
+    padding-top: 15px !important;
 }

@@ -79,9 +79,32 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
     }
   };
 
+  const handleMouseDown = (e) => {
+    // Si el clic se inicia y finaliza directamente en el fondo
+    if (e.target === e.currentTarget) {
+        onClose();
+    }
+};
+
   return createPortal(
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onMouseDown={handleMouseDown}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button 
+                     type="button" 
+                     onClick={onClose} 
+                     style={{ 
+                        position: 'absolute', 
+                        top: '15px', 
+                        right: '15px', 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '1.5rem', 
+                        color: '#666', 
+                        cursor: 'pointer',
+                        zIndex: 100 
+                    }}>
+                    &times;
+                </button>
         
 
         <h1 className="main-title" style={{ textAlign: 'center' }}>Editar Paciente</h1>
