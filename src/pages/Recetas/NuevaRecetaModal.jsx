@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import Select from 'react-select';
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
@@ -11,12 +12,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const doctorId = user?.id || 0;
   const establecimientoId = user?.establecimientoId || 1;
   console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm();
   const watchedValues = watch();
   const pacienteRecibido = pacienteProp || null;
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
-  const [dniPaciente, setDniPaciente] = useState(pacienteRecibido?.DNI || "");
   const coberturaSeleccionada = watch("Cobertura");
   const { data: diagnosticos } = useApi("/api/diagnostics");
   const { data: coberturas } = useApi("/api/private_healthcares");
@@ -39,15 +39,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const filteredPacientes = pacientes?.filter(p => {
-    const term = searchTerm.toLowerCase();
-    const fullName = `${p.Apellido} ${p.Nombres}`.toLowerCase();
-    return (
-      p.DNI?.toString().includes(term) || 
-      fullName.includes(term)
-    );
-  }) || [];
+
+  const pacienteOptions = useMemo(() =>
+      pacientes?.map(p => ({
+          value: p.PacienteID,
+          label: `${p.Apellido} ${p.Nombres} (DNI: ${p.DNI})`
+      })) || [],
+      [pacientes]
+  );
 
   useEffect(() => {
         document.body.style.overflow = 'hidden'; 
@@ -66,7 +65,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             document.body.style.paddingRight = '0';
             document.removeEventListener('keydown', handleEscape);
         };
-    }, [onClose]);
+  }, [onClose]);
 
   useEffect(() => {
     if (coberturaSeleccionada) {
@@ -175,6 +174,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     user
   ]);
 
+  const coberturaOptions = useMemo(() => 
+      coberturas?.map(c => ({
+          value: c.PrepagaID,
+          label: c.Denominacion
+      })) || [],
+      [coberturas]
+  );
+
   const NUM_COLUMNAS = 3;
 
   const practicasOrdenadas = [...(practicasNormales || [])]
@@ -199,65 +206,56 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
         <form className="Formulario" onSubmit={handleSubmit(enviar)}>
 
-          {/* Paciente */}
-          <div className="field-wrapper">
-              <label>Paciente:</label>
-              {pacienteRecibido ? (
-                  <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      padding: '10px', 
-                      backgroundColor: '#f9f9f9',
-                      borderRadius: '5px',
-                      color: '#333'
-                  }}>
-                      <strong style={{ fontSize: '1.1em' }}>
-                          {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                      </strong>
-                      <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
-                      <input
-                          type="hidden"
-                          value={pacienteRecibido.PacienteID}
-                          {...register("Paciente")}
-                      />
-                  </div>
-              ) : (
-                  <>
-                      <div className="field-wrapper" style={{ marginBottom: '5px' }}>
-                          <input
-                              type="text"
-                              placeholder="Buscar por DNI o Nombre/Apellido"
-                              className="select-input"
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                      </div>
-                      
-                      <div className="select-container">
-                          <select
-                              {...register("Paciente", { required: "Selecciona un paciente" })}
-                              className={`select-input ${errors.Paciente ? "input-error" : ""}`}
-                              onChange={(e) => {
-                                  const seleccionado = pacientes?.find((p) => p.PacienteID === parseInt(e.target.value));
-                                  setDniPaciente(seleccionado ? seleccionado.DNI : "");
-                                  setValue("Paciente", e.target.value); // Asigna el valor del paciente seleccionado
-                              }}
-                          >
-                              <option value="">Selecciona un paciente</option>
-                              {/* Usamos la lista filtrada */}
-                              {filteredPacientes.map((p) => (
-                                  <option key={p.PacienteID} value={p.PacienteID}>
-                                      {p.Apellido} {p.Nombres} (DNI: {p.DNI})
-                                  </option>
-                              ))}
-                          </select>
-                          {errors.Paciente && <p className="error-msg">{errors.Paciente.message}</p>}
-                          {dniPaciente && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>DNI: {dniPaciente}</p>}
-                      </div>
-                  </>
-              )}
-          </div>
+        {/* Paciente */}
+        <div className="field-wrapper">
+            <label>Paciente:</label>
+            {pacienteRecibido ? (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '10px',
+                    backgroundColor: '#f9f9f9',
+                    borderRadius: '5px',
+                    color: '#333'
+                }}>
+                    <strong>
+                        {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
+                    </strong>
+                    <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
+                    <input
+                        type="hidden"
+                        value={pacienteRecibido.PacienteID}
+                        {...register("Paciente")}
+                    />
+                </div>
+            ) : (
+                <Controller
+                    name="Paciente"
+                    control={control}
+                    rules={{ required: "Debes seleccionar un paciente" }}
+                    render={({ field, fieldState: { error } }) => (
+                        <>
+                        <div className={error ? 'select-container-error' : ''}>
+                            <Select
+                                {...field}
+                                options={pacienteOptions}
+                                value={pacienteOptions.find(option => option.value === field.value)}
+                                onChange={option => field.onChange(option ? option.value : null)}
+                                placeholder="Escribe para buscar y seleccionar un paciente..."
+                                isClearable
+                                isLoading={!pacientes} 
+                                loadingMessage={() => "Cargando pacientes..."}
+                                noOptionsMessage={() => "No se encontraron pacientes"}
+                                classNamePrefix="custom-select"
+                            />
+                            {error && <p className="error-msg" style={{ marginTop: '5px' }}>{error.message}</p>}
+                          </div>
+                        </>
+                    )}
+                />
+            )}
+        </div>
 
           <div className="form-row diag-calendar">
           {/* Diagnóstico */}
@@ -292,19 +290,31 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           <div className="form-row cober-plan">
           {/* Cobertura */}
           <div className="field-wrapper">
-            <label>Cobertura:</label>
-            <select
-              {...register("Cobertura", { required: "Campo obligatorio" })}
-              className={`select-input ${errors.Cobertura ? "input-error" : ""}`}
-            >
-              <option value="">Selecciona una cobertura</option>
-              {coberturas.map((c) => (
-                <option key={c.PrepagaID} value={c.PrepagaID}>
-                  {c.Denominacion}
-                </option>
-              ))}
-            </select>
-            {errors.Cobertura && <p className="error-msg">{errors.Cobertura.message}</p>}
+              <label>Cobertura:</label>
+              <Controller
+                  name="Cobertura"
+                  control={control}
+                  rules={{ required: "Debes seleccionar una cobertura" }}
+                  render={({ field, fieldState: { error } }) => (
+                      <div className={error ? 'select-container-error' : ''}>
+                          <Select
+                              {...field}
+                              options={coberturaOptions}
+                              value={coberturaOptions.find(option => option.value === field.value)}
+                              onChange={option => {
+                                  setValue("Plan", ""); 
+                                  field.onChange(option ? option.value : null);
+                              }}
+                              placeholder="Buscar y seleccionar cobertura..."
+                              isClearable
+                              isLoading={!coberturas}
+                              noOptionsMessage={() => "No se encontraron coberturas"}
+                              classNamePrefix="custom-select"
+                          />
+                          {error && <p className="error-msg">{error.message}</p>}
+                      </div>
+                  )}
+              />
           </div>
 
           {/* Plan */}
