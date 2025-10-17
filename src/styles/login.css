@@ -196,7 +196,8 @@
 
 /* CRÍTICO: Ajuste de Inputs para ocupar 100% del espacio disponible */
 .login-form input[type="text"],
-.login-form .password-input { /* CRÍTICO: Usa la clase .password-input para el input */
+.login-form .password-input, 
+.login-form .reg-input{ /* CRÍTICO: Usa la clase .password-input para el input */
     width: 100%; /* Ocupa el 100% del espacio de .login-form */
     padding: 12px 15px; 
     padding-right: 45px;
@@ -372,3 +373,35 @@
     color: #e63946;
     font-size: 0.9rem;
 }
+
+.login-form .input-error {
+    border-color: #e63946 !important; /* El color rojo del error */
+    /* Aseguramos que el fondo sea blanco, si esto estaba causando conflicto */
+    
+}
+
+
+.login-form .input-error:focus {
+    
+    border-color: #e63946 !important; 
+    box-shadow: 0 0 0 1px #e63946 !important; 
+}
+
+    
+    
+.login-form input[type="text"]:focus,
+.login-form .password-input:focus, 
+.login-form .reg-input:focus{
+     
+     border-color: #0198CC; 
+     outline: none;
+     box-shadow: 0 0 0 1px #0198CC;
+}
+.login-form .input-error:focus {
+    /* Mantenemos el mismo color de borde que la clase .input-error */
+    border-color: #e63946 !important; 
+    
+    /* Aseguramos que la sombra (focus ring) también sea roja */
+    box-shadow: 0 0 0 1px #e63946 !important; 
+}
+

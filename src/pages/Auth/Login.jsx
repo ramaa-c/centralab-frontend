@@ -57,6 +57,7 @@ export default function Login() {
                 <input
                   type="text"
                   placeholder="Email o DNI"
+                  
                   className={(errors.identifier || error) ? 'input-error' : ''}
                   {...register("identifier", { required: "Este campo no puede estar vacío." })}
                 />

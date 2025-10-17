@@ -298,7 +298,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                                 noOptionsMessage={() => "No se encontraron pacientes"}
                                 classNamePrefix="custom-select"
                             />
-                            {error && <p className="error-msg" style={{ marginTop: '5px' }}>{error.message}</p>}
+                            {error && <p className="error-msg-paciente" style={{ marginTop: '5px' }}>{error.message}</p>}
                           </div>
                         </>
                     )}
@@ -315,7 +315,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                 control={control}
                 rules={{ required: "Selecciona un diagnóstico" }}
                 render={({ field, fieldState: { error } }) => (
-                    <>
+                    <div className={error ? 'select-container-error' : ''}>
                       <Select
                           {...field}
                           options={diagnosticoOptions}
@@ -328,8 +328,10 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                           noOptionsMessage={() => "No se encontraron diagnósticos"}
                           classNamePrefix="custom-select"
                       />
-                      {error && <p className="error-msg" style={{ marginTop: '5px' }}>{error.message}</p>}
-                    </>
+                      
+                      {error && <p className="error-msg-paciente" style={{ marginTop: '5px' }}>{error.message}</p>}
+                    
+                    </div>
                 )}
             />
           </div>
@@ -339,10 +341,10 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             <label>Fecha:</label>
             <input
               type="date"
-              className={`select-input ${errors.Fecha ? "input-error" : ""}`}
+              className={`select-input ${errors.Fecha ? "input-error-paciente" : ""}`}
               {...register("Fecha", { required: "Campo obligatorio" })}
             />
-            {errors.Fecha && <p className="error-msg">{errors.Fecha.message}</p>}
+            {errors.Fecha && <p className="error-msg-paciente">{errors.Fecha.message}</p>}
           </div>
           </div>
 
@@ -370,7 +372,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                               noOptionsMessage={() => "No se encontraron coberturas"}
                               classNamePrefix="custom-select"
                           />
-                          {error && <p className="error-msg">{error.message}</p>}
+                          {error && <p className="error-msg-paciente">{error.message}</p>}
                       </div>
                   )}
               />
@@ -384,7 +386,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               control={control}
               rules={{ required: "Selecciona un plan" }}
               render={({ field, fieldState: { error } }) => (
-                  <>
+                  <div className={error ? 'select-container-error' : ''}>
                       <Select
                           {...field}
                           options={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })) || []}
@@ -395,8 +397,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                           isDisabled={!coberturaSeleccionada || !planes} // Deshabilita si no hay cobertura
                           classNamePrefix="custom-select"
                       />
-                      {error && <p className="error-msg">{error.message}</p>}
-                  </>
+                      {error && <p className="error-msg-paciente">{error.message}</p>}
+                  </div>
               )}
           />
             </div>

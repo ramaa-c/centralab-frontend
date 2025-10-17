@@ -115,7 +115,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <select
                         {...register("tipoDoc", { required: "Campo obligatorio" })}
                         defaultValue=""
-                        className={`select-input ${errors.tipoDoc ? 'input-error' : ''}`}
+                        className={`select-input ${errors.tipoDoc ? 'input-error-paciente' : ''}`}
                     >
                         <option value="" disabled>Seleccione tipo de documento</option>
                         {loadingTipos && <option>Cargando...</option>}
@@ -126,7 +126,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                         </option>
                         ))}
                     </select>
-                    {errors.tipoDoc && <p className="error-msg">{errors.tipoDoc.message}</p>}
+                    {errors.tipoDoc && <p className="error-msg-paciente">{errors.tipoDoc.message}</p>}
                     </div>
 
                     {/* Número de Documento */}
@@ -135,10 +135,10 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <input
                         type="text"
                         placeholder="Documento"
-                        className={errors.documento ? 'input-error' : ''}
+                        className={errors.documento ? 'input-error-paciente' : ''}
                         {...register("documento", { required: "Campo obligatorio" })}
                     />
-                    {errors.documento && <p className="error-msg">{errors.documento.message}</p>}
+                    {errors.documento && <p className="error-msg-paciente">{errors.documento.message}</p>}
                     </div>
 
                     {/* Email */}
@@ -147,10 +147,10 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <input
                         type="text"
                         placeholder="Email"
-                        className={errors.email ? 'input-error' : ''}
+                        className={errors.email ? 'input-error-paciente' : ''}
                         {...register("email", { required: "Campo obligatorio" })}
                     />
-                    {errors.email && <p className="error-msg">{errors.email.message}</p>}
+                    {errors.email && <p className="error-msg-paciente">{errors.email.message}</p>}
                     </div>
 
                     {/* Apellido */}
@@ -159,10 +159,10 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <input
                         type="text"
                         placeholder="Apellido"
-                        className={errors.apellido ? 'input-error' : ''}
+                        className={errors.apellido ? 'input-error-paciente' : ''}
                         {...register("apellido", { required: "Campo obligatorio" })}
                     />
-                    {errors.apellido && <p className="error-msg">{errors.apellido.message}</p>}
+                    {errors.apellido && <p className="error-msg-paciente">{errors.apellido.message}</p>}
                     </div>
 
                     {/* Nombre */}
@@ -171,10 +171,10 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <input
                         type="text"
                         placeholder="Nombre"
-                        className={errors.nombre ? 'input-error' : ''}
+                        className={errors.nombre ? 'input-error-paciente' : ''}
                         {...register("nombre", { required: "Campo obligatorio" })}
                     />
-                    {errors.nombre && <p className="error-msg">{errors.nombre.message}</p>}
+                    {errors.nombre && <p className="error-msg-paciente">{errors.nombre.message}</p>}
                     </div>
 
                     {/* Sexo */}
@@ -183,7 +183,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <select
                         {...register("sexo", { required: "Campo obligatorio" })}
                         defaultValue=""
-                        className={`select-input ${errors.sexo ? 'input-error' : ''}`}
+                        className={`select-input ${errors.sexo ? 'input-error-paciente' : ''}`}
                     >
                         <option value="" disabled>Seleccione sexo</option>
                         {loadingSexs && <option>Cargando...</option>}
@@ -194,7 +194,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                         </option>
                         ))}
                     </select>
-                    {errors.sexo && <p className="error-msg">{errors.sexo.message}</p>}
+                    {errors.sexo && <p className="error-msg-paciente">{errors.sexo.message}</p>}
                     </div>
 
                     {/* Fecha de Nacimiento */}
@@ -204,9 +204,9 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                         type="date" // 👈 CAMBIAR AQUÍ
                         placeholder="Seleccionar fecha"
                         {...register("fechaNacimiento", { required: "Campo obligatorio" })}
-                        className={`select-input ${errors.fechaNacimiento ? 'input-error' : ''}`}
+                        className={`select-input ${errors.fechaNacimiento ? 'input-error-paciente' : ''}`}
                     />
-                    {errors.fechaNacimiento && <p className="error-msg">{errors.fechaNacimiento.message}</p>}
+                    {errors.fechaNacimiento && <p className="error-msg-paciente">{errors.fechaNacimiento.message}</p>}
                     </div>
 
                     {error && <p style={{ color: 'red', marginTop: '15px' }}>{error}</p>}
