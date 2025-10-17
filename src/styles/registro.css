@@ -1,4 +1,4 @@
-@import url("./login.css"); 
+
 
 /* ------------------------------------- */
 /* ESTILOS ESPECÍFICOS DE LA VISTA DE REGISTRO */
@@ -25,6 +25,7 @@
     border-radius: 5px;
     font-size: 1rem;
     box-sizing: border-box; 
+    padding-left: 40px !important;
     
     /* 🚨 CRÍTICO: Margen superior para alinear el SELECT y los INPUTS */
     margin-top: 1px; 
