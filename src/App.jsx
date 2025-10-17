@@ -42,7 +42,7 @@ function App() {
               } 
             />
            
-          <Route path="/perfil" element={<ProtectedRoute><PerfilUsuario /></ProtectedRoute>}/>
+          <Route path="/perfil" element={<SideBar><ProtectedRoute><PerfilUsuario /></ProtectedRoute></SideBar>}/>
         </Routes>
       </AuthProvider>
     </Router>
