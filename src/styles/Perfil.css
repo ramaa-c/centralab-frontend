@@ -1,0 +1,186 @@
+/* perfil.css */
+
+/* 🚨 Importa estilos base para botones, colores, y tipografía */
+@import url("./login.css"); 
+
+
+/* ------------------------------------- */
+/* ESTRUCTURA PRINCIPAL DE LA PÁGINA */
+/* ------------------------------------- */
+.content-area {
+    /* 🚨 1. ANCHO Y MARGEN CRÍTICO 🚨 */
+    /* Mueve el contenido a la derecha del SideBar (250px) */
+    margin-left: 250px; 
+    
+    /* Ocupa el espacio restante y permite que el contenido crezca */
+    flex-grow: 1; 
+    
+    /* 🚨 CRÍTICO: Aseguramos que el padding no cause un desbordamiento horizontal */
+    width: calc(100% - 250px); /* Ocupa el 100% del viewport menos el ancho del SideBar */
+    box-sizing: border-box; /* Asegura que el padding no incremente el ancho */
+    
+    /* Padding general para el contenido */
+    padding: 20px; 
+    
+    /* Nota: Si el fondo sigue fallando, la clase profile-page-wrapper debe 
+       tener un z-index más alto para estar sobre cualquier fondo oscuro del body. */
+}
+
+.profile-page-wrapper {
+    /* 🚨 CRÍTICO: Forzamos el color de fondo para anular cualquier gris oscuro */
+    background-color: #F3F2F3; 
+    
+    min-height: 100vh; /* Asegura que ocupe toda la altura */
+    width: 100%;       /* Asegura que ocupe todo el ancho disponible */
+    
+    /* Padding para que la tarjeta no se pegue a los bordes del content-area */
+    padding: 30px 20px; 
+    box-sizing: border-box; 
+}
+
+/* 🚨 2. Estilo de la Tarjeta (Centrado y tamaño grande) */
+.profile-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    color: #333 !important;
+    
+    /* CRÍTICO: Ancho legible y centrado */
+    max-width: 900px; /* Tamaño ideal para el split-layout */
+    width: 100%;     
+    margin: 0 auto;
+    padding: 30px;
+    
+    /* CRÍTICO: Aseguramos que la tarjeta se comporte como un bloque */
+    display: block !important; 
+}
+
+/* Título de la sección */
+.profile-card h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333 !important; 
+    margin-bottom: 25px;
+    
+    border-bottom: 2px solid #0198CC;
+    padding-bottom: 10px;
+}
+
+/* ------------------------------------- */
+/* LAYOUT DE DOS COLUMNAS (Datos vs Establecimientos) */
+/* ------------------------------------- */
+
+.profile-main-split {
+    display: flex;
+    gap: 30px; /* Espacio entre la columna de datos y la de establecimientos */
+    align-items: stretch;
+    margin-bottom: 30px; /* Alinea los contenidos a la parte superior */
+}
+
+.profile-data-column {
+    flex-basis: 60%; 
+    flex-grow: 1;
+}
+
+.profile-est-column {
+    flex-basis: 40%; /* Ocupa el 30% del ancho */
+    flex-shrink: 0; /* Evita que esta columna se encoja */
+    
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; 
+    row-gap: 15px;
+    margin-bottom: 30px; /* Espacio debajo del grid */
+}
+
+/* ------------------------------------- */
+/* ESTILOS DE INPUTS Y LABELS */
+/* ------------------------------------- */
+
+/* 🚨 Estilo del Input/Select (Clase ÚNICA y Fuerte) */
+.profile-card-input {
+    /* Anula los estilos débiles de Tailwind y aplica los fuertes */
+    width: 100% !important; 
+    padding: 10px 15px !important;
+    box-sizing: border-box !important;
+    
+    /* Fondo, borde y texto consistentes */
+    background-color: #f9f9f9; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    
+    font-size: 1rem !important; 
+    color: #333 !important; 
+    
+    /* Margen: Lo maneja el row-gap del grid */
+    margin-bottom: 0; 
+}
+
+/* Ajuste de Labels */
+.profile-card label {
+    display: block;
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* ------------------------------------- */
+/* 3. SECCIÓN DE ESTABLECIMIENTOS */
+/* ------------------------------------- */
+
+.establishment-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.est-control-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.est-item {
+    background-color: #F3F2F3; 
+    border: 1px solid #DDDCDC; 
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.est-item label {
+    font-weight: 500; 
+    color: #333;
+    cursor: pointer;
+}
+
+.est-item label.active-est {
+    color: #0198CC !important; 
+    font-weight: 700;
+}
+
+.est-item button {
+    color: #dc3545; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+/* Botón Añadir */
+.btn-add-est {
+    background-color: #0198CC;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+}

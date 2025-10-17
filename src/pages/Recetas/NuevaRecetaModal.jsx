@@ -42,10 +42,19 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const pacienteOptions = useMemo(() =>
       pacientes?.map(p => ({
-          value: p.PacienteID,
-          label: `${p.Apellido} ${p.Nombres} (DNI: ${p.DNI})`
+        value: p.PacienteID,
+        label: `${p.Apellido} ${p.Nombres} (DNI: ${p.DNI})`
       })) || [],
       [pacientes]
+  );
+    
+  // 🚨 NUEVO: Opciones para Diagnóstico (para react-select)
+  const diagnosticoOptions = useMemo(() =>
+      diagnosticos?.map(d => ({
+          value: d.DiagnosticoID,
+          label: d.Descripcion
+      })) || [],
+      [diagnosticos]
   );
 
   useEffect(() => {
@@ -120,7 +129,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
-        })),
+        }))
       };
 
       const response = await crearReceta(payload);
@@ -176,8 +185,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const coberturaOptions = useMemo(() => 
       coberturas?.map(c => ({
-          value: c.PrepagaID,
-          label: c.Denominacion
+        value: c.PrepagaID,
+        label: c.Denominacion
       })) || [],
       [coberturas]
   );
@@ -198,8 +207,25 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   });
 
   return createPortal(
-  <div className="modal-backdrop">
+  <div className="modal-backdrop" onClick={handleBackdropClick}>
     <div className="modal-content wide">
+      <button 
+        type="button" 
+        onClick={onClose} 
+        style={{ 
+            position: 'absolute', 
+            top: '-10px',    /* Ajuste para la esquina superior */
+            right: '0px',  /* Ajuste para la esquina derecha */
+            background: 'none', 
+            border: 'none', 
+            fontSize: '1.5rem', 
+            color: '#666', 
+            cursor: 'pointer',
+            zIndex: 100 
+        }}
+      >
+        &times;
+      </button>
       <div className="modal-body-split">
         <div className="form-wrapper" style={{ textAlign: "center" }}>
         <h1 className="main-title">Nueva Receta</h1>
@@ -261,22 +287,32 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           {/* Diagnóstico */}
           <div className="field-wrapper">
             <label>Diagnóstico:</label>
-            <select
-              {...register("Diagnostico", { required: "Campo obligatorio" })}
-              className={`select-input ${errors.Diagnostico ? "input-error" : ""}`}
-            >
-              <option value="">Selecciona un diagnóstico</option>
-              {diagnosticos.map((d) => (
-                <option key={d.DiagnosticoID} value={d.DiagnosticoID}>
-                  {d.Descripcion}
-                </option>
-              ))}
-            </select>
-            {errors.Diagnostico && <p className="error-msg">{errors.Diagnostico.message}</p>}
+            <Controller
+                name="Diagnostico"
+                control={control}
+                rules={{ required: "Selecciona un diagnóstico" }}
+                render={({ field, fieldState: { error } }) => (
+                    <>
+                      <Select
+                          {...field}
+                          options={diagnosticoOptions}
+                          value={diagnosticoOptions.find(option => option.value === field.value)}
+                          onChange={option => field.onChange(option ? option.value : null)}
+                          placeholder="Escribe para buscar y seleccionar un diagnóstico..."
+                          isClearable
+                          isLoading={!diagnosticos} 
+                          loadingMessage={() => "Cargando diagnósticos..."}
+                          noOptionsMessage={() => "No se encontraron diagnósticos"}
+                          classNamePrefix="custom-select"
+                      />
+                      {error && <p className="error-msg" style={{ marginTop: '5px' }}>{error.message}</p>}
+                    </>
+                )}
+            />
           </div>
 
           {/* Fecha */}
-          <div className="field-wrapper">
+          <div className="field-wrapper"style={{ marginBottom: '25px'}}>
             <label>Fecha:</label>
             <input
               type="date"
@@ -320,18 +356,26 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           {/* Plan */}
           <div className="field-wrapper">
             <label>Plan:</label>
-            <select
-              {...register("Plan", { required: "Campo obligatorio" })}
-              className={`select-input ${errors.Plan ? "input-error" : ""}`}
-            >
-              <option value="">Selecciona un plan</option>
-              {planes.map((p) => (
-                <option key={p.PrepagaPlanID} value={p.PrepagaPlanID}>
-                  {p.Denominacion}
-                </option>
-              ))}
-            </select>
-            {errors.Plan && <p className="error-msg">{errors.Plan.message}</p>}
+            <Controller
+              name="Plan"
+              control={control}
+              rules={{ required: "Selecciona un plan" }}
+              render={({ field, fieldState: { error } }) => (
+                  <>
+                      <Select
+                          {...field}
+                          options={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })) || []}
+                          value={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })).find(option => option.value === field.value)}
+                          onChange={option => field.onChange(option ? option.value : null)}
+                          placeholder="Selecciona un plan"
+                          isClearable
+                          isDisabled={!coberturaSeleccionada || !planes} // Deshabilita si no hay cobertura
+                          classNamePrefix="custom-select"
+                      />
+                      {error && <p className="error-msg">{error.message}</p>}
+                  </>
+              )}
+          />
             </div>
             </div>
 
@@ -379,22 +423,16 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px",marginTop: "20px" }}>
               <button className="enviar" type="submit">
                 Registrar Receta
               </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                Volver
-              </button>
+              
             </div>
           </form>
         </div>
           <div className="preview-column">
-                  <RecetaPreview data={previewData} />
+                      <RecetaPreview data={previewData} />
           </div>
       </div>
     </div>
