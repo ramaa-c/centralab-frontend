@@ -6,12 +6,13 @@ import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
 import { getDoctorById } from "../../services/doctorService";
+import { generarPDF } from "../../components/generarPDF";
+
 
 export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const user = JSON.parse(localStorage.getItem("user"));
   const doctorId = user?.id || 0;
   const establecimientoId = user?.establecimientoId || 1;
-  console.log("dortor id:",doctorId, "establecimiento id:" ,establecimientoId);
   const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm();
   const watchedValues = watch();
   const pacienteRecibido = pacienteProp || null;
@@ -111,6 +112,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const enviar = async (data) => {
     try {
+      console.log("🚀 Enviando receta...");
+      console.log("Datos del formulario:", data);
       const payload = {
         Prescription: {
           RecetaID: 0,
@@ -131,10 +134,30 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Comentario: p.Descripcion || "",
         }))
       };
-
+      console.log("📦 Payload final enviado a crearReceta:", payload);
       const response = await crearReceta(payload);
-      alert(response.message || "Receta creada correctamente");
-      onClose();
+      const recetaId = response?.assigned_id;
+
+      if (!recetaId || recetaId === 0) {
+        console.error("❌ No se recibió un ID válido de la receta");
+        throw new Error("No se recibió un ID válido de la receta");
+      }
+      console.log("🧾 ID de la receta creada:", recetaId);
+      const previewElement = document.querySelector(".preview-container");
+          if (!previewElement) {
+      console.error("❌ No se encontró el elemento .preview-container para generar PDF");
+      throw new Error("No se encontró el elemento del preview para generar PDF");
+    }
+    console.log("🖨 Generando PDF...");
+    const pdfBase64 = await generarPDF(previewElement);
+    console.log("📄 PDF generado correctamente, tamaño Base64:", pdfBase64.length);
+
+    console.log("📤 Subiendo PDF al backend...");
+    const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
+    console.log("✅ Respuesta del backend al subir PDF:", resultadoSubida);
+
+    console.log("🎉 Receta completa registrada y PDF asociado correctamente.");
+    onClose();
     } catch (err) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
@@ -432,9 +455,24 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           </form>
         </div>
           <div className="preview-column">
-                      <RecetaPreview data={previewData} />
+              <RecetaPreview data={previewData} />
           </div>
       </div>
+                <button
+            type="button"
+            onClick={async () => {
+              const previewElement = document.querySelector(".preview-container");
+              const pdfBase64 = await generarPDF(previewElement);
+              const blob = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], { type: "application/pdf" });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "receta.pdf";
+              link.click();
+            }}
+          >
+            Descargar PDF
+          </button>
     </div>
   </div>,
   document.getElementById("modal-root")

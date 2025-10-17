@@ -6,12 +6,10 @@ import { register as registerUser } from '../../services/authService';
 import "../../styles/registro.css"; 
 import centraLabLogo from '../../assets/images/centraLab_nuevo.png'; 
 
-
 export default function Registro() {
   const { 
     register, 
     handleSubmit, 
-    // 🚨 CRÍTICO: Aseguramos la desestructuración de errors
     formState: { errors } 
   } = useForm();
   const navigate = useNavigate();

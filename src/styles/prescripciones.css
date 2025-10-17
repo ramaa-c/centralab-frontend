@@ -964,3 +964,33 @@ html, body {
     font-weight: 500;
     white-space: nowrap; /* Evita que el título se rompa */
 }
+.btn-action-ver, .btn-action-descargar {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  font-size: 1.2rem;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.btn-action-ver:hover {
+  color: #007bff; /* azul */
+}
+
+.btn-action-descargar:hover {
+  color: #28a745; /* verde */
+}
+.btn-action-eliminar {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  font-size: 1.2rem;
+  color: #dc3545;
+  transition: color 0.2s ease;
+}
+
+.btn-action-eliminar:hover {
+  color: #a71d2a;
+}

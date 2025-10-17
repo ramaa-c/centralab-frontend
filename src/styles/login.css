@@ -363,4 +363,12 @@
     background: #357ABD; /* Un celeste un poco más oscuro al pasar el mouse */
 }
 
-
+.error-msg{
+    position: absolute;
+    bottom: -8px;
+    left: 2px;
+    line-height: 22px;
+    margin: 0;
+    color: #e63946;
+    font-size: 0.9rem;
+}

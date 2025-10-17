@@ -31,7 +31,7 @@ export default function CambiarClave() {
       await cambiarClave(doctor.id, data.password);
       setSuccess(true);
       localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: false }));
-      setTimeout(() => navigate('/perfil'), 1500);
+      setTimeout(() => navigate('/prescripciones'), 1500);
     } catch (err) {
       setError(err.message || "Error al cambiar la contraseña.");
     } finally {
