@@ -14,15 +14,16 @@
     font-weight: 700; /* font-semibold */
     color: #666;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
 }
 
 /* Estilo general de la tabla */
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid #DDDCDC;
+    
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
     
     /* 🚨 CRÍTICO: Usar layout fijo para controlar el ancho de las columnas */
     table-layout: fixed; 
@@ -32,24 +33,47 @@
 .data-table thead {
     background-color: #F3F2F3; /* $white-smoke */
     color: #333;
+    
 }
 
 .data-table th,
 .data-table td {
+    
     padding: 12px 10px;
     text-align: left;
     white-space: nowrap; /* Evita que el texto se envuelva, forzando el desbordamiento si es necesario */
     overflow: hidden; /* Oculta el texto que excede el ancho de la celda */
     text-overflow: ellipsis; /* Muestra puntos suspensivos para el texto oculto */
     color: #444 ; 
+    }
     .data-table thead tr th:nth-child(1) { width: 12%; } /* DNI */
-.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI */
-.data-table thead tr th:nth-child(2) { width: 20%; } /* Apellido */
+.data-table thead tr th:nth-child(1) { width: 12; } /* DNI */
+.data-table thead tr th:nth-child(2) { width: 12%; } /* Apellido */
 .data-table thead tr th:nth-child(3) { width: 20%; } /* Nombre */
 .data-table thead tr th:nth-child(4) { width: 15%; } /* Columna de Diagnóstico/Nacimiento */
 .data-table thead tr th:nth-child(5) { width: 35%; } /* 🚨 ACCIONES (AUMENTADO A 35%) */
-}
 
+
+.data-table thead th {
+    /* Mantenemos tu padding y text-align */
+    padding: 12px 10px; 
+    text-align: left;
+    
+    
+    /* 🚨 Habilita el anclaje */
+    position: sticky; 
+    top: 0; /* ⬅️ Ancla la fila en la parte superior del contenedor de scroll */
+    z-index: 100; /* Asegura que esté por encima del contenido que se desplaza */
+    
+    /* 🚨 Fondo para evitar transparencia y cubrir el contenido que se desplaza */
+    background-color: #F3F2F3; /* ⬅️ Usamos el color que ya tienes para el thead */
+    
+    /* Esto es importante si tienes bordes */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); 
+}
+.data-table thead tr th:nth-child(5) { 
+    text-align: center; /* Centra el texto "Acciones" */
+}
 
 /* Efecto hover en filas */
 .data-table tbody tr:hover {
@@ -71,8 +95,8 @@
 
 /* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
 .btn-action-receta {
-    padding: 6px 10px; 
-    margin-right: 4px;
+    padding: 6px 7px; 
+    margin-right: 6px;
     background-color: #0198CC; /* 👈 Celestial Blue */
     color: white;
     border-radius: 6px;
@@ -88,7 +112,7 @@
     opacity: 1 ;  
     visibility: visible ;
     padding: 6px 10px;
-    margin-left: 8px !important; 
+    margin-left: 0px !important; 
     background-color: #DDDCDC; /* 👈 Platinum */
     color: #333; /* Texto oscuro para contraste */
     border-radius: 6px;
@@ -115,6 +139,7 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     height: 100%;
+    overflow: hidden;
 }
 
 /* =======================================
@@ -995,7 +1020,7 @@ html, body {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin: -8px;
+  margin: -10px;
   font-size: 1.3rem;
   color: #0198CC;
   transition: color 0.2s ease, transform 0.2s ease;
@@ -1020,4 +1045,45 @@ html, body {
 
 .btn-action-eliminar:hover {
   color: #a71d2a;
+}
+
+/* =======================================
+   ESTILOS PARA SCROLL FIJO (SOLUCIÓN FINAL)
+   ======================================= */
+
+.list-scroll-area {
+    max-height: 550px;
+    flex-grow: 1; /* Permite que ocupe el espacio disponible */
+    min-height: 0; /* Necesario para el scroll dentro de Flexbox */
+   
+    overflow-y: auto; /* ⬅️ ¡CRÍTICO! El overflow debe estar aquí */
+    overflow-x: hidden;
+    padding-right: 1px;
+}
+
+.data-table tbody tr td:nth-child(3) {
+    /* Permite que el texto se envuelva en múltiples líneas */
+    white-space: normal !important;
+    
+    /* Permite que el contenido se desborde verticalmente si necesita más altura */
+    overflow: visible !important; 
+    
+    /* Asegura que no se muestren los puntos suspensivos */
+    text-overflow: clip !important;
+    
+    /* Opcional: Ajusta el padding si el texto envuelto necesita más espacio vertical */
+    padding: 10px;
+}
+.data-table tbody tr td:nth-child(2) {
+    /* Permite que el texto se envuelva en múltiples líneas */
+    white-space: normal !important;
+    
+    /* Permite que el contenido se desborde verticalmente si necesita más altura */
+    overflow: visible !important; 
+    
+    /* Asegura que no se muestren los puntos suspensivos */
+    text-overflow: clip !important;
+    
+    /* Opcional: Ajusta el padding si el texto envuelto necesita más espacio vertical */
+    padding: 10px;
 }

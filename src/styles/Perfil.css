@@ -66,6 +66,8 @@
     padding-bottom: 10px;
 }
 
+
+
 /* ------------------------------------- */
 /* LAYOUT DE DOS COLUMNAS (Datos vs Establecimientos) */
 /* ------------------------------------- */
@@ -119,6 +121,9 @@
     margin-bottom: 0; 
 }
 
+
+
+
 /* Ajuste de Labels */
 .profile-card label {
     display: block;
@@ -126,6 +131,20 @@
     color: #333;
     margin-bottom: 5px;
     font-weight: 500;
+}
+.profile-grid > div:last-child {
+    grid-column: 1 / -1; /* Ocupa desde la primera hasta la última línea de columna */
+}
+
+.profile-card img {
+    margin-top: 15px; /* Ajusta este valor (e.g., 10px, 15px, 20px) */
+    
+    /* Mantenemos tus estilos visuales (borde, padding, fondo) */
+    border: 1px solid #DDDCDC;
+    border-radius: 4px;
+    object-fit: contain; 
+    padding: 5px; 
+    background-color: white; 
 }
 
 /* ------------------------------------- */
@@ -137,6 +156,13 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 15px;
+}
+
+.establishment-section ul {
+    list-style: none;     /* Elimina los puntos o iconos de la lista */
+    padding-left: 0;      /* ⬅️ CRÍTICO: Elimina el padding izquierdo del navegador */
+    margin-left: 0;       /* Asegura que no haya margen izquierdo */
+    margin-top: 15px;     /* Espacio para separarse del título */
 }
 
 .est-control-group {
@@ -175,6 +201,23 @@
     font-size: 0.9rem;
     text-decoration: underline;
 }
+/* ------------------------------------- */
+/* BOTÓN GUARDAR Y WRAPPER */
+/* ------------------------------------- */
+
+.save-button-wrapper {
+    text-align: center;
+    padding-top: 25px; /* Más espacio arriba */
+    margin-top: 30px; /* Más margen arriba */
+    
+    /* 🔑 CRÍTICO: Línea divisoria moderna */
+    border-top: 1px solid #E0E0E0; /* Línea gris muy clara y sutil */
+}
+
+.ingresar-btn {
+    /* Mantenemos el estilo de botón principal... */
+    box-shadow: 0 5px 15px -5px rgba(1, 152, 204, 0.6); /* Sombra más pronunciada en el color principal */
+}
 
 /* Botón Añadir */
 .btn-add-est {
@@ -183,4 +226,72 @@
     padding: 10px 15px;
     border-radius: 8px;
     border: none;
+}
+/* ------------------------------------- */
+/* AJUSTES PARA LA FIRMA IMAGEN */
+/* ------------------------------------- */
+
+/* 1. Oculta el input nativo */
+.hidden-file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+/* 2. Estilo de la "Caja Grande" (El label sustituto para el input file) */
+.file-upload-label {
+    display: block;
+    width: 100%;
+    
+    /* Mantenemos tu estilo estético de 'drop zone' */
+    background-color: #f9f9f9; 
+    border: 1px dashed #ccc; 
+    border-radius: 5px;
+    cursor: pointer;
+    
+    /* 🔑 CLAVE: Padding aumentado a la izquierda (60px) para mover el texto */
+    text-align: left; 
+    padding: 10px 15px 10px 60px; 
+    margin-top: 5px; 
+    box-sizing: border-box;
+    transition: background-color 0.2s;
+}
+
+.file-upload-label:hover {
+    background-color: #e0e0e0;
+}
+
+/* 3. Estilo del texto dentro de la caja */
+.custom-placeholder {
+    font-size: 1rem;
+    color: #666; 
+    font-weight: 500;
+}
+
+/* ------------------------------------- */
+/* RESTAURACIÓN DEL TAMAÑO DE LA IMAGEN */
+/* ------------------------------------- */
+
+/* Estilo para la imagen de previsualización */
+.profile-card img {
+    display: block;
+    
+    /* 🔑 CRÍTICO: Restaurar las limitaciones de tamaño de la imagen */
+    max-width: 400px; 
+    max-height: 200px;  
+    width: auto;       
+    height: auto;      
+    
+    /* CRÍTICO: Añadir margen superior para crear el espacio con el input */
+    margin-top: 15px; 
+    
+    /* Mantenemos tus estilos visuales (borde, padding, fondo) */
+    border: 1px solid #DDDCDC;
+    border-radius: 4px;
+    object-fit: contain; 
+    padding: 5px; 
+    background-color: white; 
 }

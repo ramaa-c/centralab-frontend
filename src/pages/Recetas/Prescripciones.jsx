@@ -14,6 +14,7 @@ const Prescripciones = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [showPacienteModal, setShowPacienteModal] = useState(false);
     const [showEditarPacienteModal, setShowEditarPacienteModal] = useState(false);
+    const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
     
     // Conexión a APIs de Tablas
     const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/api/patients");
@@ -136,6 +137,8 @@ const Prescripciones = () => {
                         <p className="text-red-600">Error: {errorPacientes}</p>
                     ) : (
                         <div className="overflow-x-auto">
+                            
+                            <div className={`list-scroll-area ${prescriptionsExpanded ? 'expanded' : ''}`}>
                             <table className="data-table">
                                 <thead>
                                     <tr>
@@ -145,6 +148,7 @@ const Prescripciones = () => {
                                         <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
                                 </thead>
+                                
                                 <tbody>
                                     {pacientes?.length === 0 ? (
                                         <tr>
@@ -174,7 +178,10 @@ const Prescripciones = () => {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
+                            
                         </div>
+                        
                     )}
                 </section>
 
@@ -195,26 +202,32 @@ const Prescripciones = () => {
                     ) : errorPrescripciones ? (
                         <p className="text-red-600">Error: {errorPrescripciones}</p>
                     ) : (
-                        <div className="overflow-x-auto">
+                        
+                    <div className="overflow-x-auto">
+                        
+                        
+                        <div className="list-scroll-area">
                             <table className="data-table">
-                                <thead>
+                                <thead >
                                     <tr>
                                         <th className="px-4 py-2 text-left">Fecha</th>
-                                        <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Diagnóstico</th>
+                                        <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
-                                </thead>
+                            </thead>
+                                
                                 <tbody>
                                     {prescripciones?.map((r) => (
                                     <tr key={r.RecetaID}>
                                         <td className="px-4 py-2">
                                         {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
                                         </td>
+                                        <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
                                         <td className="px-4 py-2">
                                         {r.Apellido} {r.Nombres}
                                         </td>
-                                        <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
+                                        
                                         <td className="px-4 py-2 action-cell">
                                         {/* 🔵 Ver PDF */}
                                         <button
@@ -237,6 +250,10 @@ const Prescripciones = () => {
                                 </tbody>
                             </table>
                         </div>
+                        
+                            
+
+                    </div>
                     )}
                 </section>
 
