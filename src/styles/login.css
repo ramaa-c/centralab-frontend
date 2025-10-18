@@ -293,14 +293,10 @@
 
 /* Botón secundario (Registrarse) */
 .registro-btn {
-    /* 🚨 CRÍTICO: Reducir padding vertical (12px a 10px) */
     padding: 10px 25px; 
     border-radius: 8px;
     font-weight: 600;
-    
-    /* 🚨 CRÍTICO: Hacerlo más corto */
-    width: 40%; 
-    
+    width: 35%; 
     background-color: #e0e0e0; 
     color: #333; 
     border: none; 
@@ -311,17 +307,12 @@
     cursor: pointer;
 }
 
-
-
-/* El icono del select se posiciona de forma normal con .input-icon */
-
-/* Ajuste del botón para el nuevo texto más largo */
 .ingresar-btn {
-    width: 65%; /* Le damos más espacio al botón principal */
+    width: 65%; 
 }
 
-.registro-btn {
-    width: 35%; /* El botón de volver es más pequeño */
+.ingresar-btn:hover{
+    color: #333;
 }
 
 /* Estilo para la tarjeta de una sola columna (Cambiar Clave) */
