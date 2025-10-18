@@ -43,13 +43,13 @@
     text-overflow: ellipsis; /* Muestra puntos suspensivos para el texto oculto */
     color: #444 ; 
     .data-table thead tr th:nth-child(1) { width: 12%; } /* DNI */
-.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI (antes 8%) */
-.data-table thead tr th:nth-child(2) { width: 22%; } /* 🚨 Apellido (Aumentado) */
-.data-table thead tr th:nth-child(3) { width: 22%; } /* 🚨 Nombre (Aumentado) */
-/* (La columna 4 'Email' fue eliminada) */
-.data-table thead tr th:nth-child(4) { width: 18%; } /* 🚨 Nacimiento (Ahora es la 4ta columna) */
-.data-table thead tr th:nth-child(5) { width: 28%; } /* 🚨 ACCIONES (Ahora es la 5ta columna, Máximo espacio) */
+.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI */
+.data-table thead tr th:nth-child(2) { width: 20%; } /* Apellido */
+.data-table thead tr th:nth-child(3) { width: 20%; } /* Nombre */
+.data-table thead tr th:nth-child(4) { width: 15%; } /* Columna de Diagnóstico/Nacimiento */
+.data-table thead tr th:nth-child(5) { width: 35%; } /* 🚨 ACCIONES (AUMENTADO A 35%) */
 }
+
 
 /* Efecto hover en filas */
 .data-table tbody tr:hover {
@@ -995,10 +995,10 @@ html, body {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin: 0 5px;
-  font-size: 1.2rem;
-  color: #333;
-  transition: color 0.2s ease;
+  margin: -8px;
+  font-size: 1.3rem;
+  color: #0198CC;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-action-ver:hover {
@@ -1012,7 +1012,7 @@ html, body {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin: 0 5px;
+  margin: -8px;
   font-size: 1.2rem;
   color: #dc3545;
   transition: color 0.2s ease;

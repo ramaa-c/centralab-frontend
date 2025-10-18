@@ -202,6 +202,7 @@ const Prescripciones = () => {
                                         <th className="px-4 py-2 text-left">Fecha</th>
                                         <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Diagnóstico</th>
+                                        <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
