@@ -1,4 +1,4 @@
-@import url("./login.css"); 
+
 /* Estilo para tarjetas de contenido (Pacientes y Prescripciones) */
 .content-card {
     /* CRÍTICO: Asegura que el fondo sea blanco */
@@ -43,13 +43,13 @@
     text-overflow: ellipsis; /* Muestra puntos suspensivos para el texto oculto */
     color: #444 ; 
     .data-table thead tr th:nth-child(1) { width: 12%; } /* DNI */
-.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI (antes 8%) */
-.data-table thead tr th:nth-child(2) { width: 22%; } /* 🚨 Apellido (Aumentado) */
-.data-table thead tr th:nth-child(3) { width: 22%; } /* 🚨 Nombre (Aumentado) */
-/* (La columna 4 'Email' fue eliminada) */
-.data-table thead tr th:nth-child(4) { width: 18%; } /* 🚨 Nacimiento (Ahora es la 4ta columna) */
-.data-table thead tr th:nth-child(5) { width: 28%; } /* 🚨 ACCIONES (Ahora es la 5ta columna, Máximo espacio) */
+.data-table thead tr th:nth-child(1) { width: 10%; } /* DNI */
+.data-table thead tr th:nth-child(2) { width: 20%; } /* Apellido */
+.data-table thead tr th:nth-child(3) { width: 20%; } /* Nombre */
+.data-table thead tr th:nth-child(4) { width: 15%; } /* Columna de Diagnóstico/Nacimiento */
+.data-table thead tr th:nth-child(5) { width: 35%; } /* 🚨 ACCIONES (AUMENTADO A 35%) */
 }
+
 
 /* Efecto hover en filas */
 .data-table tbody tr:hover {
@@ -213,7 +213,24 @@ html, body {
     /* Asegura que el fondo sea blanco y el texto sea claro */
     background-color: white !important;
     color: #333 !important;
-    margin-bottom: 25px !important; 
+    margin-bottom: 5px !important; 
+    
+    /* También asegura que el padding derecho sea suficiente para el icono */
+    padding-right: 20px !important; 
+    padding-left: 0px !important;
+
+    
+    /* 1. CRÍTICO: ANULAR EL FILTRO que oscurece el campo */
+    /* Apunta al pseudo-elemento que simula la sombra o el oscurecimiento */
+    filter: none !important; 
+    opacity: 1 !important;
+}
+
+.Formulario input[type="date"] {
+    /* Asegura que el fondo sea blanco y el texto sea claro */
+    background-color: white !important;
+    color: #333 !important;
+    
     
     /* También asegura que el padding derecho sea suficiente para el icono */
     padding-right: 20px !important; 
@@ -370,16 +387,26 @@ html, body {
   box-sizing: border-box;
   font-size: 1rem;
 }
-.error-msg {
-  position: absolute;
-  bottom: -20px;
-  left: 2px;
-  line-height: 22px;
-  margin: 0;
-  color: #e63946;
-  font-size: 0.9rem;
+
+.select-error-border .custom-select__control {
+    border-color: #e63946 !important; /* El borde rojo para el control */
 }
-.input-error {
+.error-msg-paciente {
+  /* Estilos de Flujo (para la separación) */
+  position: static; 
+  display: block; 
+  margin-top: 4px; /* Espacio entre el input y el mensaje */
+  margin-bottom: 0; 
+  
+  /* Estilos Visuales (CRÍTICOS: Aseguramos el color y tamaño) */
+  color: #e63946 !important; /* 👈 CRÍTICO: Usamos !important para asegurar el rojo */
+  font-size: 0.85rem;      /* Reducimos un poco el tamaño para discreción */
+  line-height: 1.2;
+  
+  /* Eliminamos el resto de propiedades de posicionamiento que no son necesarias */
+  padding-left: 2px; /* Mejor usar padding-left que el obsoleto 'left' en static */
+}
+.input-error-paciente {
   border-color: #e63946 !important;
 }
 .Formulario input[type="date"]::-webkit-calendar-picker-indicator {
@@ -963,4 +990,34 @@ html, body {
     color: #666;
     font-weight: 500;
     white-space: nowrap; /* Evita que el título se rompa */
+}
+.btn-action-ver, .btn-action-descargar {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin: -8px;
+  font-size: 1.3rem;
+  color: #0198CC;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-action-ver:hover {
+  color: #007bff; /* azul */
+}
+
+.btn-action-descargar:hover {
+  color: #28a745; /* verde */
+}
+.btn-action-eliminar {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin: -8px;
+  font-size: 1.2rem;
+  color: #dc3545;
+  transition: color 0.2s ease;
+}
+
+.btn-action-eliminar:hover {
+  color: #a71d2a;
 }

@@ -128,7 +128,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
           <div className="field-wrapper">
             <label>Tipo de Documento</label>
             <select {...register("tipoDoc", { required: "Campo obligatorio" })}
-            className={`select-input ${errors.tipoDoc ? 'input-error' : ''}`}>
+            className={`select-input ${errors.tipoDoc ? 'input-error-paciente' : ''}`}>
               {loadingTipos ? (
                 <option>Cargando...</option>
               ) : (
@@ -139,7 +139,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
                 ))
               )}
             </select>
-            {errors.tipoDoc && <p className="error-msg">{errors.tipoDoc.message}</p>}
+            {errors.tipoDoc && <p className="error-msg-paciente">{errors.tipoDoc.message}</p>}
           </div>
 
           {/* Documento */}
@@ -148,10 +148,10 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             <input
               type="text"
               placeholder="Documento"
-              className={errors.documento ? 'input-error' : ''}
+              className={errors.documento ? 'input-error-paciente' : ''}
               {...register("documento", { required: "Campo obligatorio" })}
             />
-            {errors.documento && <p className="error-msg">{errors.documento.message}</p>}
+            {errors.documento && <p className="error-msg-paciente">{errors.documento.message}</p>}
           </div>
 
           {/* Email */}
@@ -160,10 +160,10 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             <input
               type="text"
               placeholder="Email"
-              className={errors.email ? 'input-error' : ''}
+              className={errors.email ? 'input-error-paciente' : ''}
               {...register("email", { required: "El correo es obligatorio" })}
             />
-            {errors.email && <p className="error-msg">{errors.email.message}</p>}
+            {errors.email && <p className="error-msg-paciente">{errors.email.message}</p>}
           </div>
 
           {/* Apellido */}
@@ -172,10 +172,10 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             <input
               type="text"
               placeholder="Apellido"
-              className={errors.apellido ? 'input-error' : ''}
+              className={errors.apellido ? 'input-error-paciente' : ''}
               {...register("apellido", { required: "El apellido es obligatorio" })}
             />
-            {errors.apellido && <p className="error-msg">{errors.apellido.message}</p>}
+            {errors.apellido && <p className="error-msg-paciente">{errors.apellido.message}</p>}
           </div>
 
           {/* Nombre */}
@@ -184,17 +184,17 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             <input
               type="text"
               placeholder="Nombre"
-              className={errors.nombre ? 'input-error' : ''}
+              className={errors.nombre ? 'input-error-paciente' : ''}
               {...register("nombre", { required: "El nombre es obligatorio" })}
             />
-            {errors.nombre && <p className="error-msg">{errors.nombre.message}</p>}
+            {errors.nombre && <p className="error-msg-paciente">{errors.nombre.message}</p>}
           </div>
 
           {/* Sexo */}
           <div className="field-wrapper">
             <label>Sexo</label>
             <select {...register("sexo", { required: "Campo obligatorio" })}
-            className={`select-input ${errors.sexo ? 'input-error' : ''}`}>
+            className={`select-input ${errors.sexo ? 'input-error-paciente' : ''}`}>
               {loadingSexs ? (
                 <option>Cargando...</option>
               ) : (
@@ -205,7 +205,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
                 ))
               )}
             </select>
-            {errors.sexo && <p className="error-msg">{errors.sexo.message}</p>}
+            {errors.sexo && <p className="error-msg-paciente">{errors.sexo.message}</p>}
           </div>
 
         {/* Fecha Nacimiento */}
@@ -216,7 +216,7 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             {...register("fechaNacimiento", { required: "Campo obligatorio" })}
             className={`select-input ${errors.fechaNacimiento ? 'input-error' : ''}`}
         />
-        {errors.fechaNacimiento && <p className="error-msg">{errors.fechaNacimiento.message}</p>}
+        {errors.fechaNacimiento && <p className="error-msg-paciente">{errors.fechaNacimiento.message}</p>}
         </div>
 
           {error && (

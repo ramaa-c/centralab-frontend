@@ -6,7 +6,6 @@ export default function RecetaPreview({ data }) {
     <div className="preview-container">
       <div className="preview-header">
         <h4>Sanatorio San Pablo</h4>
-        <p>Alvear 1444, San Fernando</p>
       </div>
       <hr />
       <div className="preview-patient-info">
@@ -30,8 +29,6 @@ export default function RecetaPreview({ data }) {
         <br />
         <p><strong>Notas:</strong></p>
         <p>{data.notas || '...'}</p>
-        <p><strong>Observaciones al laboratorio:</strong></p>
-        <p>{data.notasReceta || '...'}</p>
       </div>
       <div className="preview-footer">
         <p><strong>Firma:</strong></p>

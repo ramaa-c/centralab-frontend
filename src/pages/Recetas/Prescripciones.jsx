@@ -3,10 +3,10 @@ import { useApi } from "../../hooks/useApi";
 import NuevaRecetaModal from "./NuevaRecetaModal";
 import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
 import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
-import MetricCard from "../../components/MetricCard"; // 🚨 Importar el componente MetricCard
+import MetricCard from "../../components/MetricCard";
+import axios from "axios";
 import "../../styles/prescripciones.css";
-// Si usas Font Awesome en este archivo, descomenta la línea
-// import '@fortawesome/fontawesome-free/css/all.min.css'; 
+import '@fortawesome/fontawesome-free/css/all.min.css'; 
 
 
 const Prescripciones = () => {
@@ -17,7 +17,7 @@ const Prescripciones = () => {
     
     // Conexión a APIs de Tablas
     const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/api/patients");
-    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones } = useApi("/api/prescriptions");
+    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/api/prescriptions");
     
     // 🚨 CRÍTICO: CONEXIÓN A LA API DE MÉTRICAS
     const { 
@@ -25,8 +25,7 @@ const Prescripciones = () => {
         loading: loadingMetrics, 
         error: errorMetrics 
     } = useApi("/api/RD/Info"); 
-    const metrics = metricsData || {}; // Normalización de datos
-    
+    const metrics = (metricsData && typeof metricsData === "object") ? metricsData : {};    
     
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);
@@ -42,6 +41,52 @@ const Prescripciones = () => {
     };
     const handlePacienteActualizado = () => {
         fetchPacientes();
+    };
+
+    const handleVerODescargarPDF = async (prescriptionId, accion) => {
+        try {
+            const response = await axios.get(`/api/prescription/${prescriptionId}/pdf`);
+            const base64PDF = response.data?.ArchivoPDF;
+
+            if (!base64PDF) {
+            alert("No se encontró el archivo PDF de esta prescripción.");
+            return;
+            }
+
+            const byteArray = Uint8Array.from(atob(base64PDF), (c) => c.charCodeAt(0));
+            const blob = new Blob([byteArray], { type: "application/pdf" });
+            const url = URL.createObjectURL(blob);
+
+            if (accion === "ver") {
+            // 🟢 Abrir en una nueva pestaña
+            window.open(url, "_blank");
+            } else if (accion === "descargar") {
+            // 🟣 Descargar directamente
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `prescripcion_${prescriptionId}.pdf`;
+            link.click();
+            }
+
+            // Limpieza del objeto URL
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error al obtener el PDF:", error);
+            alert("Hubo un error al obtener el PDF de la prescripción.");
+        }
+    };
+
+    const handleEliminarPrescripcion = async (prescriptionId) => {
+    if (!window.confirm("¿Seguro que deseas eliminar esta prescripción?")) return;
+
+    try {
+        await axios.delete(`/api/prescription/${prescriptionId}`);
+        alert("Prescripción eliminada correctamente ✅");
+        fetchPrescripciones();
+    } catch (error) {
+        console.error("Error al eliminar prescripción:", error);
+        alert("Hubo un error al eliminar la prescripción ❌");
+    }
     };
 
     return (
@@ -157,35 +202,45 @@ const Prescripciones = () => {
                                         <th className="px-4 py-2 text-left">Fecha</th>
                                         <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Diagnóstico</th>
+                                        <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {prescripciones?.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="3" className="text-center py-4">
-                                                No hay prescripciones registradas
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        prescripciones?.map((r) => (
-                                            <tr key={r.RecetaID}>
-                                                <td className="px-4 py-2">
-                                                {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    {r.Apellido} {r.Nombres}
-                                                </td>
-                                                <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    {prescripciones?.map((r) => (
+                                    <tr key={r.RecetaID}>
+                                        <td className="px-4 py-2">
+                                        {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
+                                        </td>
+                                        <td className="px-4 py-2">
+                                        {r.Apellido} {r.Nombres}
+                                        </td>
+                                        <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
+                                        <td className="px-4 py-2 action-cell">
+                                        {/* 🔵 Ver PDF */}
+                                        <button
+                                            className="btn-action-ver"
+                                            onClick={() => handleVerODescargarPDF(r.RecetaID, "ver")}
+                                        >
+                                        <i className="fa-solid fa-file-pdf"></i>
+                                        </button>
+                                        {/* Eliminar */}
+                                        <button
+                                            className="btn-action-eliminar"
+                                            onClick={() => handleEliminarPrescripcion(r.RecetaID)}
+                                            title="Eliminar Prescripción"
+                                        >
+                                        <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                        </td>
+                                    </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
                     )}
                 </section>
 
-            </div> {/* FIN de .main-content-wrapper */}
+            </div>
             
             {/* MODALES */}
             {showRecetaModal && (

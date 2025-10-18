@@ -7,7 +7,7 @@ import PerfilUsuario from './pages/Perfil/PerfilUsuario';
 import Prescripciones from "./pages/Recetas/Prescripciones";
 import ProtectedRoute from './components/ProtectedRoute';
 import SideBar from "./components/SideBar.jsx";
-import Resultados from './pages/Perfil/resultados';
+import Resultados from './pages/Perfil/Resultados';
 
 function App() {
   return (

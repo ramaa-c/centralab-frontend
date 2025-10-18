@@ -10,7 +10,7 @@
   min-height: 40%;
   font-size: 14px;
   line-height: 1.6;
-  display: flex;
+  display: block;
   flex-direction: column; /* Para empujar el pie de página hacia abajo */
 }
 
@@ -73,7 +73,6 @@
 
 /* --- Pie de página: Fecha y Firma --- */
 .preview-footer {
-  margin-top: auto; /* Esto empuja el footer al final del contenedor flex */
   padding-top: 20px;
   text-align: left;
   font-size: 13px;
