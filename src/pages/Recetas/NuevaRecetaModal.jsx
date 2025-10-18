@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
-import { getDoctorById } from "../../services/doctorService";
+import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
 import { generarPDF } from "../../components/generarPDF";
 
 
@@ -25,6 +25,42 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: practicasNormales } = useApi("/api/RD/PrescriptionOrder");
   const { data: pacientes } = useApi("/api/patients");
   const [doctorData, setDoctorData] = useState(null);
+  const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
+
+  useEffect(() => {
+        const fetchEstablishment = async () => {
+            if (!doctorId) return;
+
+            try {
+                const establishments = await getDoctorEstablishments(doctorId);
+                
+                const activeEstablishment = establishments.find(
+                    (est) => est.Activo === "1"
+                );
+                
+                let nameToShow = "Establecimiento Desconocido";
+
+                if (activeEstablishment) {
+                    nameToShow = activeEstablishment.Descripcion;
+                } else {
+                    const userEstablishment = establishments.find(
+                        (est) => est.EstablecimientoID === establecimientoId
+                    );
+                    if (userEstablishment) {
+                        nameToShow = userEstablishment.Descripcion;
+                    }
+                }
+
+                setEstablecimientoName(nameToShow);
+
+            } catch (error) {
+                console.error("Error al obtener establecimientos del doctor:", error);
+                setEstablecimientoName("Error al cargar establecimiento");
+            }
+        };
+        
+        fetchEstablishment();
+  }, [doctorId, establecimientoId]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -49,7 +85,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       [pacientes]
   );
     
-  // 🚨 NUEVO: Opciones para Diagnóstico (para react-select)
   const diagnosticoOptions = useMemo(() =>
       diagnosticos?.map(d => ({
           value: d.DiagnosticoID,
@@ -196,6 +231,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       notasReceta: watchedValues.NotasReceta,
       doctorName: `${user?.apellido} ${user?.nombres}`,
       firmaImagen: doctorData?.FirmaImagen || null,
+      establecimientoName: establecimientoName,
     };
   }, [
     watchedValues,

@@ -5,7 +5,7 @@ export default function RecetaPreview({ data }) {
   return (
     <div className="preview-container">
       <div className="preview-header">
-        <h4>Sanatorio San Pablo</h4>
+        <h4>{data.establecimientoName || 'Establecimiento...'}</h4>
       </div>
       <hr />
       <div className="preview-patient-info">
