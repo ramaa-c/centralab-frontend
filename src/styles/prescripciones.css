@@ -234,7 +234,7 @@ html, body {
     
     /* También asegura que el padding derecho sea suficiente para el icono */
     padding-right: 20px !important; 
-    padding-left: 0px !important;
+    padding-left: 7px !important;
 
     
     /* 1. CRÍTICO: ANULAR EL FILTRO que oscurece el campo */
@@ -855,7 +855,7 @@ html, body {
 .Formulario input[type="text"],
 .Formulario input[type="date"] {
     /* 🚨 Reducimos un poco la altura total de los campos */
-    padding: 6px 15px; /* De 12px a 10px para reducir altura total */
+    padding: 5px 15px; /* De 12px a 10px para reducir altura total */
 }
 
 /* Opcional: Reducir el margen superior e inferior del footer */

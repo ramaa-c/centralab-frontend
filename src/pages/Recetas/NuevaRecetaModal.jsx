@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
-import { getDoctorById } from "../../services/doctorService";
+import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
 import { generarPDF } from "../../components/generarPDF";
 
 
@@ -25,6 +25,42 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: practicasNormales } = useApi("/api/RD/PrescriptionOrder");
   const { data: pacientes } = useApi("/api/patients");
   const [doctorData, setDoctorData] = useState(null);
+  const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
+
+  useEffect(() => {
+        const fetchEstablishment = async () => {
+            if (!doctorId) return;
+
+            try {
+                const establishments = await getDoctorEstablishments(doctorId);
+                
+                const activeEstablishment = establishments.find(
+                    (est) => est.Activo === "1"
+                );
+                
+                let nameToShow = "Establecimiento Desconocido";
+
+                if (activeEstablishment) {
+                    nameToShow = activeEstablishment.Descripcion;
+                } else {
+                    const userEstablishment = establishments.find(
+                        (est) => est.EstablecimientoID === establecimientoId
+                    );
+                    if (userEstablishment) {
+                        nameToShow = userEstablishment.Descripcion;
+                    }
+                }
+
+                setEstablecimientoName(nameToShow);
+
+            } catch (error) {
+                console.error("Error al obtener establecimientos del doctor:", error);
+                setEstablecimientoName("Error al cargar establecimiento");
+            }
+        };
+        
+        fetchEstablishment();
+  }, [doctorId, establecimientoId]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -49,7 +85,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       [pacientes]
   );
     
-  // 🚨 NUEVO: Opciones para Diagnóstico (para react-select)
   const diagnosticoOptions = useMemo(() =>
       diagnosticos?.map(d => ({
           value: d.DiagnosticoID,
@@ -106,14 +141,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     setPracticasSeleccionadas([...practicasSeleccionadas, practica]);
   };
 
-  const handleEliminarPractica = (id) => {
-    setPracticasSeleccionadas(practicasSeleccionadas.filter((p) => p.PracticaID !== id));
-  };
-
   const enviar = async (data) => {
     try {
       console.log("🚀 Enviando receta...");
       console.log("Datos del formulario:", data);
+
       const payload = {
         Prescription: {
           RecetaID: 0,
@@ -128,41 +160,47 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential:credencialData?.List?.[0]?.Credencial || "credencial-temporal",
+        Credential: credencialData?.List?.[0]?.Credencial || "credencial-temporal",
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
         }))
       };
-      console.log("📦 Payload final enviado a crearReceta:", payload);
-      const response = await crearReceta(payload);
-      const recetaId = response?.assigned_id;
 
+      console.log("📦 Payload final enviado a crearReceta:", payload);
+
+      const response = await crearReceta(payload);
+      console.log("✅ Respuesta de crearReceta:", response);
+
+      const recetaId = response?.assigned_id;
       if (!recetaId || recetaId === 0) {
         console.error("❌ No se recibió un ID válido de la receta");
         throw new Error("No se recibió un ID válido de la receta");
       }
+
       console.log("🧾 ID de la receta creada:", recetaId);
+
       const previewElement = document.querySelector(".preview-container");
-          if (!previewElement) {
-      console.error("❌ No se encontró el elemento .preview-container para generar PDF");
-      throw new Error("No se encontró el elemento del preview para generar PDF");
-    }
-    console.log("🖨 Generando PDF...");
-    const pdfBase64 = await generarPDF(previewElement);
-    console.log("📄 PDF generado correctamente, tamaño Base64:", pdfBase64.length);
+      if (!previewElement) {
+        console.error("❌ No se encontró el elemento .preview-container para generar PDF");
+        throw new Error("No se encontró el elemento del preview para generar PDF");
+      }
 
-    console.log("📤 Subiendo PDF al backend...");
-    const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
-    console.log("✅ Respuesta del backend al subir PDF:", resultadoSubida);
+      console.log("🖨 Generando PDF...");
+      const pdfBase64 = await generarPDF(previewElement);
+      console.log("📄 PDF generado correctamente, tamaño Base64:", pdfBase64.length);
 
-    console.log("🎉 Receta completa registrada y PDF asociado correctamente.");
-    onClose();
+      console.log("📤 Subiendo PDF al backend...");
+      const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
+      console.log("✅ Respuesta del backend al subir PDF:", resultadoSubida);
+
+      console.log("🎉 Receta completa registrada y PDF asociado correctamente.");
+      onClose();
+
     } catch (err) {
-      console.error("Error al enviar la receta:", err);
+      console.error("💥 Error al enviar la receta:", err);
       setError(err.message);
     }
-
   };
 
   const handleBackdropClick = (e) => {
@@ -193,6 +231,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       notasReceta: watchedValues.NotasReceta,
       doctorName: `${user?.apellido} ${user?.nombres}`,
       firmaImagen: doctorData?.FirmaImagen || null,
+      establecimientoName: establecimientoName,
     };
   }, [
     watchedValues,
@@ -237,12 +276,12 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         onClick={onClose} 
         style={{ 
             position: 'absolute', 
-            top: '-10px',    /* Ajuste para la esquina superior */
-            right: '0px',  /* Ajuste para la esquina derecha */
-            background: 'none', 
-            border: 'none', 
-            fontSize: '1.5rem', 
-            color: '#666', 
+            top: '-10px',
+            right: '0px',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            color: '#666',
             cursor: 'pointer',
             zIndex: 100 
         }}
@@ -394,7 +433,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                           onChange={option => field.onChange(option ? option.value : null)}
                           placeholder="Selecciona un plan"
                           isClearable
-                          isDisabled={!coberturaSeleccionada || !planes} // Deshabilita si no hay cobertura
+                          isDisabled={!coberturaSeleccionada || !planes}
                           classNamePrefix="custom-select"
                       />
                       {error && <p className="error-msg-paciente">{error.message}</p>}
@@ -434,6 +473,26 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                 ))}
               </div>
           </div>
+          
+        {/* Otras prácticas */}
+        <div className="field-wrapper">
+        <label>Otras prácticas:</label>
+        <select id="comboPracticas" {...register("PracticaTemp")}>
+          <option value="">Selecciona una práctica</option>
+          {practicas.map((p) => (
+            <option key={p.PracticaID} value={p.PracticaID}>
+              {p.Descripcion}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          style={{ marginLeft: "10px" }}
+          onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
+        >
+          <i className="fa-solid fa-plus"></i> Agregar
+        </button>
+        </div>
 
           {/* Notas */}
             <label>Notas:</label>

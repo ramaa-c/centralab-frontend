@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { getDoctorEstablishments } from "../services/doctorService";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import centraLabLogo from "../assets/images/centraLab_nuevo.png";
 import "../styles/login.css"; 
@@ -8,24 +9,54 @@ export default function SideBar({ children }) {
     
     const location = useLocation();
     const currentPath = location.pathname;
-    // Función auxiliar para determinar si un enlace está activo
     const isActive = (path) => {
-        // Verifica si el path actual comienza con el path del enlace 
-        // (útil para rutas anidadas, pero aquí comparamos la ruta exacta)
         return currentPath === path;
     };
-    // 🚨 1. OBTENER DATOS DEL LOCALSTORAGE
-    // Usamos useEffect o una función para obtener los datos solo una vez, pero la lectura directa es común en layouts.
     const userJson = localStorage.getItem("user");
     const userProfile = userJson ? JSON.parse(userJson) : {};
+
+    const doctorId = userProfile.id || 0;
+    const establecimientoId = userProfile.establecimientoId || 1;
     
-    // 🚨 2. DATOS PARA LA VISTA (Usando valores por defecto si no existen)
     const name = userProfile.name || "NOMBRE DE USUARIO";
     const email = userProfile.email || "email@nodisponible.com";
     const specialty = userProfile.specialty || "Especialidad no definida";
-    // El establecimiento no está en el ejemplo de login, así que usamos un valor fijo o lo obtienes de otra parte
-    const establishment = userProfile.establishment || "SANATORIO SAN PABLO (SSP)"; 
+    const [establishmentName, setEstablishmentName] = useState("Cargando establecimiento...");
 
+    useEffect(() => {
+        const fetchEstablishment = async () => {
+            if (!doctorId) return;
+
+            try {
+                const establishments = await getDoctorEstablishments(doctorId);
+                
+                const activeEstablishment = establishments.find(
+                    (est) => est.Activo === "1"
+                );
+                
+                let nameToShow = "Establecimiento no encontrado";
+
+                if (activeEstablishment) {
+                    nameToShow = activeEstablishment.Descripcion;
+                } else {
+                    const userEstablishment = establishments.find(
+                        (est) => est.EstablecimientoID === establecimientoId
+                    );
+                    if (userEstablishment) {
+                        nameToShow = userEstablishment.Descripcion;
+                    }
+                }
+
+                setEstablishmentName(nameToShow);
+
+            } catch (error) {
+                console.error("Error al obtener establecimientos del doctor:", error);
+                setEstablishmentName("Error de carga");
+            }
+        };
+        
+        fetchEstablishment();
+    }, [doctorId, establecimientoId]);
 
     return (
         <div className="app-layout">
@@ -65,7 +96,7 @@ export default function SideBar({ children }) {
                     {/* Establecimiento */}
                     <div className="user-establishment">
                         <i className="fa-solid fa-hospital"></i>
-                        <span className="establishment-name">{establishment}</span>
+                        <span className="establishment-name">{establishmentName}</span>
                     </div>
                 </div>
 
