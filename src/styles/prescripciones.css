@@ -93,7 +93,7 @@
     background-color: #007bff; /* Un azul ligeramente más oscuro */
 }
 
-/* Botón de acción: + Receta (Usamos un color secundario de acción, ej. verde) */
+/* Botón de acción: + Receta */
 .btn-action-receta {
     padding: 6px 7px; 
     margin-right: 6px;
@@ -744,6 +744,7 @@ html, body {
     width: 100%;
     padding: 0 10px 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* Línea divisoria blanca/transparente */
+    
     margin-bottom: 20px;
     color: white; 
     text-align: center;
@@ -751,6 +752,7 @@ html, body {
 
 .sidebar .profile-icon {
     font-size: 3rem; 
+    margin-bottom: 4px;
     color: white; /* Icono blanco sobre fondo azul */
 }
 
@@ -759,7 +761,7 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 10px; 
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .sidebar .profile-name {
@@ -771,6 +773,7 @@ html, body {
 .sidebar .logout-compact-icon {
     color: white;
     font-size: 1rem;
+    
     text-decoration: none;
 }
 
@@ -778,6 +781,7 @@ html, body {
 .sidebar .profile-specialty {
     color: #b3e5fc; /* Gris claro/Celeste suave */
     font-size: 0.85rem;
+    margin-bottom: 10px;
     font-weight: 500;
     display: block;
 }
@@ -810,7 +814,7 @@ html, body {
 .sidebar .nav-link {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 14px 20px;
     margin-bottom: 5px;
     color: white; /* Enlaces blancos */
     text-align: left;
@@ -1086,4 +1090,111 @@ html, body {
     
     /* Opcional: Ajusta el padding si el texto envuelto necesita más espacio vertical */
     padding: 10px;
+}
+
+.sidebar-nav .logout-btn {
+    /* 1. Apariencia y Color de Resalte */
+    background-color: white; /* Rojo de advertencia/salir */
+    color: #333; /* Texto blanco para contraste */
+    
+    /* 2. Dimensiones y Forma */
+    border-radius: 8px; /* Bordes redondeados */
+    padding: 12px 15px; /* Relleno para que se vea como botón */
+    margin-top: 25px; /* Separación de los enlaces superiores */
+    
+    /* 3. Posicionamiento y Alineación (lo hacemos flex para centrar contenido) */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra el texto y el ícono dentro del botón */
+    text-decoration: none; /* Elimina el subrayado si es un <a> */
+    width: 85%; /* Ocupa casi todo el ancho, ajusta si es necesario */
+    margin-left: auto; /* Centra el botón si el width no es 100% */
+    margin-right: auto;
+
+    /* 4. Transiciones (para un efecto suave al interactuar) */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil para profundidad */
+}
+
+/* Estilo para el ícono dentro del botón */
+.sidebar-nav .logout-btn .nav-icon {
+    margin-right: 10px; 
+    font-size: 1.1em;
+}
+
+/* Efecto al pasar el mouse (Hover) */
+.sidebar-nav .logout-btn:hover {
+    background-color: #c82333; /* Rojo más oscuro */
+    cursor: pointer;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+}
+
+/* Efecto al presionar (Active/Click) */
+.sidebar-nav .logout-btn:active {
+    background-color: white; /* El tono más oscuro al presionar */
+    transform: translateY(1px); /* Efecto de "presionado" */
+    box-shadow: none;
+}
+
+.sidebar-nav .nav-divider {
+    /* Reiniciar estilos de HR */
+    border: 0;
+    height: 1px; 
+    
+    /* Color sutil (gris claro o blanco transparente) */
+    background-color: rgba(255, 255, 255, 0.15); /* Blanco con transparencia */
+    
+    /* Ajuste de márgenes para separar */
+    margin: 25px 0 15px 0; /* Arriba 25px, Abajo 15px */
+    
+    /* Ancho: puedes ajustarlo si no quieres que ocupe todo el ancho */
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.sidebar-nav .nav-divider-bottom {
+    /* 1. RESET CRÍTICO: Eliminar el estilo nativo del navegador */
+    border: 0; 
+    border-top: none;
+    background-image: none;
+    
+    /* 2. APLICAR EL ESTILO DE LA BARRA SUPERIOR */
+    height: 1px; /* El grosor de la línea */
+    background-color: rgba(255, 255, 255, 0.4); /* Color exacto de la barra de arriba */
+    
+    /* 3. Ajuste de Márgenes (espacio alrededor de la línea) */
+    margin: 20px auto; /* 20px de espacio arriba y abajo, centrado horizontalmente */
+    width: 100%; /* Ancho de la línea para que tenga un poco de aire en los lados */
+}
+/* ================================================= */
+/* ESTILOS PARA EL BOTÓN "AGREGAR" DE OTRAS PRÁCTICAS */
+/* ================================================= */
+
+.practice-selector-wrapper button { /* Apuntamos al botón dentro de la envoltura */
+    /* Estilos base (copiados de .btn-action-receta) */
+    padding: 6px 7px; 
+    /* El margen no es necesario aquí porque el flex gap ya lo maneja */
+    background-color: #0198CC; /* Celestial Blue */
+    color: white;
+    border: none; /* Asegura que no tenga borde de botón nativo */
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    cursor: pointer; /* Añadir cursor para mejorar UX */
+    
+    /* Pequeño ajuste para centrarlo verticalmente si es necesario */
+    height: 38px; /* O el alto estándar de tu Select/Input */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.practice-selector-wrapper button:hover {
+    /* Mantener el mismo color o uno ligeramente más oscuro para el efecto hover */
+    background-color: #0077B3; /* Azul ligeramente más oscuro que #0198CC */
+}
+
+.practice-selector-wrapper button .fa-plus {
+    margin-right: 5px; /* Pequeño margen para separar el ícono del texto */
 }
