@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
+import {subirPDFReceta} from "../../services/prescriptionService.js";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
 import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
 import { generarPDF } from "../../components/generarPDF";
@@ -115,7 +116,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   useEffect(() => {
     if (coberturaSeleccionada) {
-      fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
+      fetchPlanes(`/private_healthcares/${coberturaSeleccionada}/plans`);
     }
   }, [coberturaSeleccionada]);
 
@@ -128,7 +129,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   useEffect(() => {
   const pacienteId = pacienteRecibido?.PacienteID || watch("Paciente");
   if (pacienteId) {
-    fetchCredencial(`/api/patients/${pacienteId}/credentials`);
+    fetchCredencial(`/patients/${pacienteId}/credentials`);
   }
   }, [pacienteRecibido, watch("Paciente")]);
 
@@ -161,21 +162,21 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential: credencialData?.List?.[0]?.Credencial || "credencial-temporal",
+        Credential: credencialData?.List?.[0]?.Credencial || "",
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
         }))
       };
 
-      console.log("📦 Payload final enviado a crearReceta:", payload);
+      console.log("Payload final enviado a crearReceta:", payload);
 
       const response = await crearReceta(payload);
-      console.log("✅ Respuesta de crearReceta:", response);
+      console.log("Respuesta de crearReceta:", response);
 
       const recetaId = response?.assigned_id;
       if (!recetaId || recetaId === 0) {
-        console.error("❌ No se recibió un ID válido de la receta");
+        console.error("No se recibió un ID válido de la receta");
         throw new Error("No se recibió un ID válido de la receta");
       }
 
@@ -183,23 +184,23 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
       const previewElement = document.querySelector(".preview-container");
       if (!previewElement) {
-        console.error("❌ No se encontró el elemento .preview-container para generar PDF");
+        console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
       }
 
-      console.log("🖨 Generando PDF...");
+      console.log("Generando PDF...");
       const pdfBase64 = await generarPDF(previewElement);
-      console.log("📄 PDF generado correctamente, tamaño Base64:", pdfBase64.length);
+      console.log("PDF generado correctamente, tamaño Base64:", pdfBase64.length);
 
-      console.log("📤 Subiendo PDF al backend...");
+      console.log("Subiendo PDF al backend...");
       const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
-      console.log("✅ Respuesta del backend al subir PDF:", resultadoSubida);
+      console.log("Respuesta del backend al subir PDF:", resultadoSubida);
 
-      console.log("🎉 Receta completa registrada y PDF asociado correctamente.");
+      console.log("Receta completa registrada y PDF asociado correctamente.");
       onClose();
 
     } catch (err) {
-      console.error("💥 Error al enviar la receta:", err);
+      console.error("Error al enviar la receta:", err);
       setError(err.message);
     }
   };

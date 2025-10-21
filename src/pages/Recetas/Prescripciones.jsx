@@ -16,11 +16,9 @@ const Prescripciones = () => {
     const [showEditarPacienteModal, setShowEditarPacienteModal] = useState(false);
     const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
     
-    // Conexión a APIs de Tablas
     const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
     const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
     
-    // 🚨 CRÍTICO: CONEXIÓN A LA API DE MÉTRICAS
     const { 
         data: metricsData, 
         loading: loadingMetrics, 
@@ -60,17 +58,14 @@ const Prescripciones = () => {
             const url = URL.createObjectURL(blob);
 
             if (accion === "ver") {
-            // 🟢 Abrir en una nueva pestaña
             window.open(url, "_blank");
             } else if (accion === "descargar") {
-            // 🟣 Descargar directamente
             const link = document.createElement("a");
             link.href = url;
             link.download = `prescripcion_${prescriptionId}.pdf`;
             link.click();
             }
 
-            // Limpieza del objeto URL
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error("Error al obtener el PDF:", error);
