@@ -26,6 +26,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/api/patients");
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
+  const [dateInputType, setDateInputType] = useState('text');
 
   useEffect(() => {
         const fetchEstablishment = async () => {

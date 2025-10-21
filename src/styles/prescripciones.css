@@ -582,13 +582,13 @@ html, body {
 /* --- Estilos para la proporción 80/20 --- */
 /* El primer hijo (Diagnóstico) toma 4 partes del espacio */
 .diag-calendar .field-wrapper:first-child {
-  flex: 4; 
+  flex: 3.5; 
   min-width: 0;
 }
 
 /* El segundo hijo (Fecha) toma 1 parte del espacio */
 .diag-calendar .field-wrapper:last-child {
-  flex: 1;
+  flex: 1.5;
   min-width: 0;
 }
 /* --- 1. Contenedor Principal (Con alineación corregida) --- */
