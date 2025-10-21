@@ -20,6 +20,7 @@ export default function Login() {
     setError(null);
     try {
       await login(data);
+      navigate('/prescripciones', { replace: true });
     } catch (err) {
 
       setError(err.message || "Credenciales incorrectas.");
