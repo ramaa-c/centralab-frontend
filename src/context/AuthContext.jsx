@@ -1,60 +1,47 @@
-import React, { createContext, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { login as loginService } from "../services/authService";
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const navigate = useNavigate();
+export const AuthProvider = ({ children }) => {
+    // 1. Leer el usuario del localStorage al inicio
+    const [user, setUser] = useState(() => {
+        try {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch (e) {
+            console.error("Error al parsear user desde localStorage:", e);
+            return null;
+        }
+    });
 
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")));
+    // 2. Variable CLAVE: Es TRUE si existe el objeto user
+    const isLoggedIn = !!user; 
 
-  const login = async (credentials) => {
-    try {
-      const { user: loggedInUser } = await loginService(credentials);
+    const login = (userData) => {
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+    };
 
-      localStorage.setItem("user", JSON.stringify(loggedInUser));
+    const logout = () => {
+        // Tu lógica de borrado: borra el ítem de 'user'
+        localStorage.removeItem("user");
+        // Asegúrate de que, si borras otros ítems como 'password', los añadas aquí.
+        
+        setUser(null);
+    };
 
-      setUser(loggedInUser);
-      
-      if (loggedInUser.must_change_password) {
-        navigate('/cambiarclave'); 
-      } else {
-        navigate('/prescripciones');
-      }
-      } catch (error) {
-      console.error("Error en login:", error);
-      throw error;
-    }
-  };
+    const authContextValue = {
+        user,
+        isLoggedIn, // Este valor es el que usa ProtectedRoute
+        login,
+        logout
+    };
 
-  const logout = () => {
-    console.log("Cerrando sesión...");
-    
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    return (
+        <AuthContext.Provider value={authContextValue}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
 
-    setUser(null);
-
-    navigate("/login");
-  };
-
-  const updateActiveEstablishment = (newEstablishmentId) => {
-    if (!user) return;
-
-    const updatedUser = { ...user, establecimientoId: Number(newEstablishmentId) };
-
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-
-    setUser(updatedUser);
-  };
-
-  const isLoggedIn = !!user;
-  const value = { user, isLoggedIn, login, logout, updateActiveEstablishment  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

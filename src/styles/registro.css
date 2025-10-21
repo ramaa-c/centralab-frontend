@@ -20,7 +20,7 @@
 .reg-input { 
     width: 100%;
     padding: 12px 15px; 
-    padding-left: 40px; /* Espacio para el icono */
+    padding-left: 30px; /* Espacio para el icono */
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
@@ -47,4 +47,14 @@
 .select-container .reg-input {
     /* Aseguramos que el select no tenga un margen extra */
     margin-top: 1px; 
+}
+.sidebar-nav .last-nav-link {
+    /* 1. Agregar el borde inferior */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Borde blanco sutil y transparente */
+    
+    /* 2. Padding inferior para darle espacio a la línea */
+    padding-bottom: 20px; 
+    
+    /* 3. Margen para separar la línea del botón de Cerrar Sesión */
+    margin-bottom: 20px;
 }
