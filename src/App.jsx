@@ -9,45 +9,58 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SideBar from "./components/SideBar.jsx";
 import Resultados from './pages/Perfil/Resultados';
 
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
-          
+const ProtectedLayout = ({ children }) => (
+    <ProtectedRoute>
+        <SideBar>
+            {children}
+        </SideBar>
+    </ProtectedRoute>
+);
 
-          {/* Rutas protegidas */}
-          <Route path="/cambiarclave" element={<ProtectedRoute><CambiarClave/></ProtectedRoute>} />
-          <Route 
-            path="/prescripciones" 
-            element={
-            <SideBar>
-              <ProtectedRoute>
-                <Prescripciones />
-                 </ProtectedRoute>
-            </SideBar>
-              } 
-            />
-            <Route 
-            path="/Resultados" 
-            element={
-            <SideBar>
-              <ProtectedRoute>
-                <Resultados />
-                 </ProtectedRoute>
-            </SideBar>
-              } 
-            />
-           
-          <Route path="/perfil" element={<SideBar><ProtectedRoute><PerfilUsuario /></ProtectedRoute></SideBar>}/>
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
+
+function App() {
+    return (
+        <Router>
+            <AuthProvider>
+                <Routes>
+                    {/* Rutas públicas */}
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/registro" element={<Registro />} />
+                    
+                    {/* Rutas protegidas (Usan el layout combinado) */}
+
+                    <Route 
+                        path="/cambiarclave" 
+                        element={<ProtectedRoute><CambiarClave/></ProtectedRoute>} 
+                    />
+                    
+                    <Route 
+                        path="/cambiarclave" 
+                        element={<ProtectedLayout><CambiarClave /></ProtectedLayout>} 
+                    />
+                    
+                    <Route 
+                        path="/prescripciones" 
+                        element={<ProtectedLayout><Prescripciones /></ProtectedLayout>} 
+                    />
+                    
+                    <Route 
+                        path="/resultados" 
+                        element={<ProtectedLayout><Resultados /></ProtectedLayout>} 
+                    />
+                    
+                    <Route 
+                        path="/perfil" 
+                        element={<ProtectedLayout><PerfilUsuario /></ProtectedLayout>}
+                    />
+                    
+                    {/* ... (otras rutas) ... */}
+
+                </Routes>
+            </AuthProvider>
+        </Router>
+    );
 }
 
 export default App;

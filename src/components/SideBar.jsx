@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getDoctorEstablishments } from "../services/doctorService";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import centraLabLogo from "../assets/images/centraLab_nuevo.png";
-import "../styles/login.css"; 
+import "../styles/prescripciones.css"; 
 
 export default function SideBar({ children }) {
     
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
     const isActive = (path) => {
         return currentPath === path;
@@ -22,6 +23,21 @@ export default function SideBar({ children }) {
     const email = userProfile.email || "email@nodisponible.com";
     const specialty = userProfile.specialty || "Especialidad no definida";
     const [establishmentName, setEstablishmentName] = useState("Cargando establecimiento...");
+
+    const handleLogout = () => {
+        event.preventDefault();
+        // 1. Limpiar el almacenamiento local
+        localStorage.removeItem('token');
+        localStorage.removeItem('user'); // Opcional, si guardas info del usuario
+        
+        
+        // 2. Redirigir al usuario a la página de login
+        navigate('/login'); 
+        
+        // **OPCIONAL:** También puedes recargar la página si necesitas asegurarte
+        // de que todo el estado de la aplicación se resetee:
+        // window.location.href = '/login'; 
+    };
 
     useEffect(() => {
         const fetchEstablishment = async () => {
@@ -84,9 +100,6 @@ export default function SideBar({ children }) {
                         {/* 🚨 USAR DATO REAL */}
                         <span className="profile-name">{name.toUpperCase()}</span>
                         
-                        <Link to="/login" className="logout-compact-icon">
-                            <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                        </Link>
                     </div>
                     
                     {/* 🚨 USAR DATOS REALES */}
@@ -101,7 +114,7 @@ export default function SideBar({ children }) {
                 </div>
 
                 {/* --- SEPARADOR --- */}
-                <hr className="sidebar-divider" /> 
+                
 
                 {/* ================================== */}
                 {/* 3. MENÚ DE NAVEGACIÓN */}
@@ -130,11 +143,12 @@ export default function SideBar({ children }) {
                     >
                         <i className="fa-solid fa-user nav-icon"></i> Datos de Usuario
                     </Link>
+                    <hr className="nav-divider-bottom" />
                     
                     {/* Salir (no necesita clase activa) */}
-                    <Link to="/login" className="nav-link logout-btn">
-                        <i className="fa-solid fa-arrow-right-from-bracket nav-icon"></i> Salir
-                    </Link>
+                    <a href="#" onClick={handleLogout} className="logout-btn"> {/* 👈 Usamos <a> para mantener estilo si es necesario, pero agregamos el onClick */}
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i>  Cerrar Sesión
+                    </a>
                 </nav>
 
             </div>

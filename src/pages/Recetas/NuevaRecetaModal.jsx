@@ -26,6 +26,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/patients");
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
+  const [dateInputType, setDateInputType] = useState('text');
 
   useEffect(() => {
         const fetchEstablishment = async () => {
@@ -475,24 +476,45 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           </div>
           
         {/* Otras prácticas */}
-        <div className="field-wrapper">
-        <label>Otras prácticas:</label>
-        <select id="comboPracticas" {...register("PracticaTemp")}>
-          <option value="">Selecciona una práctica</option>
-          {practicas.map((p) => (
-            <option key={p.PracticaID} value={p.PracticaID}>
-              {p.Descripcion}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          style={{ marginLeft: "10px" }}
-          onClick={() => handleAgregarPractica(watch("PracticaTemp"))}
-        >
-          <i className="fa-solid fa-plus"></i> Agregar
-        </button>
-        </div>
+        <div className="field-wrapper">
+          <label>Otras prácticas:</label>
+          <div className="practice-selector-wrapper" style={{ display: 'flex', gap: '10px' }}> {/* Nuevo contenedor flex */}
+            <div style={{ flex: 1 }}> {/* El Select ocupa la mayor parte */}
+              <Controller
+                name="PracticaTemp"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    // Mapeamos las opciones de practicas (asegúrate de que `practicas` es la lista de todas)
+                    options={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })) || []}
+                    // Aseguramos que React Select muestre el valor que tiene el hook-form
+                    value={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })).find(option => option.value === field.value)}
+                    onChange={option => field.onChange(option ? option.value : null)}
+                    placeholder="Buscar otra práctica..."
+                    isClearable
+                    isLoading={!practicas}
+                    noOptionsMessage={() => "No se encontraron prácticas"}
+                    classNamePrefix="custom-select"
+                  />
+                )}
+              />
+            </div>
+            <button
+              type="button"
+              // Llama a la función con el valor actual del campo PracticaTemp
+              onClick={() => {
+                const practicaId = watch("PracticaTemp");
+                if (practicaId) {
+                  handleAgregarPractica(practicaId);
+                  setValue("PracticaTemp", null); // Limpiar el select después de agregar
+                }
+              }}
+            >
+              <i className="fa-solid fa-plus"></i> Agregar
+            </button>
+          </div>
+        </div>
 
           {/* Notas */}
             <label>Notas:</label>
