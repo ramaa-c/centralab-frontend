@@ -19,11 +19,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
   const coberturaSeleccionada = watch("Cobertura");
-  const { data: diagnosticos } = useApi("/api/diagnostics");
-  const { data: coberturas } = useApi("/api/private_healthcares");
-  const { data: practicas } = useApi("/api/tests/all");
-  const { data: practicasNormales } = useApi("/api/RD/PrescriptionOrder");
-  const { data: pacientes } = useApi("/api/patients");
+  const { data: diagnosticos } = useApi("/diagnostics", true, { cache: true, ttl: 86400000 });
+  const { data: coberturas } = useApi("/private_healthcares", true, { cache: true, ttl: 86400000 });
+  const { data: practicas } = useApi("/tests/all", true, { cache: true, ttl: 86400000 });
+  const { data: practicasNormales } = useApi("/RD/PrescriptionOrder", true, { cache: true, ttl: 86400000 });
+  const { data: pacientes } = useApi("/patients");
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
 

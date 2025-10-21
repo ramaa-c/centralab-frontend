@@ -17,15 +17,16 @@ const Prescripciones = () => {
     const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
     
     // Conexión a APIs de Tablas
-    const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/api/patients");
-    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/api/prescriptions");
+    const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
+    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
     
     // 🚨 CRÍTICO: CONEXIÓN A LA API DE MÉTRICAS
     const { 
         data: metricsData, 
         loading: loadingMetrics, 
         error: errorMetrics 
-    } = useApi("/api/RD/Info"); 
+    } = useApi("/RD/Info"); 
+    
     const metrics = (metricsData && typeof metricsData === "object") ? metricsData : {};    
     
     const handleOpenRecetaModal = (paciente = null) => {

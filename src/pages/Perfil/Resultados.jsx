@@ -1,26 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-// Importar estilos para la estética de la tarjeta
 import "@fortawesome/fontawesome-free/css/all.min.css"; 
 import "../../styles/login.css"; 
 //import { useApi } from "../../hooks/useApi"; 
 import "../../styles/Resultados.css";
 import "../../styles/Prescripciones.css";
-
-
-// Funciones temporales para simular datos (si no tienes la API conectada)
-const useDummyResults = (endpoint) => {
-    const data = [{
-        DNI: '10111426', Apellido: 'TORINO', Nombre: 'MARGARITA', Fecha: '04/08/2025', Servicio: 'UCO-SSL', PetID: 'Ex Proceso', Estado: 'En Proceso'
-    }, {
-        DNI: '23456789', Apellido: 'FERES', Nombre: 'JUAN', Fecha: '04/08/2025', Servicio: 'CAJ-SSL', PetID: 'SSL-45', Estado: 'Parcial'
-    }, {
-        DNI: '38219728', Apellido: 'CAPPARECI', Nombre: 'NICOLAS', Fecha: '04/08/2025', Servicio: 'UTI-SSL', PetID: 'En Proceso', Estado: 'Finalizado'
-    }];
-    return { data, loading: false, error: null };
-};
-const useResultsData  = useDummyResults; //= useApi cambiar cuando usemos api
-
 
 export default function Resultados() {
     const { data: resultados, loading, error } = useResultsData("/api/results");
@@ -28,8 +12,6 @@ export default function Resultados() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterDates, setFilterDates] = useState({ desde: '', hasta: '' });
 
-    //if (loading) return <div className="p-6">Cargando resultados...</div>;
-    //if (error) return <div className="p-6 text-red-500">Error al cargar resultados: {error.message}</div>;
 
     const filteredResults = resultados?.filter(r => 
         r.DNI?.toString().includes(searchTerm) || 
