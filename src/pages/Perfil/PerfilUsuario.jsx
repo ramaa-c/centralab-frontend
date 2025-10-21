@@ -1,361 +1,318 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import {
-  getDoctorById, updateDoctor, getDoctorEstablishments, getAllEstablishments, addDoctorEstablishment, removeDoctorEstablishment, getAllSpecialties,setActiveEstablishmentForDoctor
-} from "../../services/doctorService.js";
+import { useApiQuery } from "../../hooks/useApiQuery"; // Nuevo import
+import { useActualizarPerfil } from "../../hooks/useActualizarPerfil.js"; // Nuevo import
 import ConfirmModal from "../../components/ConfirmModal.jsx";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/perfil.css";
 import "../../styles/login.css";
 
+// 🚨 Eliminamos los imports individuales de doctorService.js
+
 export default function PerfilUsuario() {
-  const { user, updateActiveEstablishment } = useAuth();
-  const doctorId = user?.id;
-  const [draftActiveEstablishment, setDraftActiveEstablishment] = useState("");
-  const [doctor, setDoctor] = useState(null);
-  const [doctorEstablishments, setDoctorEstablishments] = useState([]);
-  const [initialDoctor, setInitialDoctor] = useState(null);
-  const [initialDoctorEstablishments, setInitialDoctorEstablishments] = useState([]);
-  const [especialidades, setEspecialidades] = useState([]);
-  const [establishments, setEstablishments] = useState([]);
-  const [selectedEstablishment, setSelectedEstablishment] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const { user, updateActiveEstablishment } = useAuth();
+    const doctorId = user?.id;
 
-  const toBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = (error) => reject(error);
-  });
+    // QUERIES: Usamos useApiQuery para todas las lecturas
+    const { data: doctor, isLoading: loadingDoctor } = useApiQuery(["doctor", doctorId]);
+    const { data: doctorEstablishmentsData, isLoading: loadingDoctorEst } = useApiQuery(["doctorEstablishments", doctorId]);
+    const { data: establishments, isLoading: loadingAllEst } = useApiQuery("/establishments");
+    const { data: especialidades, isLoading: loadingSpecialties } = useApiQuery("/specialties");
 
-  useEffect(() => {
-    fetchData();
-  }, [doctorId]);
+    // MUTACIÓN ORQUESTADORA
+    const { 
+        mutate: updateDoctorMutate, 
+        isPending: isSaving, 
+        error: saveError 
+    } = useActualizarPerfil({
+        onSuccess: (result, variables) => {
+            // Actualizar estados locales con el nuevo estado retornado por la mutación
+            setDraftDoctor(result.newDoctorState); 
+            setInitialDoctor(result.newDoctorState); // Sincroniza el estado inicial
+            setInitialEstablishments(draftEstablishments); // Sincroniza estado inicial de est.
+            setSelectedFile(null); // Limpia el archivo
+            setShowConfirmModal(false); // Cierra modal
+        },
+        onError: () => {
+            // El toast se maneja en el hook, solo limpiamos el modal
+            setShowConfirmModal(false);
+        }
+    });
 
-  const fetchData = async () => {
-    try {
-      const [doctorData, estData, allEstData, specialtiesData] = await Promise.all([
-        getDoctorById(doctorId),
-        getDoctorEstablishments(doctorId),
-        getAllEstablishments(),
-        getAllSpecialties(),
-      ]);
-      setDoctor(doctorData);
-      setInitialDoctor(doctorData);
-      setDoctorEstablishments(estData);
-      setInitialDoctorEstablishments(estData);
-      setEstablishments(allEstData);
-      setEspecialidades(specialtiesData.List || []);
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setIsLoading(false);
-      const userEst = user?.establecimientoId;
-      if (userEst !== undefined && userEst !== null) {
-        setDraftActiveEstablishment(String(userEst));
-      } else {
-        if (Array.isArray(estData) && estData.length > 0) {
-          setDraftActiveEstablishment(String(estData[0].EstablecimientoID));
-        }
-      }
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setDoctor({ ...doctor, [name]: value });
-  };
-
-  const handleFileChange = (e) => {
-    // Cuando se selecciona un archivo, guarda el objeto File
-    setSelectedFile(e.target.files[0]);
-  };
-
-  const handleAddEstablishment = () => {
-
-    const alreadyExists = doctorEstablishments.some(
-      (est) => est.EstablecimientoID === parseInt(selectedEstablishment)
-    );
-    if (alreadyExists) return;
-
-    const establishmentToAdd = establishments.find(
-      (est) => est.EstablecimientoID === parseInt(selectedEstablishment)
-    );
-
-    if (establishmentToAdd) {
-      setDoctorEstablishments([...doctorEstablishments, establishmentToAdd]);
-      setSelectedEstablishment("");
-    }
-  };
-
-  const handleRemoveEstablishment = (idToRemove) => {
-    const nuevaLista = doctorEstablishments.filter((est) => est.EstablecimientoID !== idToRemove);
-    setDoctorEstablishments(nuevaLista);
-
-    if (String(idToRemove) === draftActiveEstablishment) {
-      setDraftActiveEstablishment("");
-    }
-  };
-
-  const handleSave = async () => {
-    setShowConfirmModal(false);
-    const apiCalls = [];
+    // ESTADOS LOCALES PARA EDICIÓN
+    const [draftDoctor, setDraftDoctor] = useState(null);
+    const [draftEstablishments, setDraftEstablishments] = useState([]);
+    const [initialDoctor, setInitialDoctor] = useState(null); // Para comparación
+    const [initialEstablishments, setInitialEstablishments] = useState([]); // Para comparación
     
-    // 🔑 1. Crea una copia del estado doctor para las actualizaciones locales
-    let newDoctorState = { ...doctor };
-
-    if (JSON.stringify(doctor) !== JSON.stringify(initialDoctor) || selectedFile) {
-      let firmaBase64 = doctor.FirmaImagen;
-      if (selectedFile) {
-        firmaBase64 = await toBase64(selectedFile);
+    const [draftActiveEstablishment, setDraftActiveEstablishment] = useState("");
+    const [selectedEstablishment, setSelectedEstablishment] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    
+    // 🚨 EFECTO DE SINCRONIZACIÓN DE CACHÉ A ESTADO LOCAL (Reemplaza fetchData y useEffect inicial)
+    useEffect(() => {
+        if (doctor && !draftDoctor) {
+            setDraftDoctor(doctor);
+            setInitialDoctor(doctor); // Estado inicial para comparación
+        }
+        if (doctorEstablishmentsData && initialEstablishments.length === 0) {
+            setDraftEstablishments(doctorEstablishmentsData);
+            setInitialEstablishments(doctorEstablishmentsData);
+        }
         
-        // 🔑 2. ACTUALIZA la copia del estado con la nueva imagen Base64
-        newDoctorState.FirmaImagen = firmaBase64;
-      }
+        // Sincroniza el establecimiento activo desde AuthContext/user
+        const userEst = user?.establecimientoId;
+        if (userEst !== undefined && userEst !== null && String(userEst) !== draftActiveEstablishment) {
+            setDraftActiveEstablishment(String(userEst));
+        } else if (!userEst && doctorEstablishmentsData && doctorEstablishmentsData.length > 0 && !draftActiveEstablishment) {
+             setDraftActiveEstablishment(String(doctorEstablishmentsData[0].EstablecimientoID));
+        }
+    }, [doctor, doctorEstablishmentsData, user, draftDoctor, initialEstablishments.length, draftActiveEstablishment]);
 
-      const payload = {
-        MedicoID: doctor.MedicoID,
-        EspecialidadID: parseInt(doctor.EspecialidadID),
-        DNI: doctor.DNI,
-        Email: doctor.Email,
-        Denominacion: doctor.Denominacion,
-        Matricula: doctor.Matricula,
-        FirmaTexto: doctor.FirmaTexto,
-        FirmaImagen: firmaBase64 || "",
-      };
-      apiCalls.push(updateDoctor(payload));
-    }
+    // 🚨 ELIMINAMOS: const toBase64 = ...
+    // 🚨 ELIMINAMOS: useEffect de carga inicial
+    // 🚨 ELIMINAMOS: fetchData
 
-    const added = doctorEstablishments.filter(
-      (e) => !initialDoctorEstablishments.some((i) => i.EstablecimientoID === e.EstablecimientoID)
-    );
-    added.forEach((e) => apiCalls.push(addDoctorEstablishment(doctorId, e.EstablecimientoID)));
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setDraftDoctor({ ...draftDoctor, [name]: value });
+    };
 
-    const removed = initialDoctorEstablishments.filter(
-      (i) => !doctorEstablishments.some((e) => e.EstablecimientoID === i.EstablecimientoID)
-    );
-    removed.forEach((e) => apiCalls.push(removeDoctorEstablishment(doctorId, e.EstablecimientoID)));
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
 
-    try {
-      await Promise.all(apiCalls);
+    const handleAddEstablishment = () => {
+        const alreadyExists = draftEstablishments.some(
+            (est) => est.EstablecimientoID === parseInt(selectedEstablishment)
+        );
+        if (alreadyExists) return;
 
-      if (draftActiveEstablishment) {
-        updateActiveEstablishment(Number(draftActiveEstablishment));
-        console.log("Establecimiento activo actualizado en sesión:", draftActiveEstablishment);
-      }
+        const establishmentToAdd = establishments.find(
+            (est) => est.EstablecimientoID === parseInt(selectedEstablishment)
+        );
 
-      // 🔑 3. ACTUALIZA el estado 'doctor' para forzar la re-renderización de la imagen
-      setDoctor(newDoctorState); 
-      // 🔑 4. ACTUALIZA el estado 'initialDoctor' para la próxima comparación
-      setInitialDoctor(newDoctorState); 
-      setInitialDoctorEstablishments(doctorEstablishments);
-      // 🔑 5. Limpia el archivo seleccionado
-      setSelectedFile(null); 
-      
-      console.log("Guardado correctamente. Establecimiento activo:", draftActiveEstablishment );
-    } catch (error) {
-      console.error("Error al guardar perfil:", error);
-    }
-  };
+        if (establishmentToAdd) {
+            setDraftEstablishments([...draftEstablishments, establishmentToAdd]);
+            setSelectedEstablishment("");
+        }
+    };
 
-  if (isLoading || !doctor) return <div className="p-4">Cargando perfil...</div>;
+    const handleRemoveEstablishment = (idToRemove) => {
+        const nuevaLista = draftEstablishments.filter((est) => est.EstablecimientoID !== idToRemove);
+        setDraftEstablishments(nuevaLista);
 
-  return (
-    // 🚨 CRÍTICO: El div padre envuelve todo, incluyendo el Modal
-    <div className="profile-page-wrapper"> 
-      
-      <div className="profile-card"> 
-        <h2 className="text-2xl font-semibold mb-4">Perfil del Médico</h2>
+        if (String(idToRemove) === draftActiveEstablishment) {
+            setDraftActiveEstablishment("");
+        }
+    };
 
-        {/* 🚨 CRÍTICO: CONTENEDOR SPLIT DE DOS COLUMNAS */}
-        <div className="profile-main-split">
-            
-            {/* ======================================= */}
-            {/* 1. COLUMNA IZQUIERDA: DATOS PERSONALES */}
-            {/* ======================================= */}
-            <div className="profile-data-column">
-                
-                {/* GRID DE EMAIL, MATRÍCULA, etc. */}
-                <div className="profile-grid">
-                    
-                    {/* Campo: Email */}
-                    <div>
-                      <label className="font-medium">Email</label>
-                      <input
-                        name="Email"
-                        value={doctor.Email || ""}
-                        onChange={handleChange}
-                        className="profile-card-input"
-                      />
-                    </div>
+    // 🚨 REEMPLAZAMOS handleSave por la llamada al mutate
+    const handleSave = () => {
+        // La validación de cambios y la orquestación de API se hacen dentro del hook
+        updateDoctorMutate({
+            doctor: draftDoctor,
+            initialDoctor: initialDoctor,
+            draftEstablishments: draftEstablishments,
+            initialEstablishments: initialEstablishments,
+            selectedFile: selectedFile,
+            draftActiveEstablishment: draftActiveEstablishment,
+            doctorId: doctorId,
+            updateActiveEstablishment: updateActiveEstablishment // Función del AuthContext
+        });
+    };
 
-                    {/* Campo: Especialidad */}
-                    <div>
-                      <label className="font-medium">Especialidad:</label>
-                      <select
-                        name="EspecialidadID"
-                        value={doctor.EspecialidadID || ""}
-                        onChange={handleChange}
-                        className="profile-card-input"
-                      >
-                        {especialidades.map((esp) => (
-                          <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
-                            {esp.Descripcion}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+    const isPageLoading = loadingDoctor || loadingDoctorEst || loadingAllEst || loadingSpecialties || !draftDoctor;
 
-                    {/* Campo: Matrícula */}
-                    <div>
-                      <label className="font-medium">Matrícula</label>
-                      <input
-                        name="Matricula"
-                        value={doctor.Matricula || ""}
-                        onChange={handleChange}
-                        className="profile-card-input"
-                      />
-                    </div>
+    if (isPageLoading) return <div className="p-4">Cargando perfil...</div>;
+    
+    // Usamos draftDoctor en el render
+    const displayDoctor = draftDoctor;
 
-                    {/* Campo: Firma Texto */}
-                    <div>
-                      <label className="font-medium">Firma Texto</label>
-                      <input
-                        name="FirmaTexto"
-                        value={doctor.FirmaTexto || ""}
-                        onChange={handleChange}
-                        className="profile-card-input"
-                      />
-                    </div>
+    return (
+        <div className="profile-page-wrapper"> 
+            
+            <div className="profile-card"> 
+                <h2 className="text-2xl font-semibold mb-4">Perfil del Médico</h2>
 
-                    {/* Campo: Firma Imagen (Ocupa dos columnas en el grid interno) */}
-                    <div className="md:col-span-2"> 
-                      <label className="font-medium">Firma Imagen</label>
-                      {/* 🔑 CLAVE: La etiqueta LABEL envuelve el input y el texto estilizado */}
-                      <label htmlFor="file-upload-input" className="file-upload-label">
-                            <input
-                                id="file-upload-input" // Añade un ID para ligarlo al label
-                                type="file"
-                                onChange={handleFileChange}
-                                className="hidden-file-input" // Clase para ocultar
-                            />
-                            {/* 🔑 Texto que queremos estilizar y mover */}
-                            <span className="custom-placeholder">
-                                {selectedFile ? selectedFile.name : "Click aquí para subir archivo o arrastrar"}
-                            </span>
-                        </label>
-                      
-                      {doctor.FirmaImagen && (
-                        <img
-                          src={
-                            doctor.FirmaImagen.startsWith("data:")
-                              ? doctor.FirmaImagen
-                              : `data:image/png;base64,${doctor.FirmaImagen}`
-                          }
-                          alt="Firma actual"
-                          className="mt-2 h-16 border rounded"
-                          
-                        />
-                      )}
-                    </div>
-                </div> {/* Fin de profile-grid */}
+                <div className="profile-main-split">
+                    {/* 1. COLUMNA IZQUIERDA: DATOS PERSONALES */}
+                    <div className="profile-data-column">
+                        <div className="profile-grid">
+                            
+                            {/* Campo: Email */}
+                            <div>
+                                <label className="font-medium">Email</label>
+                                <input
+                                    name="Email"
+                                    value={displayDoctor.Email || ""}
+                                    onChange={handleChange}
+                                    className="profile-card-input"
+                                />
+                            </div>
 
-            </div> {/* Fin de profile-data-column */}
+                            {/* Campo: Especialidad */}
+                            <div>
+                                <label className="font-medium">Especialidad:</label>
+                                <select
+                                    name="EspecialidadID"
+                                    value={displayDoctor.EspecialidadID || ""}
+                                    onChange={handleChange}
+                                    className="profile-card-input"
+                                >
+                                    {/* Usar el array de especialidades directamente desde la query */}
+                                    {especialidades?.map((esp) => (
+                                        <option key={esp.EspecialidadID} value={esp.EspecialidadID}>
+                                            {esp.Descripcion}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Campo: Matrícula */}
+                            <div>
+                                <label className="font-medium">Matrícula</label>
+                                <input
+                                    name="Matricula"
+                                    value={displayDoctor.Matricula || ""}
+                                    onChange={handleChange}
+                                    className="profile-card-input"
+                                />
+                            </div>
+
+                            {/* Campo: Firma Texto */}
+                            <div>
+                                <label className="font-medium">Firma Texto</label>
+                                <input
+                                    name="FirmaTexto"
+                                    value={displayDoctor.FirmaTexto || ""}
+                                    onChange={handleChange}
+                                    className="profile-card-input"
+                                />
+                            </div>
+
+                            {/* Campo: Firma Imagen */}
+                            <div className="md:col-span-2"> 
+                                <label className="font-medium">Firma Imagen</label>
+                                <label htmlFor="file-upload-input" className="file-upload-label">
+                                    <input
+                                        id="file-upload-input" 
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        className="hidden-file-input" 
+                                    />
+                                    <span className="custom-placeholder">
+                                        {selectedFile ? selectedFile.name : "Click aquí para subir archivo o arrastrar"}
+                                    </span>
+                                </label>
+                                
+                                {(displayDoctor.FirmaImagen || selectedFile) && (
+                                    <img
+                                        src={
+                                            selectedFile 
+                                            ? URL.createObjectURL(selectedFile) // Mostrar preview del archivo seleccionado
+                                            : (displayDoctor.FirmaImagen.startsWith("data:")
+                                            ? displayDoctor.FirmaImagen
+                                            : `data:image/png;base64,${displayDoctor.FirmaImagen}`)
+                                        }
+                                        alt="Firma actual"
+                                        className="mt-2 h-16 border rounded"
+                                    />
+                                )}
+                            </div>
+                        </div> 
+                    </div> 
 
 
-            {/* ======================================= */}
-            {/* 2. COLUMNA DERECHA: ESTABLECIMIENTOS */}
-            {/* ======================================= */}
-            <div className="profile-est-column">
-                
-                {/* 🚨 SECCIÓN ESTABLECIMIENTOS (Contenido Completo) */}
-                <div className="establishment-section"> 
-                    <h3 className="text-lg font-semibold mb-2">Establecimientos vinculados</h3>
-                    
-                    <ul className="space-y-2">
-                        {doctorEstablishments.map((est) => (
-                          <li key={est.EstablecimientoID} className="est-item">
-                          <label
-                            className={`flex items-center gap-2 ${
-                              draftActiveEstablishment === String(est.EstablecimientoID)
-                                ? "active-est"
-                                : ""
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="activeEstablishment"
-                              value={String(est.EstablecimientoID)}
-                              checked={draftActiveEstablishment === String(est.EstablecimientoID)}
-                              onChange={(e) => {
-                                const value = String(e.target.value);
-                                setDraftActiveEstablishment(value);
-                              }}
-                            />
-                            {est.Descripcion}
-                          </label>
-                          <button
-                            onClick={() => handleRemoveEstablishment(est.EstablecimientoID)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            Eliminar
-                          </button>
-                        </li>
-                        ))}
-                    </ul>
-                    
-                    {/* Añadir Establecimiento */}
-                    <div className="mt-4 flex gap-2 items-center est-control-group"> 
-                      <select
-                        value={selectedEstablishment}
-                        onChange={(e) => setSelectedEstablishment(e.target.value)}
-                        className="border p-2 rounded flex-1 profile-card-input"
-                      >
-                        <option value="">Seleccionar establecimiento</option>
-                        {establishments.map((est) => (
-                          <option key={est.EstablecimientoID} value={est.EstablecimientoID}>
-                            {est.Descripcion}
-                          </option>
-                        ))}
-                      </select>
+                    {/* 2. COLUMNA DERECHA: ESTABLECIMIENTOS */}
+                    <div className="profile-est-column">
+                        <div className="establishment-section"> 
+                            <h3 className="text-lg font-semibold mb-2">Establecimientos vinculados</h3>
+                            
+                            <ul className="space-y-2">
+                                {/* Usamos draftEstablishments para la lista editable */}
+                                {draftEstablishments.map((est) => (
+                                    <li key={est.EstablecimientoID} className="est-item">
+                                        <label
+                                            className={`flex items-center gap-2 ${
+                                                draftActiveEstablishment === String(est.EstablecimientoID)
+                                                ? "active-est"
+                                                : ""
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="activeEstablishment"
+                                                value={String(est.EstablecimientoID)}
+                                                checked={draftActiveEstablishment === String(est.EstablecimientoID)}
+                                                onChange={(e) => {
+                                                    const value = String(e.target.value);
+                                                    setDraftActiveEstablishment(value);
+                                                }}
+                                            />
+                                            {est.Descripcion}
+                                        </label>
+                                        <button
+                                            onClick={() => handleRemoveEstablishment(est.EstablecimientoID)}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                            
+                            {/* Añadir Establecimiento */}
+                            <div className="mt-4 flex gap-2 items-center est-control-group"> 
+                                <select
+                                    value={selectedEstablishment}
+                                    onChange={(e) => setSelectedEstablishment(e.target.value)}
+                                    className="border p-2 rounded flex-1 profile-card-input"
+                                >
+                                    <option value="">Seleccionar establecimiento</option>
+                                    {/* Usamos establishments para la lista de opciones */}
+                                    {establishments?.map((est) => (
+                                        <option key={est.EstablecimientoID} value={est.EstablecimientoID}>
+                                            {est.Descripcion}
+                                        </option>
+                                    ))}
+                                </select>
 
-                      <button
-                        onClick={handleAddEstablishment}
-                        className="btn-add-est"
-                      >
-                        Agregar
-                      </button>
-                    </div>
-                </div> {/* Fin de establishment-section */}
+                                <button
+                                    onClick={handleAddEstablishment}
+                                    className="btn-add-est"
+                                >
+                                    Agregar
+                                </button>
+                            </div>
+                        </div> 
+                    </div> 
 
-            </div> {/* Fin de profile-est-column */}
+                </div> 
+                
+                {/* Botón Guardar Centrado Debajo de las Columnas */}
+                <div className="save-button-wrapper">
+                    <button
+                        onClick={() => setShowConfirmModal(true)}
+                        className="ingresar-btn" 
+                        style={{ width: '300px' }}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                    </button>
+                    {saveError && <p style={{ color: 'red', marginTop: '10px' }}>Error: {saveError.message}</p>}
+                </div>
 
-        </div> {/* Fin de profile-main-split */}
-        
-        
-        {/* 🚨 CRÍTICO: Botón Guardar Centrado Debajo de las Columnas */}
-        <div className="save-button-wrapper">
-            <button
-                onClick={() => setShowConfirmModal(true)}
-                className="ingresar-btn" 
-                style={{ width: '300px' }}
-            >
-                Guardar cambios
-            </button>
-        </div>
-
-      </div> {/* Fin de profile-card */}
-      
-      {/* 🚨 MODAL DE CONFIRMACIÓN */}
-      <ConfirmModal
-        isOpen={showConfirmModal}
-        message="¿Desea guardar los cambios realizados en su perfil?"
-        onConfirm={handleSave}
-        onCancel={() => setShowConfirmModal(false)}
-      />
-    </div> 
-  );
+            </div> 
+            
+            {/* MODAL DE CONFIRMACIÓN */}
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                message="¿Desea guardar los cambios realizados en su perfil?"
+                onConfirm={handleSave}
+                onCancel={() => setShowConfirmModal(false)}
+            />
+        </div> 
+    );
 }

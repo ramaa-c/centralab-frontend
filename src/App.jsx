@@ -11,7 +11,6 @@ import Resultados from './pages/Perfil/Resultados';
 
 function App() {
   return (
-    <Router>
       <AuthProvider>
         <Routes>
           {/* Rutas públicas */}
@@ -46,7 +45,6 @@ function App() {
           <Route path="/perfil" element={<SideBar><ProtectedRoute><PerfilUsuario /></ProtectedRoute></SideBar>}/>
         </Routes>
       </AuthProvider>
-    </Router>
   );
 }
 

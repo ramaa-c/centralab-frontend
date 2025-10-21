@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { useApi } from "../../hooks/useApi";
+import React, { useState, useEffect } from "react";
+import { useApiQuery } from "../../hooks/useApiQuery";
+import { usePdfViewer, processPdfAction } from "../../hooks/usePDFViewer";
+import { useEliminarPrescripcion } from "../../hooks/useEliminarPrescripcion";
 import NuevaRecetaModal from "./NuevaRecetaModal";
 import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
 import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
 import MetricCard from "../../components/MetricCard";
-import axios from "axios";
 import "../../styles/prescripciones.css";
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 
@@ -15,85 +16,75 @@ const Prescripciones = () => {
     const [showPacienteModal, setShowPacienteModal] = useState(false);
     const [showEditarPacienteModal, setShowEditarPacienteModal] = useState(false);
     const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
+    const [pdfAction, setPdfAction] = useState({ id: null, action: null });
     
-    // Conexión a APIs de Tablas
-    const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/api/patients");
-    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/api/prescriptions");
+    // QUERIES MIGRADAS
+    const { 
+        data: pacientes, 
+        isLoading: loadingPacientes, 
+        error: errorPacientes 
+    } = useApiQuery("/patients");
     
-    // 🚨 CRÍTICO: CONEXIÓN A LA API DE MÉTRICAS
+    const { 
+        data: prescripciones, 
+        isLoading: loadingPrescripciones, 
+        error: errorPrescripciones 
+    } = useApiQuery("/prescriptions");
+    
     const { 
         data: metricsData, 
-        loading: loadingMetrics, 
+        isLoading: loadingMetrics, 
         error: errorMetrics 
-    } = useApi("/api/RD/Info"); 
-    const metrics = (metricsData && typeof metricsData === "object") ? metricsData : {};    
+    } = useApiQuery("/RD/Info"); 
+
+    const { 
+        data: pdfBase64, 
+        isLoading: isPdfLoading,
+        fetchPdf 
+    } = usePdfViewer(pdfAction.id);
     
+    const metrics = (metricsData && typeof metricsData === "object") ? metricsData : {};    
+
+    // MUTATION DE ELIMINACIÓN
+    const { mutate: eliminarPrescripcionMutate } = useEliminarPrescripcion(); 
+
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);
         setShowRecetaModal(true);
     };
+    
     const handleNuevoPaciente = () => setShowPacienteModal(true);
-    const handlePacienteCreado = () => {
-        fetchPacientes();
-    };
+    
+    // 🚨 ELIMINADAS: La invalidación ocurre dentro de los hooks de mutación de los modales.
+    const handlePacienteCreado = () => {}; 
+    const handlePacienteActualizado = () => {}; 
+    
     const handleEditarPaciente = (paciente) => {
         setSelectedPatient(paciente);
         setShowEditarPacienteModal(true);
     };
-    const handlePacienteActualizado = () => {
-        fetchPacientes();
+
+    const handleEliminarPrescripcion = (prescriptionId) => {
+        if (!window.confirm("¿Seguro que deseas eliminar esta prescripción?")) return;
+
+        // 🟢 Reemplazamos Axios y fetchPrescripciones por el mutate de React Query
+        eliminarPrescripcionMutate(prescriptionId); 
     };
 
-    const handleVerODescargarPDF = async (prescriptionId, accion) => {
-        try {
-            const response = await axios.get(`/api/prescription/${prescriptionId}/pdf`);
-            const base64PDF = response.data?.ArchivoPDF;
+    useEffect(() => {
+        if (pdfBase64 && pdfAction.id && pdfAction.action) {
+            // 2. Si recibimos el Base64, ejecutamos la acción.
+            processPdfAction(pdfBase64, pdfAction.action, pdfAction.id);
 
-            if (!base64PDF) {
-            alert("No se encontró el archivo PDF de esta prescripción.");
-            return;
-            }
-
-            const byteArray = Uint8Array.from(atob(base64PDF), (c) => c.charCodeAt(0));
-            const blob = new Blob([byteArray], { type: "application/pdf" });
-            const url = URL.createObjectURL(blob);
-
-            if (accion === "ver") {
-            // 🟢 Abrir en una nueva pestaña
-            window.open(url, "_blank");
-            } else if (accion === "descargar") {
-            // 🟣 Descargar directamente
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `prescripcion_${prescriptionId}.pdf`;
-            link.click();
-            }
-
-            // Limpieza del objeto URL
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error("Error al obtener el PDF:", error);
-            alert("Hubo un error al obtener el PDF de la prescripción.");
+            // 3. Limpiamos el estado después de procesar para evitar repeticiones.
+            setPdfAction({ id: null, action: null });
         }
-    };
-
-    const handleEliminarPrescripcion = async (prescriptionId) => {
-    if (!window.confirm("¿Seguro que deseas eliminar esta prescripción?")) return;
-
-    try {
-        await axios.delete(`/api/prescription/${prescriptionId}`);
-        alert("Prescripción eliminada correctamente ✅");
-        fetchPrescripciones();
-    } catch (error) {
-        console.error("Error al eliminar prescripción:", error);
-        alert("Hubo un error al eliminar la prescripción ❌");
-    }
-    };
+    }, [pdfBase64, pdfAction]);
 
     return (
         <div className="prescriptions-view-bg"> 
             
-            {/* 🚨 ÁREA DE CONTADORES */}
+            {/* ÁREA DE CONTADORES */}
             <div className="metrics-dashboard">
                 <MetricCard 
                     title="Nuevos Pacientes" 
@@ -172,7 +163,7 @@ const Prescripciones = () => {
                                             >
                                                 <i className="fa-solid fa-pen-to-square"></i> 
                                             </button>
-                                            </td>
+                                                </td>
                                             </tr>
                                         ))
                                     )}
@@ -200,7 +191,7 @@ const Prescripciones = () => {
                     {loadingPrescripciones ? (
                         <p>Cargando prescripciones...</p>
                     ) : errorPrescripciones ? (
-                        <p className="text-red-600">Error: {errorPrescripciones}</p>
+                        <p className="text-red-600">Error: {errorPrescripciones.message}</p>
                     ) : (
                         
                     <div className="overflow-x-auto">
@@ -215,7 +206,7 @@ const Prescripciones = () => {
                                         <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
-                            </thead>
+                                </thead>
                                 
                                 <tbody>
                                     {prescripciones?.map((r) => (
@@ -232,9 +223,27 @@ const Prescripciones = () => {
                                         {/* 🔵 Ver PDF */}
                                         <button
                                             className="btn-action-ver"
-                                            onClick={() => handleVerODescargarPDF(r.RecetaID, "ver")}
+                                            onClick={() => handlePdfAction(r.RecetaID, "ver")} // Usar la nueva función
+                                            // Deshabilitar si se está cargando ESTE O CUALQUIER PDF
+                                            disabled={isPdfLoading} 
                                         >
-                                        <i className="fa-solid fa-file-pdf"></i>
+                                        {isPdfLoading && pdfAction.id === r.RecetaID ? (
+                                            <i className="fa-solid fa-spinner fa-spin"></i> 
+                                        ) : (
+                                            <i className="fa-solid fa-file-pdf"></i>
+                                        )}
+                                        </button>
+                                        {/* 🟣 Descargar PDF */}
+                                        <button
+                                            className="btn-action-ver"
+                                            onClick={() => handlePdfAction(r.RecetaID, "descargar")} // Usar la nueva función
+                                            disabled={isPdfLoading} 
+                                        >
+                                            {isPdfLoading && pdfAction.id === r.RecetaID ? (
+                                                <i className="fa-solid fa-spinner fa-spin"></i> 
+                                            ) : (
+                                                <i className="fa-solid fa-download"></i>
+                                            )}
                                         </button>
                                         {/* Eliminar */}
                                         <button
@@ -251,8 +260,7 @@ const Prescripciones = () => {
                             </table>
                         </div>
                         
-                            
-
+                        
                     </div>
                     )}
                 </section>
@@ -269,14 +277,14 @@ const Prescripciones = () => {
             {showPacienteModal && (
                 <NuevoPacienteModal
                     onClose={() => setShowPacienteModal(false)}
-                    onSuccess={handlePacienteCreado}
+                    onSuccess={handlePacienteCreado} // Ya no hace fetch, pero se mantiene la prop
                 />
             )}
             {showEditarPacienteModal && (
                 <EditarPacienteModal
                     paciente={selectedPatient}
                     onClose={() => setShowEditarPacienteModal(false)}
-                    onSuccess={handlePacienteActualizado}
+                    onSuccess={handlePacienteActualizado} // Ya no hace fetch, pero se mantiene la prop
                 />
             )}
         </div>

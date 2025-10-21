@@ -1,66 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getDoctorEstablishments } from "../services/doctorService";
+import { useApiQuery } from "../hooks/useApiQuery"; // 🚨 Nuevo Import
+import { useAuth } from '../context/AuthContext'; // 🚨 Nuevo Import
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import centraLabLogo from "../assets/images/centraLab_nuevo.png";
 import "../styles/login.css"; 
 
+
 export default function SideBar({ children }) {
     
     const location = useLocation();
-    const currentPath = location.pathname;
-    const isActive = (path) => {
-        return currentPath === path;
-    };
-    const userJson = localStorage.getItem("user");
-    const userProfile = userJson ? JSON.parse(userJson) : {};
-
+    const { user } = useAuth(); // Usar el hook de contexto para el usuario
+    
+    // Extracción de datos de usuario del contexto (más limpio)
+    const userProfile = user || {};
     const doctorId = userProfile.id || 0;
     const establecimientoId = userProfile.establecimientoId || 1;
     
     const name = userProfile.name || "NOMBRE DE USUARIO";
     const email = userProfile.email || "email@nodisponible.com";
     const specialty = userProfile.specialty || "Especialidad no definida";
+
+    // 🚨 1. REEMPLAZO DE useEffect POR useApiQuery
+    // La clave ['doctorEstablishments', doctorId] está precargada en AuthContext
+    const { data: establishmentsData } = useApiQuery(["doctorEstablishments", doctorId]);
+
+    // 🚨 2. Estado local para el nombre
     const [establishmentName, setEstablishmentName] = useState("Cargando establecimiento...");
 
+    // 🚨 3. LÓGICA DE CÁLCULO DEL NOMBRE DEL ESTABLECIMIENTO ACTIVO (useEffect React Query)
     useEffect(() => {
-        const fetchEstablishment = async () => {
-            if (!doctorId) return;
+        if (!establishmentsData) {
+            setEstablishmentName("Cargando establecimiento...");
+            return;
+        }
 
-            try {
-                const establishments = await getDoctorEstablishments(doctorId);
-                
-                const activeEstablishment = establishments.find(
-                    (est) => est.Activo === "1"
-                );
-                
-                let nameToShow = "Establecimiento no encontrado";
-
-                if (activeEstablishment) {
-                    nameToShow = activeEstablishment.Descripcion;
-                } else {
-                    const userEstablishment = establishments.find(
-                        (est) => est.EstablecimientoID === establecimientoId
-                    );
-                    if (userEstablishment) {
-                        nameToShow = userEstablishment.Descripcion;
-                    }
-                }
-
-                setEstablishmentName(nameToShow);
-
-            } catch (error) {
-                console.error("Error al obtener establecimientos del doctor:", error);
-                setEstablishmentName("Error de carga");
-            }
-        };
+        // Buscar el establecimiento activo basado en el ID de la sesión (userProfile.establecimientoId)
+        const activeEstablishment = establishmentsData.find(
+            (est) => String(est.EstablecimientoID) === String(establecimientoId)
+        );
         
-        fetchEstablishment();
-    }, [doctorId, establecimientoId]);
+        let nameToShow = "Establecimiento no encontrado";
+
+        if (activeEstablishment) {
+            nameToShow = activeEstablishment.Descripcion;
+        } else {
+            // Lógica de fallback si el ID activo no está en la lista 
+            const defaultEstablishment = establishmentsData[0];
+            if (defaultEstablishment) {
+                 nameToShow = defaultEstablishment.Descripcion;
+            }
+        }
+
+        setEstablishmentName(nameToShow);
+
+    }, [establishmentsData, establecimientoId]);
+
+    
+    const currentPath = location.pathname;
+    const isActive = (path) => {
+        return currentPath === path;
+    };
 
     return (
         <div className="app-layout">
-            
             <div className="sidebar">
                 
                 {/* 1. SECCIÓN DEL LOGO */}
@@ -81,19 +84,18 @@ export default function SideBar({ children }) {
                     
                     {/* Nombre y Botón de Salir (a la derecha) */}
                     <div className="name-and-logout">
-                        {/* 🚨 USAR DATO REAL */}
                         <span className="profile-name">{name.toUpperCase()}</span>
                         
-                        <Link to="/login" className="logout-compact-icon">
+                        {/* El botón de salir DEBE llamar a useAuth().logout() si quieres cerrar la sesión */}
+                        <Link to="/login" className="logout-compact-icon"> 
                             <i className="fa-solid fa-arrow-right-from-bracket"></i>
                         </Link>
                     </div>
                     
-                    {/* 🚨 USAR DATOS REALES */}
                     <span className="profile-email">{email}</span>
                     <span className="profile-specialty">{specialty}</span>
 
-                    {/* Establecimiento */}
+                    {/* Establecimiento (Usando el estado derivado) */}
                     <div className="user-establishment">
                         <i className="fa-solid fa-hospital"></i>
                         <span className="establishment-name">{establishmentName}</span>
@@ -131,7 +133,7 @@ export default function SideBar({ children }) {
                         <i className="fa-solid fa-user nav-icon"></i> Datos de Usuario
                     </Link>
                     
-                    {/* Salir (no necesita clase activa) */}
+                    {/* Salir (idealmente con useAuth().logout) */}
                     <Link to="/login" className="nav-link logout-btn">
                         <i className="fa-solid fa-arrow-right-from-bracket nav-icon"></i> Salir
                     </Link>

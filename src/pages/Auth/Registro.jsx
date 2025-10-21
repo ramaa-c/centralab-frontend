@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from 'react-router-dom';
-import { useApi } from '../../hooks/useApi';
+import { useApiQuery } from "../../hooks/useApiQuery";
+import { useRegistroDoctor } from "../../hooks/useRegistroDoctor";
 import { register as registerUser } from '../../services/authService';
 import "../../styles/registro.css"; 
 import centraLabLogo from '../../assets/images/centraLab_nuevo.png'; 
@@ -14,21 +15,30 @@ export default function Registro() {
   } = useForm();
   const navigate = useNavigate();
 
-  const { data: especialidades = [], error: errorEsp, loading: loadingEsp } = useApi("/api/specialties");
+const { 
+    data: especialidades = [], 
+    isLoading: loadingEsp, 
+    error: errorEsp 
+} = useApiQuery("/specialties"); // Nota: Usamos el endpoint '/specialties' de AuthContext
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  // 2. MUTATION: Hook para registrar al doctor
+ const { 
+    mutate: registrarMutate, 
+    isPending: isLoading, // isPending es nuestro nuevo isLoading
+    isSuccess, // Estado de éxito de la mutación
+    error: registroError, // Objeto de error de la mutación
+    isError
+ } = useRegistroDoctor({
+    onSuccess: () => {
+      console.log("Registro exitoso");
+      // El toast de éxito se maneja en useRegistroDoctor
+      setTimeout(() => navigate('/login'), 1500);
+    }
+ });
 
   const listaEspecialidades = especialidades.List || especialidades;
 
   const enviar = async (data) => {
-    console.log("Datos del formulario:", data);
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
-
     const payload = {
       MedicoID: 0,
       Email: data.Email.trim(),
@@ -43,17 +53,8 @@ export default function Registro() {
       MomentoAlta: new Date().toISOString().slice(0, 19),
     };
 
-    try {
-      await registerUser(payload);
-      console.log("Registro exitoso");
-      setSuccess(true);
-      setTimeout(() => navigate('/Login'), 1500);
-    } catch (err) {
-      console.error("Error al registrar:", err);
-      setError(err.message || 'Error en el registro');
-    } finally {
-      setIsLoading(false);
-    }
+    registrarMutate(payload);
+
   };
 
   return (
@@ -213,8 +214,13 @@ export default function Registro() {
               {errors.FirmaTexto && <p className="error-msg">{errors.FirmaTexto.message}</p>}
             </div>
 
-            {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
-
+            {isSuccess && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
+            {isError && (
+                <p style={{ color: 'red', marginTop: '1rem' }}>
+                    {registroError?.message || 'Error desconocido al registrar.'}
+                </p>
+            )}
+            
             <div className="button-group" style={{ marginTop: '1.5rem' }}>
               <button className="ingresar-btn" type="submit" disabled={isLoading}>
                 {isLoading ? 'Registrando...' : 'Registrar Cuenta'}

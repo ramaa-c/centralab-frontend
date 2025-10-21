@@ -1,13 +1,22 @@
-import apiAuthenticated from './apiAuthenticated';
+// En services/patientService.js
+// Asumo que 'api' y 'apiAuthenticated' son el mismo objeto en tu contexto
+import api from './apiAuthenticated'; // Usar la misma instancia de Axios autenticada
 
-const PATIENTS_ENDPOINT = "/patients";
+const PACIENTES_ENDPOINT = "/patients";
 
-export const editarPaciente = async (pacienteData) => {
-  try {
-    const response = await apiAuthenticated.put(PATIENTS_ENDPOINT, pacienteData);
+// 1. Crear Paciente (solo realiza la llamada)
+export const crearPaciente = async (pacienteData) => {
+    // Si la llamada falla, Axios lanzará el error, el cual será capturado por useApiMutation.
+    const response = await api.post(PACIENTES_ENDPOINT, pacienteData); 
     return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al actualizar el paciente';
-    throw new Error(msg);
-  }
 };
+
+// 2. Editar Paciente (solo realiza la llamada)
+export const editarPaciente = async (pacienteData) => {
+    // Si la llamada falla, Axios lanzará el error.
+    const response = await api.put(PACIENTES_ENDPOINT, pacienteData);
+    return response.data;
+};
+
+// Nota: Puedes considerar renombrar este archivo a algo como 'patientFetchers.js' 
+// o 'patientApi.js' para reflejar su nueva función.

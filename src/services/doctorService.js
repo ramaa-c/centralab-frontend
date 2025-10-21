@@ -1,100 +1,54 @@
-import api from "./api";
-import apiAuthenticated from './apiAuthenticated'; 
+import apiAuthenticated from './apiAuthenticated';
 
 const DOCTORS_ENDPOINT = "/doctors";
-const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
+const ESTABLISHMENTS_ENDPOINT = "/establishments";
+const SPECIALTIES_ENDPOINT = "/specialties";
 
+// Funciones de Lectura (Pueden ser usadas directamente por useApiQuery o si se requiere lógica especial)
 export const getDoctorById = async (doctorId) => {
-  try {
-    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
+    const response = await apiAuthenticated.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching doctor by ID:", error);
-    throw error;
-  }
-};
-
-export const getAllEstablishments = async () => {
-  try {
-    const response = await api.get(ESTABLECIMIENTOS_ENDPOINT);
-    return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching establishments:", error);
-    throw error;
-  }
 };
 
 export const getDoctorEstablishments = async (doctorId) => {
-  try {
-    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
+    const response = await apiAuthenticated.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
+    return response.data;
+};
+
+export const getAllEstablishments = async () => {
+    const response = await apiAuthenticated.get(ESTABLISHMENTS_ENDPOINT);
     return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching doctor establishments:", error);
-    throw error;
-  }
-};
-
-export const addDoctorEstablishment = async (doctorId, establishmentId) => {
-  try {
-    const response = await api.post(`${DOCTORS_ENDPOINT}/${doctorId}/establishments/${establishmentId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error adding doctor establishment:", error);
-    throw error;
-  }
-};
-
-export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
-  try {
-    const response = await api.delete(`${DOCTORS_ENDPOINT}/${doctorId}/establishments/${establishmentId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error removing doctor establishment:", error);
-    throw error;
-  }
-};
-
-export const updateDoctor = async (doctorData) => {
-  try {
-    const response = await apiAuthenticated.put(DOCTORS_ENDPOINT, doctorData);
-    return response.data;
-  } catch (error) {
-    console.error("Error al actualizar los datos del doctor:", error);
-    const msg = error.response?.data?.message || 'Error al actualizar los datos';
-    throw new Error(msg);
-  }
 };
 
 export const getAllSpecialties = async () => {
-  try {
-    const response = await api.get('/specialties'); 
+    const response = await apiAuthenticated.get(SPECIALTIES_ENDPOINT);
     return response.data;
-  } catch (error) {
-    console.error("Error al obtener especialidades:", error);
-    throw error;
-  }
 };
-export const setActiveEstablishmentForDoctor = async (doctorId, activeEstablishmentId) => {
-  try {
-    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
-    const allEstablishments = response.data?.List || [];
 
-    const updateCalls = allEstablishments.map((est) => {
-      const isActive = est.EstablecimientoID === Number(activeEstablishmentId);
-      return api.post(
-        `${DOCTORS_ENDPOINT}/${doctorId}/establishments/${est.EstablecimientoID}`,
-        { Activo: isActive ? 1 : 0 }
-      );
+// Funciones de Mutación (Simplificadas - Usadas dentro de useUpdateDoctorProfile)
+
+export const updateDoctor = async (payload) => {
+    const response = await apiAuthenticated.put(DOCTORS_ENDPOINT, payload);
+    return response.data;
+};
+
+export const addDoctorEstablishment = async (doctorId, establishmentId) => {
+    const response = await apiAuthenticated.post(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`, {
+        EstablecimientoID: establishmentId,
+        MedicoID: doctorId,
+        Activo: "0" // Asumo que no se activa por defecto
     });
+    return response.data;
+};
 
-    await Promise.all(updateCalls);
-    console.log("Establecimiento activo actualizado correctamente en la base de datos.");
+export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
+    const response = await apiAuthenticated.delete(`${DOCTORS_ENDPOINT}/${doctorId}/establishments/${establishmentId}`);
+    return response.data;
+};
 
-    return true;
-  } catch (error) {
-    console.error("Error al cambiar establecimiento activo:", error);
-    throw error;
-  }
+export const setActiveEstablishmentForDoctor = async (doctorId, establishmentId) => {
+    const response = await apiAuthenticated.put(`${DOCTORS_ENDPOINT}/${doctorId}/activeEstablishment`, {
+        EstablecimientoID: establishmentId
+    });
+    return response.data;
 };

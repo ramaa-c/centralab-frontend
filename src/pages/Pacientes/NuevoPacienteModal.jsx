@@ -1,23 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
-import { crearPaciente } from '../../services/authService';
-import { useApi } from '../../hooks/useApi';
+import { useApiQuery } from '../../hooks/useApiQuery'; // Nuevo import
+import { useCrearPaciente } from '../../hooks/useCrearPaciente'; // Nuevo import
+// Eliminamos: crearPaciente, useApi
 import ConfirmModal from "../../components/ConfirmModal.jsx";
-
 
 
 export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { data: sexs, isLoading: loadingSexs, error: errorSexs } = useApi('/api/sexs');
-    const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/api/identificationtypes');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+    
+    // 1. MIGRACIÓN DE QUERIES (usando useApiQuery, sin loading/error manual)
+    // Los datos 'sexs' y 'tiposDoc' están precargados con cache infinito en AuthContext.
+    const { data: sexs } = useApiQuery('/sexs');
+    const { data: tiposDoc } = useApiQuery('/identificationtypes');
+    
+    // 2. MIGRACIÓN DE MUTACIÓN (usando useCrearPaciente)
+    const { 
+        mutate: crearPacienteMutate, 
+        isPending: isSubmitting, 
+        error: mutationError // Renombrado a mutationError para mayor claridad
+    } = useCrearPaciente({
+        onSuccess: (data) => {
+            // Sincronización automática: React Query ya invalidó ['/api/patients']
+            // Ejecutamos el onSuccess original (que ahora es opcional en Prescripciones.jsx)
+            if (onSuccess) onSuccess(data); 
+            onClose(); // Cerrar el modal
+        },
+    });
+
+    // Eliminamos: const [isLoading, setIsLoading] = useState(false);
+    // Eliminamos: const [error, setError] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
     
-
-
-
         useEffect(() => {
                 // Bloquea el scroll y evita el salto visual
                 document.body.style.overflow = 'hidden'; 
@@ -41,75 +56,66 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                 };
             }, [onClose]);
 
-        
-         const handleOpenConfirm = (formData) => {
-            // Si handleSubmit llama a esta función, significa que la validación pasó.
-            setShowConfirm(true); 
-            // Guardamos los datos validados temporalmente
-            // No es necesario guardarlos aquí si confiamos en que handleSubmit los pasará
-        };
-    
-     
-       
-     const enviar = async (formData) => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const payload = {
-                PacienteID: 0,
-                DNI: formData.documento,
-                Apellido: formData.apellido,
-                Nombres: formData.nombre,
-                SexoID: Number(formData.sexo),
-                fchNacimiento: `${formData.fechaNacimiento}T00:00:00`,
-                Email: formData.email,
-                TipoDocPacienteID: Number(formData.tipoDoc),
-                MomentoAlta: new Date().toISOString().slice(0, 19),
-            };
-            setShowConfirm(false);
-
-            await crearPaciente(payload);
-            onSuccess();
-            onClose();
-
-        } catch (err) {
-            setError(err.message || 'Error al crear el paciente');
-        } finally {
-            setIsLoading(false);
-        }
+    const handleOpenConfirm = (formData) => {
+        // En lugar de guardar datos, solo abrimos la confirmación. 
+        // El handleSubmit(enviar) en onConfirm se encargará de pasar los datos.
+        setShowConfirm(true); 
     };
+    
+    const enviar = async (formData) => {
+        // 🚨 ELIMINAMOS: setIsLoading(true); setError(null);
+        setShowConfirm(false);
+
+        const payload = {
+            PacienteID: 0,
+            DNI: formData.documento,
+            Apellido: formData.apellido,
+            Nombres: formData.nombre,
+            SexoID: Number(formData.sexo),
+            fchNacimiento: `${formData.fechaNacimiento}T00:00:00`,
+            Email: formData.email,
+            TipoDocPacienteID: Number(formData.tipoDoc),
+            MomentoAlta: new Date().toISOString().slice(0, 19),
+        };
+
+        // 3. REEMPLAZO DE LLAMADA AXIOS MANUAL
+        // Antes: await crearPaciente(payload); onSuccess(); onClose();
+        // Ahora: Llamamos al mutate, que dispara onSuccess/onError.
+        crearPacienteMutate(payload);
+
+        // 🚨 ELIMINAMOS: } catch...finally { setIsLoading(false); }
+    };
+    
     const handleMouseDown = (e) => {
-    // Si el clic se inicia y finaliza directamente en el fondo
-    if (e.target === e.currentTarget) {
-        onClose();
-    }
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
     };
     
 
     return createPortal(
-
         <div className="modal-backdrop" onMouseDown={handleMouseDown}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button 
-                     type="button" 
-                     onClick={onClose} 
-                     style={{ 
-                        position: 'absolute', 
-                        top: '15px', 
-                        right: '15px', 
-                        background: 'none', 
-                        border: 'none', 
-                        fontSize: '1.5rem', 
-                        color: '#666', 
-                        cursor: 'pointer',
-                        zIndex: 100 
+                    type="button" 
+                    onClick={onClose} 
+                    style={{ 
+                         position: 'absolute', 
+                         top: '15px', 
+                         right: '15px', 
+                         background: 'none', 
+                         border: 'none', 
+                         fontSize: '1.5rem', 
+                         color: '#666', 
+                         cursor: 'pointer',
+                         zIndex: 100 
                     }}>
                     &times;
                 </button>
                 <h1 className="main-title">Nuevo Paciente</h1>
-                <form className="Formulario" onSubmit={handleSubmit(handleOpenConfirm)} style={{ textAlign: 'left' }}>                    
-                    {/* Tipo de Documento */}
+                <form className="Formulario" onSubmit={handleSubmit(handleOpenConfirm)} style={{ textAlign: 'left' }}>                    
+                    
+                    {/* Select TipoDoc */}
                     <div className="field-wrapper">
                     <label>Tipo de Documento</label>
                     <select
@@ -118,8 +124,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                         className={`select-input ${errors.tipoDoc ? 'input-error-paciente' : ''}`}
                     >
                         <option value="" disabled>Seleccione tipo de documento</option>
-                        {loadingTipos && <option>Cargando...</option>}
-                        {errorTipos && <option>Error al cargar tipos</option>}
+                        {/* 🚨 Eliminamos el manejo de loading/error aquí ya que la data está precargada */}
                         {tiposDoc?.map(tipo => (
                         <option key={tipo.TipoDocPacienteID} value={tipo.TipoDocPacienteID}>
                             {tipo.Descripcion}
@@ -176,7 +181,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     />
                     {errors.nombre && <p className="error-msg-paciente">{errors.nombre.message}</p>}
                     </div>
-
+                    
                     {/* Sexo */}
                     <div className="field-wrapper">
                     <label>Sexo</label>
@@ -186,8 +191,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                         className={`select-input ${errors.sexo ? 'input-error-paciente' : ''}`}
                     >
                         <option value="" disabled>Seleccione sexo</option>
-                        {loadingSexs && <option>Cargando...</option>}
-                        {errorSexs && <option>Error al cargar sexos</option>}
+                        {/* 🚨 Eliminamos el manejo de loading/error aquí ya que la data está precargada */}
                         {sexs?.map(sexo => (
                         <option key={sexo.SexoID} value={sexo.SexoID}>
                             {sexo.Descripcion}
@@ -209,23 +213,23 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     {errors.fechaNacimiento && <p className="error-msg-paciente">{errors.fechaNacimiento.message}</p>}
                     </div>
 
-                    {error && <p style={{ color: 'red', marginTop: '15px' }}>{error}</p>}
+                    {/* Mostramos el error de mutación */}
+                    {mutationError && <p style={{ color: 'red', marginTop: '15px' }}>{mutationError.message}</p>}
                     
                     <div className="modal-footer" style={{ borderTop: '1px solid #eee', paddingTop: '20px', textAlign: 'right', marginTop: '30px' }}>
-                        <button className="enviar" type="submit" disabled={isLoading}>
-                            {isLoading ? 'Creando...' : 'Crear Paciente'}
+                        <button className="enviar" type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Creando...' : 'Crear Paciente'}
                         </button>
                     </div>
-                    </form>
-                    {showConfirm && (
-                <ConfirmModal 
-                    isOpen={showConfirm}
-                    message="¿Está seguro de querer crear este nuevo paciente?"
-                    // 🚨 CRÍTICO: onConfirm llama a handleSubmit(enviar) para revalidar y ejecutar la API
-                    onConfirm={handleSubmit(enviar)} 
-                    onCancel={() => setShowConfirm(false)}
-                />
-            )}
+                </form>
+                {showConfirm && (
+                    <ConfirmModal 
+                        isOpen={showConfirm}
+                        message="¿Está seguro de querer crear este nuevo paciente?"
+                        onConfirm={handleSubmit(enviar)} 
+                        onCancel={() => setShowConfirm(false)}
+                    />
+                )}
 
                 
             </div>
