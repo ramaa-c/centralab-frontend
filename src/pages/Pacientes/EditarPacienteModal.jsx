@@ -46,8 +46,8 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
 
   
 
-  const { data: sexs, isLoading: loadingSexs } = useApi('/api/sexs');
-  const { data: tiposDoc, isLoading: loadingTipos } = useApi('/api/identificationtypes');
+  const { data: sexs, isLoading: loadingSexs } = useApi('/sexs');
+  const { data: tiposDoc, isLoading: loadingTipos } = useApi('/identificationtypes');
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);

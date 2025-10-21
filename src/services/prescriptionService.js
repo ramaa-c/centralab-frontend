@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./apiAuthenticated";
 
 export const subirPDFReceta = async (recetaId, archivoBase64) => {
       console.log("📤 [subirPDFReceta] Iniciando subida del PDF...");

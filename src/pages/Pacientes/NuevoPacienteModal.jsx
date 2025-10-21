@@ -9,8 +9,8 @@ import ConfirmModal from "../../components/ConfirmModal.jsx";
 
 export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { data: sexs, isLoading: loadingSexs, error: errorSexs } = useApi('/api/sexs');
-    const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/api/identificationtypes');
+    const { data: sexs, isLoading: loadingSexs, error: errorSexs } = useApi('/sexs');
+    const { data: tiposDoc, isLoading: loadingTipos, error: errorTipos } = useApi('/identificationtypes');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);

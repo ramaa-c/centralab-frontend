@@ -14,7 +14,7 @@ export default function Registro() {
   } = useForm();
   const navigate = useNavigate();
 
-  const { data: especialidades = [], error: errorEsp, loading: loadingEsp } = useApi("/api/specialties");
+  const { data: especialidades = [], error: errorEsp, loading: loadingEsp } = useApi("/specialties");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

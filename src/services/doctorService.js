@@ -1,5 +1,4 @@
-import api from "./api";
-import apiAuthenticated from './apiAuthenticated'; 
+import api from './apiAuthenticated'; 
 
 const DOCTORS_ENDPOINT = "/doctors";
 const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
@@ -58,7 +57,7 @@ export const removeDoctorEstablishment = async (doctorId, establishmentId) => {
 
 export const updateDoctor = async (doctorData) => {
   try {
-    const response = await apiAuthenticated.put(DOCTORS_ENDPOINT, doctorData);
+    const response = await api.put(DOCTORS_ENDPOINT, doctorData);
     return response.data;
   } catch (error) {
     console.error("Error al actualizar los datos del doctor:", error);
