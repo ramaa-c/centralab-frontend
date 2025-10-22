@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
 import { crearReceta } from "../../services/authService";
+import {subirPDFReceta} from "../../services/prescriptionService.js";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
 import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
 import { generarPDF } from "../../components/generarPDF";
@@ -27,6 +28,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
   const [dateInputType, setDateInputType] = useState('text');
+  const handleEliminarPractica = (practicaId) => {
+    setPracticasSeleccionadas(prevPracticas =>
+        prevPracticas.filter(p => p.PracticaID !== practicaId)
+    );
+};
 
   useEffect(() => {
         const fetchEstablishment = async () => {
@@ -115,7 +121,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   useEffect(() => {
     if (coberturaSeleccionada) {
-      fetchPlanes(`/api/private_healthcares/${coberturaSeleccionada}/plans`);
+      fetchPlanes(`/private_healthcares/${coberturaSeleccionada}/plans`);
     }
   }, [coberturaSeleccionada]);
 
@@ -128,7 +134,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   useEffect(() => {
   const pacienteId = pacienteRecibido?.PacienteID || watch("Paciente");
   if (pacienteId) {
-    fetchCredencial(`/api/patients/${pacienteId}/credentials`);
+    fetchCredencial(`/patients/${pacienteId}/credentials`);
   }
   }, [pacienteRecibido, watch("Paciente")]);
 
@@ -161,21 +167,21 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential: credencialData?.List?.[0]?.Credencial || "credencial-temporal",
+        Credential: credencialData?.List?.[0]?.Credencial || "",
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
         }))
       };
 
-      console.log("📦 Payload final enviado a crearReceta:", payload);
+      console.log("Payload final enviado a crearReceta:", payload);
 
       const response = await crearReceta(payload);
-      console.log("✅ Respuesta de crearReceta:", response);
+      console.log("Respuesta de crearReceta:", response);
 
       const recetaId = response?.assigned_id;
       if (!recetaId || recetaId === 0) {
-        console.error("❌ No se recibió un ID válido de la receta");
+        console.error("No se recibió un ID válido de la receta");
         throw new Error("No se recibió un ID válido de la receta");
       }
 
@@ -183,23 +189,23 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
       const previewElement = document.querySelector(".preview-container");
       if (!previewElement) {
-        console.error("❌ No se encontró el elemento .preview-container para generar PDF");
+        console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
       }
 
-      console.log("🖨 Generando PDF...");
+      console.log("Generando PDF...");
       const pdfBase64 = await generarPDF(previewElement);
-      console.log("📄 PDF generado correctamente, tamaño Base64:", pdfBase64.length);
+      console.log("PDF generado correctamente, tamaño Base64:", pdfBase64.length);
 
-      console.log("📤 Subiendo PDF al backend...");
+      console.log("Subiendo PDF al backend...");
       const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
-      console.log("✅ Respuesta del backend al subir PDF:", resultadoSubida);
+      console.log("Respuesta del backend al subir PDF:", resultadoSubida);
 
-      console.log("🎉 Receta completa registrada y PDF asociado correctamente.");
+      console.log("Receta completa registrada y PDF asociado correctamente.");
       onClose();
 
     } catch (err) {
-      console.error("💥 Error al enviar la receta:", err);
+      console.error("Error al enviar la receta:", err);
       setError(err.message);
     }
   };
@@ -514,6 +520,62 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               <i className="fa-solid fa-plus"></i> Agregar
             </button>
           </div>
+          <div className="field-wrapper" style={{ marginTop: '15px' }}>
+            <label>Prácticas en Receta:</label>
+            <div className="selected-practices-list" style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '8px', 
+                maxHeight: '150px', 
+                overflowY: 'auto',
+                padding: '10px',
+                border: '1px solid #ccc',
+                borderRadius: '5px'
+            }}>
+                {practicasSeleccionadas.length === 0 ? (
+                    <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>Selecciona prácticas arriba o agrega una de las "Otras prácticas".</p>
+                ) : (
+                    practicasSeleccionadas.map((p) => (
+                        <div 
+                            key={p.PracticaID} 
+                            className="selected-practice-item" 
+                            style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                padding: '5px 8px',
+                                backgroundColor: '#e9ecef',
+                                borderRadius: '3px'
+                            }}
+                        >
+                            <span style={{ flex: 1, textAlign: 'left' }}>
+                                **{p.Descripcion}** {/* Si quieres, puedes identificar las que vienen del select si no tienen Columna: */}
+                                {p.Columna === undefined && <span style={{fontSize: '0.8em', color: '#666'}}> (Manual)</span>}
+                            </span>
+                            
+                            {/* Botón de Eliminar */}
+                            <button
+                                type="button"
+                                onClick={() => handleEliminarPractica(p.PracticaID)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#dc3545', 
+                                    cursor: 'pointer',
+                                    fontSize: '1.2em',
+                                    marginLeft: '10px',
+                                    padding: '0 5px',
+                                    lineHeight: '1'
+                                }}
+                                title={`Quitar práctica: ${p.Descripcion}`}
+                            >
+                                <i className="fa-solid fa-xmark"></i> {/* Icono de FontAwesome para eliminar */}
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
         </div>
 
           {/* Notas */}
