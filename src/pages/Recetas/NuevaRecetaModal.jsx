@@ -28,6 +28,11 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
   const [dateInputType, setDateInputType] = useState('text');
+  const handleEliminarPractica = (practicaId) => {
+    setPracticasSeleccionadas(prevPracticas =>
+        prevPracticas.filter(p => p.PracticaID !== practicaId)
+    );
+};
 
   useEffect(() => {
         const fetchEstablishment = async () => {
@@ -515,6 +520,62 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               <i className="fa-solid fa-plus"></i> Agregar
             </button>
           </div>
+          <div className="field-wrapper" style={{ marginTop: '15px' }}>
+            <label>Prácticas en Receta:</label>
+            <div className="selected-practices-list" style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '8px', 
+                maxHeight: '150px', 
+                overflowY: 'auto',
+                padding: '10px',
+                border: '1px solid #ccc',
+                borderRadius: '5px'
+            }}>
+                {practicasSeleccionadas.length === 0 ? (
+                    <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>Selecciona prácticas arriba o agrega una de las "Otras prácticas".</p>
+                ) : (
+                    practicasSeleccionadas.map((p) => (
+                        <div 
+                            key={p.PracticaID} 
+                            className="selected-practice-item" 
+                            style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                padding: '5px 8px',
+                                backgroundColor: '#e9ecef',
+                                borderRadius: '3px'
+                            }}
+                        >
+                            <span style={{ flex: 1, textAlign: 'left' }}>
+                                **{p.Descripcion}** {/* Si quieres, puedes identificar las que vienen del select si no tienen Columna: */}
+                                {p.Columna === undefined && <span style={{fontSize: '0.8em', color: '#666'}}> (Manual)</span>}
+                            </span>
+                            
+                            {/* Botón de Eliminar */}
+                            <button
+                                type="button"
+                                onClick={() => handleEliminarPractica(p.PracticaID)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#dc3545', 
+                                    cursor: 'pointer',
+                                    fontSize: '1.2em',
+                                    marginLeft: '10px',
+                                    padding: '0 5px',
+                                    lineHeight: '1'
+                                }}
+                                title={`Quitar práctica: ${p.Descripcion}`}
+                            >
+                                <i className="fa-solid fa-xmark"></i> {/* Icono de FontAwesome para eliminar */}
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
         </div>
 
           {/* Notas */}
