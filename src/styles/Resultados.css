@@ -1,6 +1,3 @@
-/* =========================================
-   ESTRUCTURA GENERAL DE RESULTADOS
-   ========================================= */
 
 .results-view-container {
     padding: 20px;
@@ -10,10 +7,10 @@
 .results-main-layout {
     display: flex;
     gap: 20px;
-    align-items: flex-start; /* Alinea los paneles en la parte superior */
+    align-items: flex-start; 
 }
 
-/* Título de la vista */
+
 .results-view-container .view-title {
     font-size: 1.8rem;
     font-weight: 700;
@@ -21,14 +18,12 @@
     margin-bottom: 20px;
 }
 
-/* -----------------------------------------
-   1. PANEL DE FILTROS (IZQUIERDA)
-   ----------------------------------------- */
+
 .results-filter-panel {
-    flex-shrink: 0; /* No permite que se encoja */
-    width: 250px; /* Ancho fijo para el panel de filtros */
+    flex-shrink: 0; 
+    width: 250px; 
     padding: 20px;
-    /* content-card ya le da fondo y sombra */
+   
 }
 
 .results-filter-panel .filter-title {
@@ -65,7 +60,7 @@
 
 
 
-/* Botón de acción Buscar */
+
 .btn-filter-action {
     width: 100%;
     padding: 10px;
@@ -79,16 +74,14 @@
     transition: background-color 0.2s;
 }
 
-/* -----------------------------------------
-   2. TABLA DE RESULTADOS (DERECHA)
-   ----------------------------------------- */
+
 .results-table-panel {
     flex-grow: 1;
     min-width: 0;
-    /* content-card ya le da fondo */
+
 }
 
-/* Controles de encabezado (Botones y Título) */
+
 .table-header-controls {
     display: flex;
     justify-content: space-between;
@@ -96,14 +89,14 @@
     margin-bottom: 15px;
 }
 
-/* Botones de control (Historia, Ver, Descargar) */
+
 .header-actions {
     display: flex;
     gap: 10px;
 }
 .header-btn {
     padding: 8px 12px;
-    background-color: #DDDCDC; /* Platinum/Gris */
+    background-color: #DDDCDC; 
     color: #333;
     border: none;
     border-radius: 5px;
@@ -113,10 +106,10 @@
 }
 .header-btn i {
     margin-right: 5px;
-    color: #0198CC; /* Iconos en Celestial Blue */
+    color: #0198CC; 
 }
 
-/* Estilo para el estado de la petición */
+
 .status-badge {
     display: inline-block;
     padding: 4px 8px;
@@ -126,8 +119,8 @@
     text-transform: capitalize;
 }
 
-/* Colores por estado (puedes ajustar estos hex codes) */
-.status-En { /* En Proceso */
+
+.status-En { 
     background-color: #ffe0b2;
     color: #ff9800;
 }
