@@ -89,7 +89,7 @@ const Prescripciones = () => {
     return (
         <div className="prescriptions-view-bg"> 
             
-            {/* 🚨 ÁREA DE CONTADORES */}
+            {/* ÁREA DE CONTADORES */}
             <div className="metrics-dashboard">
                 <MetricCard 
                     title="Nuevos Pacientes" 
@@ -111,11 +111,10 @@ const Prescripciones = () => {
                 />
                 
             </div>
-            {/* ---------------------------------- */}
             
             <div className="main-content-wrapper">
                 
-                {/* 1. COLUMNA IZQUIERDA: PACIENTES */}
+                {/* COLUMNA IZQUIERDA: PACIENTES */}
                 <section className="content-card patients-column">
                     <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
                         <h2 className="section-title">Pacientes</h2>

@@ -3,8 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select';
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
-import { crearReceta } from "../../services/authService";
-import {subirPDFReceta} from "../../services/prescriptionService.js";
+import { crearReceta, subirPDFReceta } from "../../services/prescriptionService.js";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
 import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
 import { generarPDF } from "../../components/generarPDF";
@@ -27,7 +26,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/patients");
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
-  const [dateInputType, setDateInputType] = useState('text');
   const handleEliminarPractica = (practicaId) => {
     setPracticasSeleccionadas(prevPracticas =>
         prevPracticas.filter(p => p.PracticaID !== practicaId)
@@ -150,7 +148,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const enviar = async (data) => {
     try {
-      console.log("🚀 Enviando receta...");
+      console.log("Enviando receta...");
       console.log("Datos del formulario:", data);
 
       const payload = {
@@ -167,7 +165,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential: credencialData?.List?.[0]?.Credencial || "",
+        Credential: credencialData?.[0]?.Credencial,
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
@@ -221,6 +219,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     const selectedDiagnostico = diagnosticos.find(d => d.DiagnosticoID === parseInt(watchedValues.Diagnostico));
     const selectedCobertura = coberturas.find(c => c.PrepagaID === parseInt(watchedValues.Cobertura));
     const selectedPlan = planes.find(p => p.PrepagaPlanID === parseInt(watchedValues.Plan));
+console.log("🪪 credencialData:", credencialData);
 
     return {
       paciente: selectedPaciente ? {
@@ -239,6 +238,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       doctorName: `${user?.apellido} ${user?.nombres}`,
       firmaImagen: doctorData?.FirmaImagen || null,
       establecimientoName: establecimientoName,
+      credencial: credencialData?.[0]?.Credencial || null,
+      
     };
   }, [
     watchedValues,
@@ -249,7 +250,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     planes,
     pacienteRecibido,
     doctorData,
-    user
+    user,
+    credencialData
   ]);
 
   const coberturaOptions = useMemo(() => 
@@ -482,44 +484,39 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           </div>
           
         {/* Otras prácticas */}
-        <div className="field-wrapper">
-          <label>Otras prácticas:</label>
-          <div className="practice-selector-wrapper" style={{ display: 'flex', gap: '10px' }}> {/* Nuevo contenedor flex */}
-            <div style={{ flex: 1 }}> {/* El Select ocupa la mayor parte */}
-              <Controller
-                name="PracticaTemp"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    // Mapeamos las opciones de practicas (asegúrate de que `practicas` es la lista de todas)
-                    options={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })) || []}
-                    // Aseguramos que React Select muestre el valor que tiene el hook-form
-                    value={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })).find(option => option.value === field.value)}
-                    onChange={option => field.onChange(option ? option.value : null)}
-                    placeholder="Buscar otra práctica..."
-                    isClearable
-                    isLoading={!practicas}
-                    noOptionsMessage={() => "No se encontraron prácticas"}
-                    classNamePrefix="custom-select"
-                  />
-                )}
-              />
-            </div>
-            <button
-              type="button"
-              // Llama a la función con el valor actual del campo PracticaTemp
-              onClick={() => {
-                const practicaId = watch("PracticaTemp");
-                if (practicaId) {
-                  handleAgregarPractica(practicaId);
-                  setValue("PracticaTemp", null); // Limpiar el select después de agregar
-                }
-              }}
-            >
-              <i className="fa-solid fa-plus"></i> Agregar
-            </button>
-          </div>
+      <div className="field-wrapper">
+      <label>Otras prácticas:</label>
+      <div className="practice-selector-wrapper" style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ flex: 1 }}>
+      <Controller
+        name="PracticaTemp"
+        control={control}
+        render={({ field }) => (
+                <Select
+                  {...field}
+                  options={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })) || []}
+                  value={practicas?.map(p => ({ value: p.PracticaID, label: p.Descripcion })).find(option => option.value === field.value)}
+                  onChange={option => field.onChange(option ? option.value : null)}
+                  placeholder="Buscar otra práctica..."
+                   
+                  isLoading={!practicas}
+                  noOptionsMessage={() => "No se encontraron prácticas"}
+                  classNamePrefix="custom-select"
+                 />
+                )}
+                />
+                </div>
+                <button
+                type="button"
+                onClick={() => {
+                  const practicaId = watch("PracticaTemp");
+                  if (practicaId) {
+                  handleAgregarPractica(practicaId);
+                  setValue("PracticaTemp", null);
+                }}}>
+          <i className="fa-solid fa-plus"></i> Agregar
+          </button>
+          </div>
           <div className="field-wrapper" style={{ marginTop: '15px' }}>
             <label>Prácticas en Receta:</label>
             <div className="selected-practices-list" style={{ 
@@ -533,7 +530,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                 borderRadius: '5px'
             }}>
                 {practicasSeleccionadas.length === 0 ? (
-                    <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>Selecciona prácticas arriba o agrega una de las "Otras prácticas".</p>
+                    <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>Selecciona prácticas arriba o agrega una de "Otras prácticas".</p>
                 ) : (
                     practicasSeleccionadas.map((p) => (
                         <div 
@@ -549,7 +546,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                             }}
                         >
                             <span style={{ flex: 1, textAlign: 'left' }}>
-                                **{p.Descripcion}** {/* Si quieres, puedes identificar las que vienen del select si no tienen Columna: */}
+                                **{p.Descripcion}**
                                 {p.Columna === undefined && <span style={{fontSize: '0.8em', color: '#666'}}> (Manual)</span>}
                             </span>
                             
@@ -569,14 +566,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                                 }}
                                 title={`Quitar práctica: ${p.Descripcion}`}
                             >
-                                <i className="fa-solid fa-xmark"></i> {/* Icono de FontAwesome para eliminar */}
+                                <i className="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                     ))
                 )}
             </div>
         </div>
-        </div>
+        </div>
 
           {/* Notas */}
             <label>Notas:</label>

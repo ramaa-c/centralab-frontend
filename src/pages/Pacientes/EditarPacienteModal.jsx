@@ -22,22 +22,17 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
   });
 
   useEffect(() => {
-          // Bloquea el scroll y evita el salto visual
           document.body.style.overflow = 'hidden'; 
           document.body.style.paddingRight = '10px'; 
-          
-          // 1. Define el handler de la tecla Esc
           const handleEscape = (event) => {
               if (event.key === 'Escape') {
                   onClose(); 
               }
           };
   
-          // 2. Adjunta el escuchador
           document.addEventListener('keydown', handleEscape);
   
           return () => {
-              // 3. Limpieza: Desbloquea scroll y elimina el escuchador
               document.body.style.overflow = 'unset'; 
               document.body.style.paddingRight = '0';
               document.removeEventListener('keydown', handleEscape);
@@ -52,19 +47,12 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const handleOpenConfirm = (formData) => {
-            // Si handleSubmit llama a esta función, significa que la validación pasó.
-            setShowConfirm(true); 
-            // Guardamos los datos validados temporalmente
-            // No es necesario guardarlos aquí si confiamos en que handleSubmit los pasará
-        };
+  const handleOpenConfirm = (formData) => { setShowConfirm(true); };
 
 
   const handleSave = async (formData) => {
         setIsLoading(true);
         setError(null);
-        
-        // 🚨 CRÍTICO: Cierra el modal de confirmación inmediatamente antes de la API
         setShowConfirm(false); 
 
         try {
@@ -248,7 +236,6 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
                 <ConfirmModal 
                     isOpen={showConfirm}
                     message="¿Está seguro de querer guardar los cambios realizados en el perfil?"
-                    // 🚨 CRÍTICO: onConfirm llama a handleSubmit(handleSave) para ejecutar la API
                     onConfirm={handleSubmit(handleSave)} 
                     onCancel={() => setShowConfirm(false)}
                 />

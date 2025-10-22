@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { createPortal } from 'react-dom';
-import { crearPaciente } from '../../services/authService';
+import { crearPaciente } from '../../services/patientService.js';
 import { useApi } from '../../hooks/useApi';
 import ConfirmModal from "../../components/ConfirmModal.jsx";
-
-
 
 export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -15,43 +13,31 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
     const [error, setError] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
     
-
-
-
-        useEffect(() => {
-                // Bloquea el scroll y evita el salto visual
-                document.body.style.overflow = 'hidden'; 
-                document.body.style.paddingRight = '10px'; 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden'; 
+        document.body.style.paddingRight = '10px'; 
                 
-                // 1. Define el handler de la tecla Esc
-                const handleEscape = (event) => {
-                    if (event.key === 'Escape') {
-                        onClose(); 
-                    }
-                };
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                onClose(); 
+            }
+        };
         
-                // 2. Adjunta el escuchador
-                document.addEventListener('keydown', handleEscape);
+        document.addEventListener('keydown', handleEscape);
         
-                return () => {
-                    // 3. Limpieza: Desbloquea scroll y elimina el escuchador
-                    document.body.style.overflow = 'unset'; 
-                    document.body.style.paddingRight = '0';
-                    document.removeEventListener('keydown', handleEscape);
-                };
-            }, [onClose]);
+        return () => {
+            document.body.style.overflow = 'unset'; 
+            document.body.style.paddingRight = '0';
+            document.removeEventListener('keydown', handleEscape);
+       };
+    }, [onClose]);
 
         
-         const handleOpenConfirm = (formData) => {
-            // Si handleSubmit llama a esta función, significa que la validación pasó.
-            setShowConfirm(true); 
-            // Guardamos los datos validados temporalmente
-            // No es necesario guardarlos aquí si confiamos en que handleSubmit los pasará
-        };
-    
-     
+    const handleOpenConfirm = (formData) => {
+        etShowConfirm(true); 
+    };  
        
-     const enviar = async (formData) => {
+    const enviar = async (formData) => {
         setIsLoading(true);
         setError(null);
 
@@ -80,13 +66,11 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
         }
     };
     const handleMouseDown = (e) => {
-    // Si el clic se inicia y finaliza directamente en el fondo
     if (e.target === e.currentTarget) {
         onClose();
     }
     };
     
-
     return createPortal(
 
         <div className="modal-backdrop" onMouseDown={handleMouseDown}>
@@ -201,7 +185,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                     <div className="field-wrapper">
                     <label>Fecha de Nacimiento</label>
                    <input
-                        type="date" // 👈 CAMBIAR AQUÍ
+                        type="date"
                         placeholder="Seleccionar fecha"
                         {...register("fechaNacimiento", { required: "Campo obligatorio" })}
                         className={`select-input ${errors.fechaNacimiento ? 'input-error-paciente' : ''}`}
@@ -221,7 +205,6 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
                 <ConfirmModal 
                     isOpen={showConfirm}
                     message="¿Está seguro de querer crear este nuevo paciente?"
-                    // 🚨 CRÍTICO: onConfirm llama a handleSubmit(enviar) para revalidar y ejecutar la API
                     onConfirm={handleSubmit(enviar)} 
                     onCancel={() => setShowConfirm(false)}
                 />

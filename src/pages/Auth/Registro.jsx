@@ -39,7 +39,7 @@ export default function Registro() {
       FirmaTexto: data.FirmaTexto.trim(),
       FirmaImagen: "",
       HashSeguridad: "",
-      DebeCambiarClave: "0",
+      DebeCambiarClave: "1",
       MomentoAlta: new Date().toISOString().slice(0, 19),
     };
 
@@ -67,7 +67,7 @@ export default function Registro() {
         <div className="card-left-column">
           <div className="logo-section">
             <img src={centraLabLogo} alt="CentraLab Logo" className="card-logo" />
-            <span className="logo-text"></span> {/* Aseguramos el texto del logo */}
+            <span className="logo-text"></span>
           </div>
           <div className="decorative-image-placeholder"></div>
         </div>
@@ -89,7 +89,6 @@ export default function Registro() {
                   placeholder="Ingresa tu Email"
                   className={`reg-input ${errors.Email ? 'input-error' : ''}`}
                   {...register("Email", {
-                    // 🚨 MENSAJE DE ERROR
                     required: "Este campo es obligatorio",
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -98,7 +97,6 @@ export default function Registro() {
                   })}
                 />
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.Email && <p className="error-msg">{errors.Email.message}</p>}
             </div>
 
@@ -111,7 +109,6 @@ export default function Registro() {
                   placeholder="Ingresa tu DNI o Pasaporte"
                   className={`reg-input ${errors.DNI ? 'input-error' : ''}`}
                   {...register("DNI", {
-                    // 🚨 MENSAJE DE ERROR
                     required: "Este campo es obligatorio",
                     pattern: {
                       value: /^[0-9]{7,9}$/,
@@ -120,7 +117,6 @@ export default function Registro() {
                   })}
                 />
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.DNI && <p className="error-msg">{errors.DNI.message}</p>}
             </div>
 
@@ -133,7 +129,6 @@ export default function Registro() {
                   placeholder="Ingresa tu Nombre y Apellido"
                   className={`reg-input ${errors.Denominacion ? 'input-error' : ''}`}
                   {...register("Denominacion", {
-                    // 🚨 MENSAJE DE ERROR
                     required: "Este campo es obligatorio",
                     pattern: {
                       value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s']+$/,
@@ -142,7 +137,6 @@ export default function Registro() {
                   })}
                 />
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.Denominacion && <p className="error-msg">{errors.Denominacion.message}</p>}
             </div>
 
@@ -171,7 +165,6 @@ export default function Registro() {
                   </select>
                 )}
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.EspecialidadID && <p className="error-msg">{errors.EspecialidadID.message}</p>}
             </div>
 
@@ -184,13 +177,11 @@ export default function Registro() {
                   placeholder="Ingresa tu Matrícula"
                   className={`reg-input ${errors.Matricula ? 'input-error' : ''}`}
                   {...register("Matricula", {
-                    // 🚨 MENSAJE DE ERROR
                     required: "Este campo es obligatorio",
                     minLength: { value: 4, message: "Debe tener al menos 4 caracteres" }
                   })}
                 />
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.Matricula && <p className="error-msg">{errors.Matricula.message}</p>}
             </div>
 
@@ -203,13 +194,11 @@ export default function Registro() {
                   placeholder="Ingresa tu Firma y Aclaración"
                   className={`reg-input ${errors.FirmaTexto ? 'input-error' : ''}`}
                   {...register("FirmaTexto", {
-                    // 🚨 MENSAJE DE ERROR
                     required: "Este campo es obligatorio",
                     minLength: { value: 3, message: "Debe tener al menos 3 caracteres" }
                   })}
                 />
               </div>
-              {/* 🚨 RENDERIZADO DEL ERROR */}
               {errors.FirmaTexto && <p className="error-msg">{errors.FirmaTexto.message}</p>}
             </div>
 
