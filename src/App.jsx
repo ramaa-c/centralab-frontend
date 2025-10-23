@@ -28,11 +28,16 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/registro" element={<Registro />} />
                     
-                    {/* Rutas protegidas */}
+                    {/* Rutas protegidas (Usan el layout combinado) */}
 
                     <Route 
                         path="/cambiarclave" 
                         element={<ProtectedRoute><CambiarClave/></ProtectedRoute>} 
+                    />|
+                    
+                    <Route 
+                        path="/cambiarclave" 
+                        element={<ProtectedLayout><CambiarClave /></ProtectedLayout>} 
                     />
                     
                     <Route 
@@ -50,6 +55,8 @@ function App() {
                         element={<ProtectedLayout><PerfilUsuario /></ProtectedLayout>}
                     />
                     
+                    {/* ... (otras rutas) ... */}
+
                 </Routes>
             </AuthProvider>
         </Router>
