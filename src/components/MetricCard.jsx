@@ -5,7 +5,6 @@ const MetricCard = ({ title, value, icon, isLoading }) => {
     return (
         <div className="metric-card">
             <div className="metric-icon-container">
-                {/* Muestra un spinner si está cargando */}
                 {isLoading ? (
                     <i className="fa-solid fa-spinner fa-spin"></i> 
                 ) : (

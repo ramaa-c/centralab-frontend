@@ -20,8 +20,6 @@ export default function CambiarClave() {
   const doctor = JSON.parse(localStorage.getItem('user'));
 
   const enviar = async (data) => {
-    // Si la validación de react-hook-form falla (e.g., contraseñas no coinciden), 
-    // handleSubmit no llamará a esta función.
     
     setIsLoading(true);
     setError(null);
@@ -30,7 +28,7 @@ export default function CambiarClave() {
     try {
       await cambiarClave(doctor.id, data.password);
       setSuccess(true);
-      localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: false }));
+      localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: "0" }));
       setTimeout(() => navigate('/prescripciones'), 1500);
     } catch (err) {
       setError(err.message || "Error al cambiar la contraseña.");
@@ -42,16 +40,11 @@ export default function CambiarClave() {
   return (
     <div className="login-page">
       
-      {/* Fondo decorativo */}
       <div className="decorative-background">
         <div className="shape-top"></div>
         <div className="shape-bottom"></div>
       </div>
-
-      {/* Tarjeta principal - Estructura simple de una sola columna */}
       <div className="login-card single-column"> 
-
-        {/* Contenido centrado */}
         <div className="card-center-content">
             
             {/* Logo y Título */}
@@ -68,7 +61,7 @@ export default function CambiarClave() {
             <form className="login-form" onSubmit={handleSubmit(enviar)} style={{ width: '100%', maxWidth: '350px', margin: '0 auto' }}>
                 
                 {/* Nueva Contraseña */}
-                <div className="password-container" style={{ marginBottom: '30px' }}> {/* Aumentamos el margen inferior para el mensaje absoluto */}
+                <div className="password-container" style={{ marginBottom: '30px' }}>
                     <i className="fa-solid fa-lock input-icon"></i> 
                     <input
                       type={showPassword ? "text" : "password"}
@@ -83,14 +76,13 @@ export default function CambiarClave() {
                         {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
                     </button>
                     
-                    {/* 🚨 CRÍTICO: Mensaje de error ABSOLUTO para evitar el salto */}
                     {errors.password && (
                         <p style={{ 
                             color: 'red', 
                             fontSize: '0.85rem', 
                             textAlign: 'left', 
                             position: 'absolute', 
-                            bottom: '-20px', /* Posicionado debajo del input */
+                            bottom: '-20px',
                             left: '0' 
                         }}>
                             {errors.password.message}
@@ -99,7 +91,7 @@ export default function CambiarClave() {
                 </div>
                 
                 {/* Confirmar Contraseña */}
-                <div className="password-container" style={{ marginBottom: '30px' }}> {/* Aumentamos el margen inferior para el mensaje absoluto */}
+                <div className="password-container" style={{ marginBottom: '30px' }}>
                     <i className="fa-solid fa-lock input-icon"></i> 
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -115,14 +107,13 @@ export default function CambiarClave() {
                         {showConfirmPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
                     </button>
                     
-                    {/* 🚨 CRÍTICO: Mensaje de error ABSOLUTO para evitar el salto */}
                     {errors.confirmPassword && (
                         <p style={{ 
                             color: 'red', 
                             fontSize: '0.85rem', 
                             textAlign: 'left', 
                             position: 'absolute', 
-                            bottom: '-20px', /* Posicionado debajo del input */
+                            bottom: '-20px',
                             left: '0' 
                         }}>
                             {errors.confirmPassword.message}
@@ -137,9 +128,7 @@ export default function CambiarClave() {
                     </button>
                 </div>
                 
-                {/* CONTENEDOR DE ALTURA FIJA PARA MENSAJES DE API/ÉXITO */}
                 <div className="message-placeholder">
-                    {/* Mensajes de estado (errores de API o éxito) */}
                     {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
                     {success && <p style={{ color: 'green', marginTop: '1rem' }}>Contraseña cambiada correctamente</p>}
                 </div>

@@ -6,7 +6,6 @@ export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
     const portalRoot = document.getElementById("modal-root") || document.body;
 
     return createPortal(
-        // Usamos el backdrop y content que ya tienes
         <div className="modal-backdrop" onClick={onCancel}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px', padding: '30px', textAlign: 'center' }}>
                 
@@ -16,7 +15,6 @@ export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
                 
                 <div className="button-group" style={{ display: 'flex', justifyContent: 'center', gap: '15px', width: '100%' }}>
                     
-                    {/* Botón ACEPTAR (Llama a la acción final) */}
                     <button
                         onClick={onConfirm} 
                         className="ingresar-btn" 
@@ -25,7 +23,6 @@ export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
                         Aceptar
                     </button>
                     
-                    {/* 🚨 BOTÓN CANCELAR CORREGIDO: Solo llama a onCancel */}
                     <button
                         onClick={onCancel} 
                         className="registro-btn" 

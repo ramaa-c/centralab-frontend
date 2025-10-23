@@ -70,7 +70,6 @@ export default function PerfilUsuario() {
   };
 
   const handleFileChange = (e) => {
-    // Cuando se selecciona un archivo, guarda el objeto File
     setSelectedFile(e.target.files[0]);
   };
 
@@ -103,16 +102,11 @@ export default function PerfilUsuario() {
   const handleSave = async () => {
     setShowConfirmModal(false);
     const apiCalls = [];
-    
-    // 🔑 1. Crea una copia del estado doctor para las actualizaciones locales
     let newDoctorState = { ...doctor };
-
     if (JSON.stringify(doctor) !== JSON.stringify(initialDoctor) || selectedFile) {
       let firmaBase64 = doctor.FirmaImagen;
       if (selectedFile) {
         firmaBase64 = await toBase64(selectedFile);
-        
-        // 🔑 2. ACTUALIZA la copia del estado con la nueva imagen Base64
         newDoctorState.FirmaImagen = firmaBase64;
       }
 
@@ -147,12 +141,9 @@ export default function PerfilUsuario() {
         console.log("Establecimiento activo actualizado en sesión:", draftActiveEstablishment);
       }
 
-      // 🔑 3. ACTUALIZA el estado 'doctor' para forzar la re-renderización de la imagen
       setDoctor(newDoctorState); 
-      // 🔑 4. ACTUALIZA el estado 'initialDoctor' para la próxima comparación
       setInitialDoctor(newDoctorState); 
       setInitialDoctorEstablishments(doctorEstablishments);
-      // 🔑 5. Limpia el archivo seleccionado
       setSelectedFile(null); 
       
       console.log("Guardado correctamente. Establecimiento activo:", draftActiveEstablishment );
@@ -164,21 +155,14 @@ export default function PerfilUsuario() {
   if (isLoading || !doctor) return <div className="p-4">Cargando perfil...</div>;
 
   return (
-    // 🚨 CRÍTICO: El div padre envuelve todo, incluyendo el Modal
+
     <div className="profile-page-wrapper"> 
-      
       <div className="profile-card"> 
         <h2 className="text-2xl font-semibold mb-4">Perfil del Médico</h2>
-
-        {/* 🚨 CRÍTICO: CONTENEDOR SPLIT DE DOS COLUMNAS */}
         <div className="profile-main-split">
             
-            {/* ======================================= */}
-            {/* 1. COLUMNA IZQUIERDA: DATOS PERSONALES */}
-            {/* ======================================= */}
+            {/* COLUMNA IZQUIERDA: DATOS PERSONALES */}
             <div className="profile-data-column">
-                
-                {/* GRID DE EMAIL, MATRÍCULA, etc. */}
                 <div className="profile-grid">
                     
                     {/* Campo: Email */}
@@ -231,18 +215,16 @@ export default function PerfilUsuario() {
                       />
                     </div>
 
-                    {/* Campo: Firma Imagen (Ocupa dos columnas en el grid interno) */}
+                    {/* Campo: Firma Imagen */}
                     <div className="md:col-span-2"> 
                       <label className="font-medium">Firma Imagen</label>
-                      {/* 🔑 CLAVE: La etiqueta LABEL envuelve el input y el texto estilizado */}
                       <label htmlFor="file-upload-input" className="file-upload-label">
                             <input
-                                id="file-upload-input" // Añade un ID para ligarlo al label
+                                id="file-upload-input" 
                                 type="file"
                                 onChange={handleFileChange}
-                                className="hidden-file-input" // Clase para ocultar
+                                className="hidden-file-input"
                             />
-                            {/* 🔑 Texto que queremos estilizar y mover */}
                             <span className="custom-placeholder">
                                 {selectedFile ? selectedFile.name : "Click aquí para subir archivo o arrastrar"}
                             </span>
@@ -261,17 +243,14 @@ export default function PerfilUsuario() {
                         />
                       )}
                     </div>
-                </div> {/* Fin de profile-grid */}
+                </div>
 
-            </div> {/* Fin de profile-data-column */}
+            </div>
 
 
-            {/* ======================================= */}
-            {/* 2. COLUMNA DERECHA: ESTABLECIMIENTOS */}
-            {/* ======================================= */}
+            {/* COLUMNA DERECHA: ESTABLECIMIENTOS */}
             <div className="profile-est-column">
                 
-                {/* 🚨 SECCIÓN ESTABLECIMIENTOS (Contenido Completo) */}
                 <div className="establishment-section"> 
                     <h3 className="text-lg font-semibold mb-2">Establecimientos vinculados</h3>
                     
@@ -307,7 +286,6 @@ export default function PerfilUsuario() {
                         ))}
                     </ul>
                     
-                    {/* Añadir Establecimiento */}
                     <div className="mt-4 flex gap-2 items-center est-control-group"> 
                       <select
                         value={selectedEstablishment}
@@ -329,14 +307,9 @@ export default function PerfilUsuario() {
                         Agregar
                       </button>
                     </div>
-                </div> {/* Fin de establishment-section */}
-
-            </div> {/* Fin de profile-est-column */}
-
-        </div> {/* Fin de profile-main-split */}
-        
-        
-        {/* 🚨 CRÍTICO: Botón Guardar Centrado Debajo de las Columnas */}
+                </div>
+            </div>
+        </div>
         <div className="save-button-wrapper">
             <button
                 onClick={() => setShowConfirmModal(true)}
@@ -347,9 +320,8 @@ export default function PerfilUsuario() {
             </button>
         </div>
 
-      </div> {/* Fin de profile-card */}
+      </div>
       
-      {/* 🚨 MODAL DE CONFIRMACIÓN */}
       <ConfirmModal
         isOpen={showConfirmModal}
         message="¿Desea guardar los cambios realizados en su perfil?"

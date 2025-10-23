@@ -10,7 +10,6 @@ import "../styles/prescripciones.css";
 export default function SideBar({ children }) {
     
     const location = useLocation();
-    const navigate = useNavigate();
 
     const { logout } = useAuth();
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -83,43 +82,35 @@ export default function SideBar({ children }) {
             
             <div className="sidebar">
                 
-                {/* 1. SECCIÓN DEL LOGO */}
+                {/*SECCIÓN DEL LOGO */}
                 <div className="sidebar-logo-container">
                     <img src={centraLabLogo} alt="CentraLab Logo" className="card-logo" /> 
                     <span className="logo-text"></span> 
                 </div>
 
-                {/*  2. SECCIÓN DE PERFIL DE USUARIO  */}
+                {/* SECCIÓN DE PERFIL DE USUARIO  */}
 
                 <div className="user-profile-info">
                     
-                    {/* Icono de Avatar */}
                     <div className="user-avatar">
                         <i className="fa-solid fa-user-circle profile-icon"></i> 
                     </div>
                     
-                    {/* Nombre y Botón de Salir (a la derecha) */}
                     <div className="name-and-logout">
-                        {/*  USAR DATO REAL */}
                         <span className="profile-name">{name.toUpperCase()}</span>
                         
                     </div>
                     
-                    {/*  USAR DATOS REALES */}
                     <span className="profile-email">{email}</span>
                     <span className="profile-specialty">{specialty}</span>
 
-                    {/* Establecimiento */}
                     <div className="user-establishment">
                         <i className="fa-solid fa-hospital"></i>
                         <span className="establishment-name">{establishmentName}</span>
                     </div>
-                </div>
+                </div>                
 
-                {/* --- SEPARADOR --- */}
-                
-
-                {/* 3. MENÚ DE NAVEGACIÓN */}
+                {/* MENÚ DE NAVEGACIÓN */}
                 <nav className="sidebar-nav">
                     
                 <Link 
@@ -129,7 +120,6 @@ export default function SideBar({ children }) {
                         <i className="fa-solid fa-house-chimney nav-icon"></i> Prescripciones
                     </Link>
                     
-                    {/* Resultados */}
                     <Link 
                         to="/resultados" 
                         className={`nav-link ${isActive('/resultados') ? 'active' : ''}`}
@@ -137,7 +127,6 @@ export default function SideBar({ children }) {
                         <i className="fa-solid fa-flask nav-icon"></i> Resultados
                     </Link>
                     
-                    {/* Datos de Usuario */}
                     <Link 
                         to="/perfil" 
                         className={`nav-link ${isActive('/perfil') ? 'active' : ''}`}
@@ -146,7 +135,7 @@ export default function SideBar({ children }) {
                     </Link>
                     <hr className="nav-divider-bottom" />
                     
-                    {/* Salir (no necesita clase activa) */}
+                    {/* Salir */}
                     <a href="#" onClick={handleLogoutClick} className="logout-btn">
                     <i className="fa-solid fa-arrow-right-from-bracket"></i>  Cerrar Sesión
                     </a>
@@ -154,7 +143,6 @@ export default function SideBar({ children }) {
 
             </div>
 
-            {/* CONTENIDO PRINCIPAL */}
             <div className="content-area">
                 {children}
             </div>

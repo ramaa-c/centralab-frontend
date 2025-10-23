@@ -26,9 +26,7 @@ export default function Resultados() {
 
             <div className="results-main-layout">
                 
-                {/* ================================== */}
-                {/* 1. SECCIÓN DE FILTROS (IZQUIERDA) */}
-                {/* ================================== */}
+                {/* SECCIÓN DE FILTROS */}
                 <div className="results-filter-panel content-card">
                     <h3 className="filter-title">Filtros</h3>
 
@@ -61,7 +59,6 @@ export default function Resultados() {
                         <label>Servicio Médico</label>
                         <select className="filter-select">
                             <option value="">Todos</option>
-                            {/* Opciones del servicio */}
                         </select>
                     </div>
 
@@ -77,9 +74,7 @@ export default function Resultados() {
                     <button className="btn-filter-action">Buscar</button>
                 </div>
                 
-                {/* ================================== */}
-                {/* 2. TABLA DE RESULTADOS (DERECHA) */}
-                {/* ================================== */}
+                {/* TABLA DE RESULTADOS (DERECHA) */}
                 <div className="results-table-panel">
                     
                     <div className="table-header-controls">

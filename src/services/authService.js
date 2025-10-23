@@ -1,9 +1,7 @@
-import api from './api';
+import api from './apiAuthenticated';
 
 const LOGIN_ENDPOINT = "/auth/login";
 const DOCTORS_ENDPOINT = "/doctors";
-const PACIENTES_ENDPOINT = "/patients";
-const RECETAS_ENDPOINT = "/prescriptions";
 
 export const login = async (credentials) => {
   const { identifier, password } = credentials;
@@ -68,29 +66,6 @@ export const register = async (userData) => {
     return response.data;
   } catch (error) {
     const msg = error.response?.data?.message || 'Error en el registro';
-    throw new Error(msg);
-  }
-};
-
-export const crearPaciente = async (pacienteData) => {
-  try {
-    console.log("Creando paciente con:", pacienteData);
-    const response = await api.post(PACIENTES_ENDPOINT, pacienteData);
-    return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || 'Error al crear el paciente';
-    throw new Error(msg);
-  }
-};
-
-export const crearReceta = async (recetaData) => {
-  try {
-    console.log("Enviando receta:", recetaData);
-    const response = await api.post(RECETAS_ENDPOINT, recetaData);
-    return response.data;
-  } catch (error) {
-    console.error("Error en crearReceta:", error);
-    const msg = error.response?.data?.message || "Error al crear la receta";
     throw new Error(msg);
   }
 };

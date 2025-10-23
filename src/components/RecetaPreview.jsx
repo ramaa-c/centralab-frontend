@@ -13,6 +13,7 @@ export default function RecetaPreview({ data }) {
         <p><strong>DNI:</strong> {data.paciente?.DNI || '...'}</p>
         <p><strong>Cobertura:</strong> {data.cobertura?.Denominacion || '...'}</p>
         <p> <strong>Plan:</strong> {data.plan?.Denominacion || '...'}</p>
+        <p><strong>N° de afiliado:</strong> {data.credencial || '...'}</p>
       </div>
       <hr />
       <div className="preview-body">

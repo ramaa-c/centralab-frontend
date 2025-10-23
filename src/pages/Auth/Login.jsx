@@ -19,10 +19,13 @@ export default function Login() {
     setIsLoading(true);
     setError(null);
     try {
-      await login(data);
-      navigate('/prescripciones', { replace: true });
+      const user = await login(data);
+      if (user.must_change_password === "1" || user.must_change_password === true) {
+        navigate("/cambiarclave", { replace: true });
+      } else {
+        navigate("/prescripciones", { replace: true });
+      }
     } catch (err) {
-
       setError(err.message || "Credenciales incorrectas.");
       console.error("Falló al ingresar:", err);
     } finally {
@@ -93,8 +96,8 @@ export default function Login() {
               )}
             </div>
             <Link to="/forgot-password" className="forgot-password-link">
-              ¿Olvidó su contraseña?
-            </Link>
+              ¿Olvidó su contraseña?
+            </Link>
 
             <div className="button-group">
               <button className="ingresar-btn" type="submit" disabled={isLoading}>
