@@ -1,61 +1,40 @@
-/* perfil.css */
 
-/* 🚨 Importa estilos base para botones, colores, y tipografía */
 @import url("./login.css"); 
 
 
-/* ------------------------------------- */
-/* ESTRUCTURA PRINCIPAL DE LA PÁGINA */
-/* ------------------------------------- */
+
 .content-area {
-    /* 🚨 1. ANCHO Y MARGEN CRÍTICO 🚨 */
-    /* Mueve el contenido a la derecha del SideBar (250px) */
     margin-left: 250px; 
-    
-    /* Ocupa el espacio restante y permite que el contenido crezca */
     flex-grow: 1; 
-    
-    /* 🚨 CRÍTICO: Aseguramos que el padding no cause un desbordamiento horizontal */
-    width: calc(100% - 250px); /* Ocupa el 100% del viewport menos el ancho del SideBar */
-    box-sizing: border-box; /* Asegura que el padding no incremente el ancho */
-    
-    /* Padding general para el contenido */
+    width: calc(100% - 250px); 
+    box-sizing: border-box; 
     padding: 20px; 
-    
-    /* Nota: Si el fondo sigue fallando, la clase profile-page-wrapper debe 
-       tener un z-index más alto para estar sobre cualquier fondo oscuro del body. */
 }
 
 .profile-page-wrapper {
-    /* 🚨 CRÍTICO: Forzamos el color de fondo para anular cualquier gris oscuro */
     background-color: #F3F2F3; 
-    
-    min-height: 100vh; /* Asegura que ocupe toda la altura */
-    width: 100%;       /* Asegura que ocupe todo el ancho disponible */
-    
-    /* Padding para que la tarjeta no se pegue a los bordes del content-area */
+    min-height: 100vh; 
+    width: 100%;      
     padding: 30px 20px; 
     box-sizing: border-box; 
 }
 
-/* 🚨 2. Estilo de la Tarjeta (Centrado y tamaño grande) */
+
 .profile-card {
     background: white;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     color: #333 !important;
     
-    /* CRÍTICO: Ancho legible y centrado */
-    max-width: 900px; /* Tamaño ideal para el split-layout */
+  
+    max-width: 900px;
     width: 100%;     
     margin: 0 auto;
     padding: 30px;
-    
-    /* CRÍTICO: Aseguramos que la tarjeta se comporte como un bloque */
     display: block !important; 
 }
 
-/* Título de la sección */
+
 .profile-card h2 {
     font-size: 1.8rem;
     font-weight: 700;
@@ -67,16 +46,11 @@
 }
 
 
-
-/* ------------------------------------- */
-/* LAYOUT DE DOS COLUMNAS (Datos vs Establecimientos) */
-/* ------------------------------------- */
-
 .profile-main-split {
     display: flex;
-    gap: 30px; /* Espacio entre la columna de datos y la de establecimientos */
+    gap: 30px; 
     align-items: stretch;
-    margin-bottom: 30px; /* Alinea los contenidos a la parte superior */
+    margin-bottom: 30px;
 }
 
 .profile-data-column {
@@ -85,8 +59,8 @@
 }
 
 .profile-est-column {
-    flex-basis: 40%; /* Ocupa el 30% del ancho */
-    flex-shrink: 0; /* Evita que esta columna se encoja */
+    flex-basis: 40%; 
+    flex-shrink: 0; 
     
 }
 
@@ -95,21 +69,17 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px; 
     row-gap: 15px;
-    margin-bottom: 30px; /* Espacio debajo del grid */
+    margin-bottom: 30px;
 }
 
-/* ------------------------------------- */
-/* ESTILOS DE INPUTS Y LABELS */
-/* ------------------------------------- */
 
-/* 🚨 Estilo del Input/Select (Clase ÚNICA y Fuerte) */
+
+
 .profile-card-input {
-    /* Anula los estilos débiles de Tailwind y aplica los fuertes */
+    
     width: 100% !important; 
     padding: 10px 15px !important;
     box-sizing: border-box !important;
-    
-    /* Fondo, borde y texto consistentes */
     background-color: #f9f9f9; 
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -117,14 +87,10 @@
     font-size: 1rem !important; 
     color: #333 !important; 
     
-    /* Margen: Lo maneja el row-gap del grid */
+    
     margin-bottom: 0; 
 }
 
-
-
-
-/* Ajuste de Labels */
 .profile-card label {
     display: block;
     font-size: 0.95rem;
@@ -133,13 +99,11 @@
     font-weight: 500;
 }
 .profile-grid > div:last-child {
-    grid-column: 1 / -1; /* Ocupa desde la primera hasta la última línea de columna */
+    grid-column: 1 / -1; 
 }
 
 .profile-card img {
-    margin-top: 15px; /* Ajusta este valor (e.g., 10px, 15px, 20px) */
-    
-    /* Mantenemos tus estilos visuales (borde, padding, fondo) */
+    margin-top: 15px; 
     border: 1px solid #DDDCDC;
     border-radius: 4px;
     object-fit: contain; 
@@ -147,9 +111,6 @@
     background-color: white; 
 }
 
-/* ------------------------------------- */
-/* 3. SECCIÓN DE ESTABLECIMIENTOS */
-/* ------------------------------------- */
 
 .establishment-section h3 {
     font-size: 1.2rem;
@@ -159,10 +120,10 @@
 }
 
 .establishment-section ul {
-    list-style: none;     /* Elimina los puntos o iconos de la lista */
-    padding-left: 0;      /* ⬅️ CRÍTICO: Elimina el padding izquierdo del navegador */
-    margin-left: 0;       /* Asegura que no haya margen izquierdo */
-    margin-top: 15px;     /* Espacio para separarse del título */
+    list-style: none;     
+    padding-left: 0;     
+    margin-left: 0;      
+    margin-top: 15px;   
 }
 
 .est-control-group {
@@ -201,25 +162,20 @@
     font-size: 0.9rem;
     text-decoration: underline;
 }
-/* ------------------------------------- */
-/* BOTÓN GUARDAR Y WRAPPER */
-/* ------------------------------------- */
+
 
 .save-button-wrapper {
     text-align: center;
-    padding-top: 25px; /* Más espacio arriba */
-    margin-top: 30px; /* Más margen arriba */
-    
-    /* 🔑 CRÍTICO: Línea divisoria moderna */
-    border-top: 1px solid #E0E0E0; /* Línea gris muy clara y sutil */
+    padding-top: 25px; 
+    margin-top: 30px;
+    border-top: 1px solid #E0E0E0; 
 }
 
 .ingresar-btn {
-    /* Mantenemos el estilo de botón principal... */
-    box-shadow: 0 5px 15px -5px rgba(1, 152, 204, 0.6); /* Sombra más pronunciada en el color principal */
+   
+    box-shadow: 0 5px 15px -5px rgba(1, 152, 204, 0.6); 
 }
 
-/* Botón Añadir */
 .btn-add-est {
     background-color: #0198CC;
     color: white;
@@ -227,11 +183,9 @@
     border-radius: 8px;
     border: none;
 }
-/* ------------------------------------- */
-/* AJUSTES PARA LA FIRMA IMAGEN */
-/* ------------------------------------- */
 
-/* 1. Oculta el input nativo */
+
+
 .hidden-file-input {
     width: 0.1px;
     height: 0.1px;
@@ -241,18 +195,13 @@
     z-index: -1;
 }
 
-/* 2. Estilo de la "Caja Grande" (El label sustituto para el input file) */
 .file-upload-label {
     display: block;
     width: 100%;
-    
-    /* Mantenemos tu estilo estético de 'drop zone' */
     background-color: #f9f9f9; 
     border: 1px dashed #ccc; 
     border-radius: 5px;
     cursor: pointer;
-    
-    /* 🔑 CLAVE: Padding aumentado a la izquierda (60px) para mover el texto */
     text-align: left; 
     padding: 10px 15px 10px 60px; 
     margin-top: 5px; 
@@ -264,31 +213,23 @@
     background-color: #e0e0e0;
 }
 
-/* 3. Estilo del texto dentro de la caja */
+
 .custom-placeholder {
     font-size: 1rem;
     color: #666; 
     font-weight: 500;
 }
 
-/* ------------------------------------- */
-/* RESTAURACIÓN DEL TAMAÑO DE LA IMAGEN */
-/* ------------------------------------- */
 
-/* Estilo para la imagen de previsualización */
+
+
 .profile-card img {
     display: block;
-    
-    /* 🔑 CRÍTICO: Restaurar las limitaciones de tamaño de la imagen */
     max-width: 400px; 
     max-height: 200px;  
     width: auto;       
-    height: auto;      
-    
-    /* CRÍTICO: Añadir margen superior para crear el espacio con el input */
+    height: auto;       
     margin-top: 15px; 
-    
-    /* Mantenemos tus estilos visuales (borde, padding, fondo) */
     border: 1px solid #DDDCDC;
     border-radius: 4px;
     object-fit: contain; 

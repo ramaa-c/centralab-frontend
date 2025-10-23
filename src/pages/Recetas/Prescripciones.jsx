@@ -7,6 +7,7 @@ import MetricCard from "../../components/MetricCard";
 import axios from "axios";
 import "../../styles/prescripciones.css";
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
+import ConfirmModal from "../../components/ConfirmModal.jsx";
 
 
 const Prescripciones = () => {
@@ -15,6 +16,8 @@ const Prescripciones = () => {
     const [showPacienteModal, setShowPacienteModal] = useState(false);
     const [showEditarPacienteModal, setShowEditarPacienteModal] = useState(false);
     const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
+    const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
+    const [prescriptionToDeleteId, setPrescriptionToDeleteId] = useState(null);
     
     const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
     const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
@@ -75,16 +78,25 @@ const Prescripciones = () => {
     };
 
     const handleEliminarPrescripcion = async (prescriptionId) => {
-    if (!window.confirm("¿Seguro que deseas eliminar esta prescripción?")) return;
+    setPrescriptionToDeleteId(prescriptionId);
+        setShowConfirmDeleteModal(true);
+    };
 
-    try {
-        await axios.delete(`/api/prescription/${prescriptionId}`);
-        alert("Prescripción eliminada correctamente ✅");
-        fetchPrescripciones();
-    } catch (error) {
-        console.error("Error al eliminar prescripción:", error);
-        alert("Hubo un error al eliminar la prescripción ❌");
-    }
+    const confirmEliminarPrescripcion = async () => {
+        if (!prescriptionToDeleteId) return; // Seguridad
+
+        try {
+            await axios.delete(`/api/prescription/${prescriptionToDeleteId}`);
+            alert("Prescripción eliminada correctamente ✅");
+            fetchPrescripciones();
+        } catch (error) {
+            console.error("Error al eliminar prescripción:", error);
+            alert("Hubo un error al eliminar la prescripción ❌");
+        } finally {
+            // Cerrar modal y limpiar ID en ambos casos
+            setShowConfirmDeleteModal(false);
+            setPrescriptionToDeleteId(null);
+        }
     };
 
     return (
@@ -240,10 +252,13 @@ const Prescripciones = () => {
                                         >
                                         <i className="fa-solid fa-trash"></i>
                                         </button>
+                                        
                                         </td>
                                     </tr>
+                                    
                                     ))}
                                 </tbody>
+                                
                             </table>
                         </div>
                         
@@ -273,6 +288,18 @@ const Prescripciones = () => {
                     paciente={selectedPatient}
                     onClose={() => setShowEditarPacienteModal(false)}
                     onSuccess={handlePacienteActualizado}
+                />
+            )}
+            {showConfirmDeleteModal && (
+                <ConfirmModal
+                    isOpen={showConfirmDeleteModal}
+                    message="¿Estás seguro de que deseas ELIMINAR PERMANENTEMENTE esta prescripción? Esta acción no se puede deshacer."
+                    onConfirm={confirmEliminarPrescripcion}
+                    onCancel={() => {
+                        setShowConfirmDeleteModal(false);
+                        setPrescriptionToDeleteId(null); 
+                    }}
+                    
                 />
             )}
         </div>
