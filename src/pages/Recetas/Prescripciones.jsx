@@ -18,6 +18,7 @@ const Prescripciones = () => {
     const [prescriptionsExpanded, setPrescriptionsExpanded] = useState(false);
     const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
     const [prescriptionToDeleteId, setPrescriptionToDeleteId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
     
     const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
     const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
@@ -98,6 +99,25 @@ const Prescripciones = () => {
             setPrescriptionToDeleteId(null);
         }
     };
+    const handleClearSelection = () => {
+        setSelectedPatient(null);
+        setSearchTerm(""); // Opcional: limpiar la búsqueda al deseleccionar
+    };
+    const filteredPacientes = pacientes?.filter(paciente => {
+        const fullName = `${paciente.Apellido} ${paciente.Nombres}`.toLowerCase();
+        const dni = String(paciente.DNI).toLowerCase();
+        const search = searchTerm.toLowerCase();
+        
+        return fullName.includes(search) || dni.includes(search);
+    });
+    const filteredPrescripciones = prescripciones?.filter(receta => {
+        // Si no hay un paciente seleccionado, muestra todas las recetas
+        if (!selectedPatient) {
+            return true;
+        }
+        // Filtra por el ID del paciente seleccionado. Asume que 'receta' tiene un campo 'PacienteID'
+        return receta.PacienteID === selectedPatient.PacienteID; 
+    });
 
     return (
         <div className="prescriptions-view-bg"> 
@@ -128,16 +148,76 @@ const Prescripciones = () => {
             <div className="main-content-wrapper">
                 
                 {/* COLUMNA IZQUIERDA: PACIENTES */}
-                <section className="content-card patients-column">
-                    <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
-                        <h2 className="section-title">Pacientes</h2>
-                        <button
-                            onClick={handleNuevoPaciente}
-                            className="btn-primary"
-                        >
-                            <i className="fa-solid fa-user-plus mr-2"></i> + Nuevo Paciente
-                        </button>
-                    </div>
+           <section className="content-card patients-column">
+    
+    {/* CONTENEDOR FLEX PRINCIPAL: Título/Botón (Izquierda) y Búsqueda (Derecha) */}
+    <div 
+        className="flex-header-pacientes" 
+        style={{ 
+            marginTop: '20px', 
+            marginBottom: '20px', 
+            display: 'flex', 
+            alignItems: 'flex-start', 
+            justifyContent: 'space-between', 
+            gap: '30px' 
+        }}
+    >
+        
+        {/*
+        #########################################
+        #  CAMBIO CLAVE: Nuevo DIV contenedor  #
+        #########################################
+        */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}> 
+            <h2 className="section-title" style={{ margin: 0, marginBottom: '10px' }}>Pacientes</h2> 
+            <button
+                onClick={handleNuevoPaciente}
+                className="btn-primary"
+            >
+                <i className="fa-solid fa-user-plus mr-2"></i> + Nuevo Paciente
+            </button>
+        </div>
+        {/* FIN DEL NUEVO DIV CONTENEDOR */}
+
+
+        {/* GRUPO 2: CAMPO de BÚSQUEDA */}
+        <div 
+            className="search-input-container" 
+            style={{ 
+                flexGrow: 1, 
+                maxWidth: '800px', 
+                marginRight: '20px',
+                marginTop: '44px' // Ajuste de alineación vertical
+            }}
+        >
+            <input
+                type="text"
+                placeholder="Buscar paciente (Apellido, Nombre o DNI)"
+                value={searchTerm}
+                onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setSelectedPatient(null);
+                }}
+                className="search-input"
+                style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+            />
+        </div>
+    </div> 
+    {/* FIN DEL CONTENEDOR FLEX PRINCIPAL */}
+    
+    
+    {selectedPatient && (
+    <div className="selected-patient-info" style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e6f7ff', borderLeft: '3px solid #1890ff', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <button 
+            onClick={handleClearSelection} 
+            className="btn-clear-filter" 
+            style={{ padding: '5px 10px', fontSize: '0.8rem' }}
+        >
+            <i className="fa-solid fa-xmark"></i> Quitar Filtro ({selectedPatient.Apellido} {selectedPatient.Nombres})
+        </button>
+    </div>
+    )}
+                
 
                     {loadingPacientes ? (
                         <p>Cargando pacientes...</p>
@@ -158,116 +238,134 @@ const Prescripciones = () => {
                                 </thead>
                                 
                                 <tbody>
-                                    {pacientes?.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="text-center py-4">
-                                                No hay pacientes registrados
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        pacientes?.map((p) => (
-                                            <tr key={p.PacienteID}>
-                                                <td className="px-4 py-2">{p.DNI}</td>
-                                                <td className="px-4 py-2">{p.Apellido}</td>
-                                                <td className="px-4 py-2">{p.Nombres}</td>
-                                                <td className="px-4 py-2 action-cell"> 
-                                                <button onClick={() => handleOpenRecetaModal(p)} className="btn-action-receta">
-                                                <i className="fa-solid fa-file-circle-plus"></i> Receta
-                                            </button>
-                                            <button 
-                                                onClick={() => handleEditarPaciente(p)}
-                                                className="btn-action-editar"
-                                            >
-                                                <i className="fa-solid fa-pen-to-square"></i> 
-                                            </button>
-                                            </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                            </div>
-                            
-                        </div>
-                        
-                    )}
+    {filteredPacientes?.length === 0 ? (
+        <tr>
+            <td colSpan="4" className="text-center py-4">
+                No hay pacientes que coincidan con la búsqueda.
+            </td>
+        </tr>
+    ) : (
+        filteredPacientes?.map((p) => (
+            <tr 
+                key={p.PacienteID} 
+                onClick={() => setSelectedPatient(p)} // <-- Manejador de selección de fila
+                className={`cursor-pointer hover:bg-gray-100 ${selectedPatient?.PacienteID === p.PacienteID ? 'selected-row' : ''}`}
+            >
+                <td className="px-4 py-2">{p.DNI}</td>
+                <td className="px-4 py-2">{p.Apellido}</td>
+                <td className="px-4 py-2">{p.Nombres}</td>
+                <td className="px-4 py-2 action-cell"> 
+                    
+                    {/* Botón de Receta (CORREGIDO: con e.stopPropagation) */}
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenRecetaModal(p); }} 
+                        className="btn-action-receta"
+                    >
+                        <i className="fa-solid fa-file-circle-plus"></i> Receta
+                    </button>
+                    
+                    {/* Botón de Editar (CORREGIDO: con e.stopPropagation) */}
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handleEditarPaciente(p); }}
+                        className="btn-action-editar"
+                    >
+                        <i className="fa-solid fa-pen-to-square"></i> 
+                    </button>
+                    
+                </td>
+            </tr>
+        ))
+    )}
+</tbody>
+                </table>
+            </div>
+            
+        </div>
+    )}
                 </section>
 
                 {/* 2. COLUMNA DERECHA: PRESCRIPCIONES */}
-                <section className="content-card prescriptions-column">
-                    <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
-                        <h2 className="section-title">Prescripciones</h2>
-                        <button
-                            onClick={() => handleOpenRecetaModal()}
-                            className="btn-primary"
-                        >
-                            <i className="fa-solid fa-prescription-bottle-medical mr-2"></i> + Nueva Prescripción
-                        </button>
-                    </div>
+            <section className="content-card prescriptions-column">
+                <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
+                    <h2 className="section-title">Prescripciones</h2>
+                    <button
+                        onClick={() => handleOpenRecetaModal()}
+                        className="btn-primary"
+                    >
+                        <i className="fa-solid fa-prescription-bottle-medical mr-2"></i> + Nueva Prescripción
+                    </button>
+                </div>
+                
+                {/* MENSAJE DE FILTRO ACTIVO */}
+                
 
-                    {loadingPrescripciones ? (
-                        <p>Cargando prescripciones...</p>
-                    ) : errorPrescripciones ? (
-                        <p className="text-red-600">Error: {errorPrescripciones}</p>
-                    ) : (
-                        
+                {loadingPrescripciones ? (
+                    <p>Cargando prescripciones...</p>
+                ) : errorPrescripciones ? (
+                    <p className="text-red-600">Error: {errorPrescripciones}</p>
+                ) : (
                     <div className="overflow-x-auto">
-                        
-                        
                         <div className="list-scroll-area">
                             <table className="data-table">
-                                <thead >
+                                <thead>
                                     <tr>
                                         <th className="px-4 py-2 text-left">Fecha</th>
                                         <th className="px-4 py-2 text-left">Diagnóstico</th>
                                         <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Acciones</th>
                                     </tr>
-                            </thead>
+                                </thead>
                                 
                                 <tbody>
-                                    {prescripciones?.map((r) => (
-                                    <tr key={r.RecetaID}>
-                                        <td className="px-4 py-2">
-                                        {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
-                                        </td>
-                                        <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
-                                        <td className="px-4 py-2">
-                                        {r.Apellido} {r.Nombres}
-                                        </td>
-                                        
-                                        <td className="px-4 py-2 action-cell">
-                                        {/* 🔵 Ver PDF */}
-                                        <button
-                                            className="btn-action-ver"
-                                            onClick={() => handleVerODescargarPDF(r.RecetaID, "ver")}
-                                        >
-                                        <i className="fa-solid fa-file-pdf"></i>
-                                        </button>
-                                        {/* Eliminar */}
-                                        <button
-                                            className="btn-action-eliminar"
-                                            onClick={() => handleEliminarPrescripcion(r.RecetaID)}
-                                            title="Eliminar Prescripción"
-                                        >
-                                        <i className="fa-solid fa-trash"></i>
-                                        </button>
-                                        
-                                        </td>
-                                    </tr>
-                                    
-                                    ))}
+                                    {/* MANEJO DE LISTA VACÍA O FILTRADA VACÍA */}
+                                    {filteredPrescripciones?.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="text-center py-4">
+                                                {/* Muestra un mensaje diferente si hay un paciente seleccionado pero no tiene recetas */}
+                                                {selectedPatient 
+                                                    ? `El paciente ${selectedPatient.Apellido} no tiene recetas registradas.`
+                                                    : 'No hay prescripciones registradas.'
+                                                }
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        /* MAPEADO DE LA LISTA FILTRADA */
+                                        filteredPrescripciones?.map((r) => (
+                                            <tr key={r.RecetaID}>
+                                                <td className="px-4 py-2">
+                                                    {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-2">{r.DescripcionDiagnostico}</td>
+                                                <td className="px-4 py-2">
+                                                    {r.Apellido} {r.Nombres}
+                                                </td>
+                                                
+                                                <td className="px-4 py-2 action-cell">
+                                                    {/* 🔵 Ver PDF */}
+                                                    <button
+                                                        className="btn-action-ver"
+                                                        onClick={() => handleVerODescargarPDF(r.RecetaID, "ver")}
+                                                    >
+                                                        <i className="fa-solid fa-file-pdf"></i>
+                                                    </button>
+                                                    {/* Eliminar */}
+                                                    <button
+                                                        className="btn-action-eliminar"
+                                                        onClick={() => handleEliminarPrescripcion(r.RecetaID)}
+                                                        title="Eliminar Prescripción"
+                                                    >
+                                                        <i className="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
-                                
                             </table>
                         </div>
-                        
-                            
-
                     </div>
-                    )}
-                </section>
-
+                )}
+            </section>
             </div>
             
             {/* MODALES */}

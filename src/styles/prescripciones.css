@@ -6,7 +6,6 @@
     padding: 24px;
 }
 
-
 .section-title {
     font-size: 1.5rem; 
     font-weight: 700; 
@@ -14,7 +13,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     
 }
-
 
 .data-table {
     width: 100%;
@@ -143,9 +141,7 @@ html, body {
     z-index: 1000;
 }
 
-/* =======================================
-       ESTILO DEL CONTENIDO DEL MODAL 
-   ======================================= */
+
 .modal-content {
     background: white;
     border-radius: 10px; 
@@ -170,12 +166,9 @@ html, body {
     
     border-bottom: 2px solid #0198CC; 
     padding-bottom: 10px;
-    text-align: center; /* Centramos el título */
+    text-align: center; 
 }
 
-/* -------------------------------------------------- */
-/*  ESTILOS DEL FORMULARIO Y SUS ELEMENTOS */
-/* -------------------------------------------------- */
 
 
 .Formulario label {
@@ -274,8 +267,6 @@ html, body {
 }
 
 
-
-
 .Formulario .practice-input-group .add-practice-btn {
   padding: 12px 15px;      
   border-radius: 8px;
@@ -318,10 +309,6 @@ html, body {
     font-size: 1rem;
     padding: 0;
 }
-
-/* -------------------------------------------------- */
-/*       ESTILOS DE LOS BOTONES INFERIORES */
-/* -------------------------------------------------- */
 
 
 .Formulario .enviar {
@@ -438,9 +425,6 @@ html, body {
     overflow-y: auto; 
 }
 
-/* =======================================
-   ESTILO DE SCROLLBAR DEL MODAL (Webkit)
-   ======================================= */
 
 .modal-content {
     scrollbar-color: #0198CC #F3F2F3; 
@@ -616,9 +600,7 @@ html, body {
 .practice-item input[type="checkbox"]:checked::before {
   transform: scale(1);
 }
-/* =========================================
-   ESTILOS GENERALES DE LA SIDEBAR
-   ========================================= */
+
 
 .app-layout {
     display: flex;
@@ -654,9 +636,6 @@ html, body {
     padding: 30px 10px 20px 10px; 
 }
 
-/* ----------------------------------------- */
-/*  SECCIÓN DEL LOGO  */
-/* ----------------------------------------- */
 
 .sidebar .sidebar-logo-container {
     background-color: white; 
@@ -684,9 +663,6 @@ html, body {
     display: block; 
 }
 
-/* ---------------------------------
-    ÁREA DE PERFIL DE USUARIO 
-   --------------------------------- */
 
 .sidebar .user-profile-info {
     width: 100%;
@@ -750,9 +726,6 @@ html, body {
     color: white;
 }
 
-/* ---------------------------------
-    NAVEGACIÓN (Enlaces)
-   --------------------------------- */
 
 .sidebar .sidebar-nav {
     width: 100%;
@@ -788,9 +761,6 @@ html, body {
     margin-top: 30px;
 }
 
-/* ----------------------------------------- */
-/* CONTENIDO PRINCIPAL  */
-/* ----------------------------------------- */
 .content-area {
     margin-left: 250px; 
     flex-grow: 1;
@@ -901,9 +871,6 @@ html, body {
 .css-13cymwt-control {
     background-color: #adb5bd;
 }
-/* =========================================
-   ESTILOS DEL DASHBOARD DE MÉTRICAS
-   ========================================= */
 
 .metrics-dashboard {
     display: flex;
@@ -1080,4 +1047,12 @@ html, body {
 
 .practice-selector-wrapper button .fa-plus {
     margin-right: 5px; 
+}
+.btn-clear-filter {
+    padding: 10px 16px;
+    background-color: #0198CC;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
