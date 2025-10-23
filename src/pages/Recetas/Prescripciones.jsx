@@ -25,7 +25,8 @@ const Prescripciones = () => {
         error: errorMetrics 
     } = useApi("/RD/Info"); 
     
-    const metrics = (metricsData && typeof metricsData === "object") ? metricsData : {};    
+    const metrics = (metricsData && Array.isArray(metricsData) && metricsData.length > 0) ? metricsData[0] : {};
+    console.log("Métricas de RD/Info:", metrics);
     
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);

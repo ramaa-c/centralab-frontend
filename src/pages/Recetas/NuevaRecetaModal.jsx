@@ -26,6 +26,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: pacientes } = useApi("/patients");
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
+  const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
   const handleEliminarPractica = (practicaId) => {
     setPracticasSeleccionadas(prevPracticas =>
         prevPracticas.filter(p => p.PracticaID !== practicaId)
@@ -129,12 +130,72 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     }
   }, [pacienteRecibido, setValue]);
 
-  useEffect(() => {
+  const coberturaId = watch("Cobertura");
+  const planId = watch("Plan");
   const pacienteId = pacienteRecibido?.PacienteID || watch("Paciente");
-  if (pacienteId) {
-    fetchCredencial(`/patients/${pacienteId}/credentials`);
-  }
-  }, [pacienteRecibido, watch("Paciente")]);
+
+  useEffect(() => {
+    if (!coberturaId) {
+      setValue("Plan", null);
+      setValue("Credencial", "");
+      setCredencialSeleccionada(null);
+    } else {
+      setValue("Plan", null);
+      setValue("Credencial", "");
+      setCredencialSeleccionada(null);
+    }
+  }, [coberturaId, setValue]);
+
+  useEffect(() => {
+    if (!planId) {
+      setValue("Credencial", "");
+      setCredencialSeleccionada(null);
+    } else {
+      setValue("Credencial", "");
+      setCredencialSeleccionada(null);
+    }
+  }, [planId, setValue]);
+
+  useEffect(() => {
+    if (pacienteId) {
+      fetchCredencial(`/patients/${pacienteId}/credentials`);
+    }
+  }, [pacienteId]);
+
+  useEffect(() => {
+    console.log("🔍 --- Debug credencialSeleccionada ---");
+  console.log("➡️ Cobertura seleccionada:", coberturaId);
+  console.log("➡️ Plan seleccionado:", planId);
+  console.log("➡️ Datos de credencialData:", credencialData);
+  console.log("➡️ credencialData.List:", credencialData?.List);
+  console.log("➡️ Cantidad de credenciales:", credencialData?.List?.length || 0);
+
+    if (!Array.isArray(credencialData) || !credencialData.length) {
+      console.warn("⚠️ credencialData vacío o sin credenciales disponibles aún");
+      setCredencialSeleccionada(null);
+      return;
+    }
+
+    const encontrada = credencialData.find(
+      (c) =>
+        Number(c.PrepagaID) === coberturaId &&
+        Number(c.PrepagaPlanID) === planId
+    );
+
+    if (encontrada) {
+      console.log("✅ Credencial encontrada:", encontrada);
+      setCredencialSeleccionada(encontrada);
+    } else {
+      console.warn("⚠️ No se encontró una credencial que coincida con cobertura/plan");
+      setCredencialSeleccionada(null);
+    }
+  }, [credencialData, coberturaId, planId]);
+
+  useEffect(() => {
+    if (credencialSeleccionada?.Credencial) {
+      setValue("Credencial", credencialSeleccionada.Credencial);
+    }
+  }, [credencialSeleccionada, setValue]);
 
   const handleAgregarPractica = (id) => {
     const listaPracticas = practicas?.List || practicas || [];
@@ -143,7 +204,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     if (!practica) return;
     if (practicasSeleccionadas.some((p) => p.PracticaID === practica.PracticaID)) return;
 
-    setPracticasSeleccionadas([...practicasSeleccionadas, practica]);
+    setPracticasSeleccionadas([...practicasSeleccionadas, { ...practica, origen: "manual" }]);
   };
 
   const enviar = async (data) => {
@@ -165,13 +226,13 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
         },
-        Credential: credencialData?.[0]?.Credencial,
+        Credential: data.Credencial || credencialSeleccionada?.Credencial || null,
         Tests: practicasSeleccionadas.map((p) => ({
           PracticaID: p.PracticaID,
           Comentario: p.Descripcion || "",
         }))
       };
-
+      console.log("Contenido de Credencial:", payload.Credential);
       console.log("Payload final enviado a crearReceta:", payload);
 
       const response = await crearReceta(payload);
@@ -219,7 +280,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     const selectedDiagnostico = diagnosticos.find(d => d.DiagnosticoID === parseInt(watchedValues.Diagnostico));
     const selectedCobertura = coberturas.find(c => c.PrepagaID === parseInt(watchedValues.Cobertura));
     const selectedPlan = planes.find(p => p.PrepagaPlanID === parseInt(watchedValues.Plan));
-console.log("🪪 credencialData:", credencialData);
 
     return {
       paciente: selectedPaciente ? {
@@ -238,8 +298,7 @@ console.log("🪪 credencialData:", credencialData);
       doctorName: `${user?.apellido} ${user?.nombres}`,
       firmaImagen: doctorData?.FirmaImagen || null,
       establecimientoName: establecimientoName,
-      credencial: credencialData?.[0]?.Credencial || null,
-      
+      credencial: credencialSeleccionada?.Credencial || null,      
     };
   }, [
     watchedValues,
@@ -251,7 +310,7 @@ console.log("🪪 credencialData:", credencialData);
     pacienteRecibido,
     doctorData,
     user,
-    credencialData
+    credencialSeleccionada
   ]);
 
   const coberturaOptions = useMemo(() => 
@@ -410,11 +469,13 @@ console.log("🪪 credencialData:", credencialData);
                               {...field}
                               options={coberturaOptions}
                               value={coberturaOptions.find(option => option.value === field.value)}
-                              onChange={option => {
-                                  setValue("Plan", ""); 
-                                  field.onChange(option ? option.value : null);
+                              onChange={(option) => {
+                                field.onChange(option ? option.value : null);
+                                setValue("Plan", null);
+                                setValue("Credencial", "");
+                                setCredencialSeleccionada(null);
                               }}
-                              placeholder="Buscar y seleccionar cobertura..."
+                              placeholder="Buscar cobertura..."
                               isClearable
                               isLoading={!coberturas}
                               noOptionsMessage={() => "No se encontraron coberturas"}
@@ -438,8 +499,12 @@ console.log("🪪 credencialData:", credencialData);
                       <Select
                           {...field}
                           options={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })) || []}
-                          value={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })).find(option => option.value === field.value)}
-                          onChange={option => field.onChange(option ? option.value : null)}
+                          value={planes?.map(p => ({ value: p.PrepagaPlanID, label: p.Denominacion })).find(option => option.value === field.value) || null}
+                          onChange={(option) => {
+                            field.onChange(option ? option.value : null);
+                            setValue("Credencial", "");
+                            setCredencialSeleccionada(null);
+                          }}
                           placeholder="Selecciona un plan"
                           isClearable
                           isDisabled={!coberturaSeleccionada || !planes}
@@ -449,6 +514,26 @@ console.log("🪪 credencialData:", credencialData);
                   </div>
               )}
           />
+            </div>
+            {/* Número de Afiliado / Credencial */}
+            <div className="field-wrapper">
+              <label>N° de Afiliado:</label>
+              <input
+                type="text"
+                className="select-input"
+                {...register("Credencial", {
+                  required: "Debes ingresar un número de afiliado o credencial",
+                })}
+                defaultValue={credencialSeleccionada?.Credencial || ""}
+                placeholder="Ej: 123456789"
+                onChange={(e) => setCredencialSeleccionada({
+                  ...credencialSeleccionada,
+                  Credencial: e.target.value
+                })}
+              />
+              {errors.Credencial && (
+                <p className="error-msg-paciente">{errors.Credencial.message}</p>
+              )}
             </div>
             </div>
 
@@ -466,7 +551,7 @@ console.log("🪪 credencialData:", credencialData);
                             checked={practicasSeleccionadas.some(sel => sel.PracticaID === p.PracticaID)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setPracticasSeleccionadas([...practicasSeleccionadas, p]);
+                                setPracticasSeleccionadas([...practicasSeleccionadas, { ...p, origen: "check" }]);
                               } else {
                                 setPracticasSeleccionadas(
                                   practicasSeleccionadas.filter(sel => sel.PracticaID !== p.PracticaID)
@@ -519,60 +604,69 @@ console.log("🪪 credencialData:", credencialData);
           </div>
           <div className="field-wrapper" style={{ marginTop: '15px' }}>
             <label>Prácticas en Receta:</label>
-            <div className="selected-practices-list" style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '8px', 
-                maxHeight: '150px', 
+            <div
+              className="selected-practices-list"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                maxHeight: '150px',
                 overflowY: 'auto',
                 padding: '10px',
                 border: '1px solid #ccc',
-                borderRadius: '5px'
-            }}>
-                {practicasSeleccionadas.length === 0 ? (
-                    <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>Selecciona prácticas arriba o agrega una de "Otras prácticas".</p>
-                ) : (
-                    practicasSeleccionadas.map((p) => (
-                        <div 
-                            key={p.PracticaID} 
-                            className="selected-practice-item" 
-                            style={{ 
-                                display: 'flex', 
-                                justifyContent: 'space-between', 
-                                alignItems: 'center',
-                                padding: '5px 8px',
-                                backgroundColor: '#e9ecef',
-                                borderRadius: '3px'
-                            }}
-                        >
-                            <span style={{ flex: 1, textAlign: 'left' }}>
-                                **{p.Descripcion}**
-                                {p.Columna === undefined && <span style={{fontSize: '0.8em', color: '#666'}}> (Manual)</span>}
-                            </span>
-                            
-                            {/* Botón de Eliminar */}
-                            <button
-                                type="button"
-                                onClick={() => handleEliminarPractica(p.PracticaID)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#dc3545', 
-                                    cursor: 'pointer',
-                                    fontSize: '1.2em',
-                                    marginLeft: '10px',
-                                    padding: '0 5px',
-                                    lineHeight: '1'
-                                }}
-                                title={`Quitar práctica: ${p.Descripcion}`}
-                            >
-                                <i className="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                    ))
-                )}
+                borderRadius: '5px',
+              }}
+            >
+              {practicasSeleccionadas.filter(p => p.origen === "manual").length === 0 ? (
+                <p style={{ color: '#999', margin: 0, fontSize: '0.9em' }}>
+                  No se ha seleccionado ninguna práctica.
+                </p>
+              ) : (
+                practicasSeleccionadas
+                  .filter(p => p.origen === "manual")
+                  .map((p) => (
+                    <div
+                      key={p.PracticaID}
+                      className="selected-practice-item"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '5px 8px',
+                        backgroundColor: '#e9ecef',
+                        borderRadius: '3px',
+                      }}
+                    >
+                      <span style={{ flex: 1, textAlign: 'left' }}>
+                        {p.Descripcion}
+                        {p.Columna === undefined && (
+                          <span style={{ fontSize: '0.8em', color: '#666' }}></span>
+                        )}
+                      </span>
+
+                      {/* Botón de Eliminar */}
+                      <button
+                        type="button"
+                        onClick={() => handleEliminarPractica(p.PracticaID)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#dc3545',
+                          cursor: 'pointer',
+                          fontSize: '1.2em',
+                          marginLeft: '10px',
+                          padding: '0 5px',
+                          lineHeight: '1',
+                        }}
+                        title={`Quitar práctica: ${p.Descripcion}`}
+                      >
+                        <i className="fa-solid fa-xmark"></i>
+                      </button>
+                    </div>
+                  ))
+              )}
             </div>
-        </div>
+          </div>
         </div>
 
           {/* Notas */}
@@ -600,21 +694,6 @@ console.log("🪪 credencialData:", credencialData);
               <RecetaPreview data={previewData} />
           </div>
       </div>
-                <button
-            type="button"
-            onClick={async () => {
-              const previewElement = document.querySelector(".preview-container");
-              const pdfBase64 = await generarPDF(previewElement);
-              const blob = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], { type: "application/pdf" });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "receta.pdf";
-              link.click();
-            }}
-          >
-            Descargar PDF
-          </button>
     </div>
   </div>,
   document.getElementById("modal-root")

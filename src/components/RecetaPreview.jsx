@@ -11,9 +11,9 @@ export default function RecetaPreview({ data }) {
       <div className="preview-patient-info">
         <p><strong>Paciente:</strong> {data.paciente?.NombreCompleto || '...'}</p>
         <p><strong>DNI:</strong> {data.paciente?.DNI || '...'}</p>
-        <p><strong>Credencial:</strong> {data.credencial || '...'}</p>
         <p><strong>Cobertura:</strong> {data.cobertura?.Denominacion || '...'}</p>
         <p> <strong>Plan:</strong> {data.plan?.Denominacion || '...'}</p>
+        <p><strong>N° de afiliado:</strong> {data.credencial || '...'}</p>
       </div>
       <hr />
       <div className="preview-body">
