@@ -14,15 +14,25 @@ const retryRequest = async (fn, retries = 3, delay = 500) => {
   }
 };
 
-export const getDoctorById = async (doctorId) => {
-  try {
-    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching doctor by ID:", error);
-    throw error;
+const DOCTOR_CACHE = new Map();
+
+export const getDoctorById = async (doctorId, { force = false } = {}) => {
+  if (!doctorId) throw new Error("Doctor ID inválido");
+
+  if (!force && DOCTOR_CACHE.has(doctorId)) {
+    console.log(`💾 Usando cache para el doctor ${doctorId}`);
+    return DOCTOR_CACHE.get(doctorId);
   }
+
+  const response = await api.get(`/doctors/${doctorId}`);
+  const data = response.data;
+
+  DOCTOR_CACHE.set(doctorId, data);
+  localStorage.setItem(`doctor_${doctorId}`, JSON.stringify(data));
+
+  return data;
 };
+
 
 export const getAllEstablishments = async () => {
   return retryRequest(async () => {

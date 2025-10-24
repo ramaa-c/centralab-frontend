@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Eliminamos useEffect
+import React, { useState, useEffect } from "react"; // Eliminamos useEffect
 import { useAuth } from "../../context/AuthContext";
 // ❌ Eliminamos las importaciones directas de servicios de carga de datos
 import {
@@ -17,7 +17,7 @@ import { useDoctorProfileData } from "../../hooks/useDoctorProfileData.js";
 export default function PerfilUsuario() {
   const { user, updateActiveEstablishment } = useAuth();
   const doctorId = user?.id;
-
+    
   // 1. Usamos el nuevo hook para obtener los datos y el estado de carga/error
   const {
     profile, 
@@ -45,34 +45,38 @@ export default function PerfilUsuario() {
   const [selectedFile, setSelectedFile] = useState(null);
   // Eliminamos: isLoading (ahora es 'loading' del hook)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
+  const [isInitialized, setIsInitialized] = useState(false);
   // 2. Lógica para inicializar los estados locales (borradores) cuando el hook termina de cargar
-  React.useEffect(() => {
-    if (profile && currentDoctorEstablishments && doctorEstablishments.length === 0) {
-      // Inicializar el estado de la vista con los datos del hook SÓLO la primera vez.
+    useEffect(() => {
+    // Solo inicializa si los datos están cargados y aún no se ha inicializado
+    if (profile && currentDoctorEstablishments && !isInitialized) { 
 
-      // Datos del doctor
+      // 1. Inicializar el estado del doctor
       setDoctor(profile);
       setInitialDoctor(profile);
       
-      // Establecimientos del doctor
+      // 2. Inicializar los establecimientos (borradores)
       setDoctorEstablishments(currentDoctorEstablishments);
       setInitialDoctorEstablishments(currentDoctorEstablishments);
 
-      // Establecimiento activo
+      // 3. Inicializar el establecimiento activo
       const userEst = user?.establecimientoId;
       if (userEst !== undefined && userEst !== null) {
         setDraftActiveEstablishment(String(userEst));
       } else if (Array.isArray(currentDoctorEstablishments) && currentDoctorEstablishments.length > 0) {
         setDraftActiveEstablishment(String(currentDoctorEstablishments[0].EstablecimientoID));
       }
+
+      // 4. Establecer el flag a true para evitar futuras ejecuciones
+      setIsInitialized(true); 
     }
 
     if (error) {
       console.error("Error cargando el perfil desde el hook:", error);
-      // Opcional: Mostrar un mensaje de error al usuario
     }
-  }, [profile, currentDoctorEstablishments, error, user?.establecimientoId]);
+  // Se eliminan las dependencias que cambian (como user?.establecimientoId)
+  // y solo se deja 'isInitialized' para que React no se queje si se usa en el cuerpo del efecto.
+  }, [profile, currentDoctorEstablishments, error, user?.establecimientoId, isInitialized]);
 
 
   // Función para convertir archivo a Base64 (se mantiene igual)

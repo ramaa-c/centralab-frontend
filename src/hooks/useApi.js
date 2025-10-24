@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import api from "../services/apiAuthenticated";
 
 const memoryCache = new Map();
-const pendingRequests = new Map(); // 🧩 Mapa global para evitar peticiones duplicadas
+const pendingRequests = new Map();
 
 const normalizeToArray = (respData) => {
   if (!respData && respData !== 0) return [];
@@ -23,10 +23,9 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
   const debounceTimer = useRef(null);
 
   const fetchData = async (url = endpoint, { forceRefresh = false } = {}) => {
-    if (!url || pendingRequests.has(url)) return; // 🚫 evita duplicado
+    if (!url || pendingRequests.has(url)) return;
     console.log("🔥 useApi ejecutado para:", url, "desde", new Error().stack);
 
-    // 🧠 1. Verificar caché en memoria
     if (cache && !forceRefresh && memoryCache.has(cacheKey)) {
       const { data: cachedData, timestamp } = memoryCache.get(cacheKey);
       if (Date.now() - timestamp < ttl) {
@@ -38,7 +37,6 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       }
     }
 
-    // 🧱 2. Verificar localStorage
     if (cache && !forceRefresh) {
       const stored = localStorage.getItem(`cache_${cacheKey}`);
       if (stored) {
@@ -53,10 +51,9 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       }
     }
 
-    // 🌐 3. Evitar duplicado y hacer request real
     try {
       setLoading(true);
-      pendingRequests.set(url, true); // 🚧 marca request en curso
+      pendingRequests.set(url, true);
       const response = await api.get(url);
       const result = normalizeToArray(response.data);
 
@@ -75,7 +72,7 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       console.error(`❌ Error al obtener datos de ${url}:`, err);
       setError(err.message || "Error al cargar datos");
     } finally {
-      pendingRequests.delete(url); // ✅ libera el endpoint
+      pendingRequests.delete(url);
       if (mounted.current) setLoading(false);
     }
   };
@@ -84,7 +81,6 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
     mounted.current = true;
 
     if (autoFetch && endpoint) {
-      // ⏱️ debounce: evita múltiples llamadas en montajes consecutivos
       clearTimeout(debounceTimer.current);
       debounceTimer.current = setTimeout(() => {
         fetchData(endpoint);

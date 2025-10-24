@@ -42,6 +42,13 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
+        const local = localStorage.getItem(`doctor_${doctorId}`);
+        if (local) {
+          const parsed = JSON.parse(local);
+          setDoctorData(parsed);
+          return;
+        }
+
         const data = await getDoctorById(doctorId);
         setDoctorData(data);
       } catch (error) {

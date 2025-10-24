@@ -104,7 +104,7 @@ const Prescripciones = () => {
     };
     const handleClearSelection = () => {
         setSelectedPatient(null);
-        setSearchTerm(""); // Opcional: limpiar la búsqueda al deseleccionar
+        setSearchTerm("");
     };
     const filteredPacientes = pacientes?.filter(paciente => {
         const fullName = `${paciente.Apellido} ${paciente.Nombres}`.toLowerCase();
