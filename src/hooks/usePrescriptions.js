@@ -1,59 +1,113 @@
-import { useState, useEffect, useCallback } from "react"; // Importamos useCallback
+import { useState, useEffect, useRef, useCallback } from "react";
 import { obtenerRecetas } from "../services/prescriptionService";
 
 const cache = new Map();
 
-/**
- * Hook para obtener prescripciones de un médico, con cache y debounce
- */
 export const usePrescriptions = (doctorId, options = {}) => {
-  const { ttl = 300000, debounceMs = 300 } = options;
+  const {
+    ttl = 300000, // 5 minutos de cache
+    pageSize = 15,
+    debounceMs = 300,
+    patientId = null, // nuevo filtro opcional
+  } = options;
+
   const [prescriptions, setPrescriptions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const debounceTimer = useRef(null);
 
-  const cacheKey = `prescriptions_${doctorId}`;
+  // 🔑 Clave de cache dinámica (por doctor + paciente)
+  const cacheKey = `prescriptions_${doctorId || "all"}_${patientId || "none"}`;
 
-  // 1. Definimos fetchData/refetch usando useCallback para que la función sea estable
-  const fetchData = useCallback(async (bypassCache = false) => {
-    if (!doctorId) return;
+  /**
+   * 📡 Función principal para traer recetas (paginadas)
+   */
+  const fetchData = useCallback(
+    async ({ reset = false } = {}) => {
+      if (loading) return;
 
-    if (!bypassCache) {
-        const cached = cache.get(cacheKey);
-        if (cached && Date.now() - cached.timestamp < ttl) {
-            setPrescriptions(cached.data);
-            setLoading(false);
-            return;
-        }
-    }
+      const currentPage = reset ? 1 : page;
+      const cached = cache.get(cacheKey);
 
-    setLoading(true);
-    try {
-        const response = await obtenerRecetas(doctorId);
-        setPrescriptions(response);
-        cache.set(cacheKey, { data: response, timestamp: Date.now() });
-        return response; // Opcional: devolver la respuesta
-    } catch (err) {
-        console.error("Error al obtener prescripciones:", err);
+      // 🧠 Usa cache si es válida y no se solicitó reset
+      if (!reset && cached && Date.now() - cached.timestamp < ttl) {
+        setPrescriptions(cached.data);
+        setHasMore(cached.hasMore);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const { recetas, meta } = await obtenerRecetas({
+          doctor_id: doctorId,
+          patient_id: patientId,
+          page: currentPage,
+          page_size: pageSize,
+        });
+
+        // 📦 Mezclar nuevas recetas o reiniciar lista
+        setPrescriptions((prev) =>
+          reset ? recetas : [...prev, ...recetas]
+        );
+
+        // 🔍 Determinar si hay más páginas
+        const more = meta?.has_next_page ?? recetas.length === pageSize;
+        setHasMore(more);
+
+        // 💾 Guardar en cache
+        cache.set(cacheKey, {
+          data: reset ? recetas : [...(cached?.data || []), ...recetas],
+          hasMore: more,
+          timestamp: Date.now(),
+        });
+      } catch (err) {
+        console.error("❌ Error al obtener recetas:", err);
         setError(err);
-    } finally {
+      } finally {
         setLoading(false);
-    }
-  }, [doctorId, ttl]); // Dependencias para useCallback
+      }
+    },
+    [doctorId, patientId, page, pageSize, ttl, loading]
+  );
 
-  // 2. Modificamos el useEffect para usar la función estable fetchData
+  /**
+   * 🔁 Efecto para cargar recetas iniciales o al cambiar paciente
+   */
   useEffect(() => {
-    if (!doctorId) return;
-    
-    // Si hay un debounce, usamos un timeout; si no, la llamamos directamente.
-    if (debounceMs > 0) {
-        const timeoutId = setTimeout(() => fetchData(), debounceMs);
-        return () => clearTimeout(timeoutId);
-    } else {
-        fetchData();
-    }
-  }, [doctorId, debounceMs, fetchData]); // Incluimos fetchData como dependencia
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      fetchData({ reset: true });
+      setPage(1);
+    }, debounceMs);
 
-  // 3. ¡Exponemos fetchData con el nombre refetch!
-  return { prescriptions, loading, error, refetch: fetchData }; 
+    return () => clearTimeout(debounceTimer.current);
+  }, [doctorId, patientId]);
+
+  /**
+   * 📜 Cargar más recetas (paginación)
+   */
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      setPage((prev) => prev + 1);
+    }
+  }, [hasMore, loading]);
+
+  /**
+   * ⏱️ Efecto para cambio de página
+   */
+  useEffect(() => {
+    if (page > 1) fetchData();
+  }, [page]);
+
+  return {
+    prescriptions,
+    loading,
+    error,
+    hasMore,
+    loadMore,
+    refresh: () => fetchData({ reset: true }),
+  };
 };

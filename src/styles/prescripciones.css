@@ -1195,5 +1195,37 @@ html, body {
 }
 
 
+.action-cell {
+    /* Nueva regla para organizar los botones */
+    display: flex;
+    gap: 8px; /* Espacio entre los botones */
+    justify-content: center; /* Centra los botones horizontalmente */
+    align-items: center;
+}
+/* Asegúrate que el thead para acciones también esté centrado si es necesario */
+.data-table thead tr th:nth-child(4) { 
+    /* Esta es la columna de Acciones en la tabla de Prescripciones */
+    text-align: center;
+}
 
+.btn-action-imprimir {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin: -10px; /* Ajuste para alinear con los otros iconos */
+    font-size: 1.3rem;
+    color: #0198CC; /* Color verde para la acción de imprimir */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-action-imprimir:hover {
+    color: #0077B3; /* Tono de verde más oscuro al pasar el mouse */
+    transform: scale(1.05);
+}
+/* Reajuste de márgenes para los botones existentes para una mejor alineación */
+.btn-action-ver, .btn-action-imprimir, .btn-action-eliminar {
+    /* Quitamos el margin negativo individual y lo manejamos con el `gap` del `action-cell` */
+    margin: 0;
+    padding: 0 5px; /* Un poco de padding si lo necesitas, o déjalo en 0 */
+}
 
