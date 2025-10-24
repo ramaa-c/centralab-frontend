@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react"; // Importamos useCallback
 import { obtenerRecetas } from "../services/prescriptionService";
 
 const cache = new Map();
@@ -12,39 +12,48 @@ export const usePrescriptions = (doctorId, options = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const cacheKey = `prescriptions_${doctorId}`;
+
+  // 1. Definimos fetchData/refetch usando useCallback para que la función sea estable
+  const fetchData = useCallback(async (bypassCache = false) => {
     if (!doctorId) return;
 
-    const cacheKey = `prescriptions_${doctorId}`;
-    const cached = cache.get(cacheKey);
-
-    if (cached && Date.now() - cached.timestamp < ttl) {
-      setPrescriptions(cached.data);
-      setLoading(false);
-      return;
+    if (!bypassCache) {
+        const cached = cache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < ttl) {
+            setPrescriptions(cached.data);
+            setLoading(false);
+            return;
+        }
     }
 
-    let timeoutId;
-
-    const fetchData = async () => {
-      setLoading(true);
-      try {
+    setLoading(true);
+    try {
         const response = await obtenerRecetas(doctorId);
         setPrescriptions(response);
         cache.set(cacheKey, { data: response, timestamp: Date.now() });
-      } catch (err) {
+        return response; // Opcional: devolver la respuesta
+    } catch (err) {
         console.error("Error al obtener prescripciones:", err);
         setError(err);
-      } finally {
+    } finally {
         setLoading(false);
-      }
-    };
+    }
+  }, [doctorId, ttl]); // Dependencias para useCallback
 
-    timeoutId = setTimeout(fetchData, debounceMs);
+  // 2. Modificamos el useEffect para usar la función estable fetchData
+  useEffect(() => {
+    if (!doctorId) return;
+    
+    // Si hay un debounce, usamos un timeout; si no, la llamamos directamente.
+    if (debounceMs > 0) {
+        const timeoutId = setTimeout(() => fetchData(), debounceMs);
+        return () => clearTimeout(timeoutId);
+    } else {
+        fetchData();
+    }
+  }, [doctorId, debounceMs, fetchData]); // Incluimos fetchData como dependencia
 
-    return () => clearTimeout(timeoutId);
-
-  }, [doctorId, ttl, debounceMs]);
-
-  return { prescriptions, loading, error };
+  // 3. ¡Exponemos fetchData con el nombre refetch!
+  return { prescriptions, loading, error, refetch: fetchData }; 
 };

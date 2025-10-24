@@ -9,6 +9,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SideBar from "./components/SideBar.jsx";
 import Resultados from './pages/Perfil/Resultados';
 
+
+
 const ProtectedLayout = ({ children }) => (
     <ProtectedRoute>
         <SideBar>
@@ -16,6 +18,7 @@ const ProtectedLayout = ({ children }) => (
         </SideBar>
     </ProtectedRoute>
 );
+
 
 
 function App() {
@@ -27,6 +30,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/registro" element={<Registro />} />
+                    
                     
                     {/* Rutas protegidas (Usan el layout combinado) */}
 

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useApi } from "../../hooks/useApi";
-import { usePatients } from "../../hooks/usePatients";
-import { usePrescriptions } from "../../hooks/usePrescriptions";
 import NuevaRecetaModal from "./NuevaRecetaModal";
 import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
 import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
-import MetricCard from "../../components/MetricCard";
+
 import axios from "axios";
 import "../../styles/prescripciones.css";
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
@@ -21,29 +19,66 @@ const Prescripciones = () => {
     const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
     const [prescriptionToDeleteId, setPrescriptionToDeleteId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortConfig, setSortConfig] = useState({ field: 'fchReceta', direction: 'desc' });
+    
+    const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
+    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
+    
+    // 🎯 FUNCIÓN DE ORDENAMIENTO DE DATOS
+    const sortedPrescripciones = useMemo(() => {
+        // 1. Empezamos con las prescripciones filtradas (si ya las tienes) o las originales
+        const sortableItems = prescripciones ? [...prescripciones] : [];
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const doctorId = user?.id || 0;
-    const { patients: pacientes, loading: loadingPacientes, error: errorPacientes } = usePatients(doctorId);
-    const { prescriptions: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones } = usePrescriptions(doctorId);
-    
-    const { 
-        data: metricsData, 
-        loading: loadingMetrics, 
-        error: errorMetrics 
-    } = useApi("/RD/Info"); 
-    
-    const metrics = (metricsData && Array.isArray(metricsData) && metricsData.length > 0) ? metricsData[0] : {};
+        if (sortConfig.field) {
+            sortableItems.sort((a, b) => {
+                const aValue = a[sortConfig.field];
+                const bValue = b[sortConfig.field];
+
+                // Compara como fechas (clave para el ordenamiento cronológico)
+                const dateA = new Date(aValue);
+                const dateB = new Date(bValue);
+
+                if (dateA < dateB) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (dateA > dateB) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0; // Si las fechas son iguales
+            });
+        }
+        return sortableItems;
+    }, [prescripciones, sortConfig]); // Se recalcula si las prescripciones o la configuración de ordenamiento cambian
+
+    // 🎯 FUNCIÓN PARA MANEJAR EL CLIC EN EL ENCABEZADO DE LA COLUMNA
+    const handleSort = (field) => {
+        let direction = 'asc';
+        if (sortConfig.field === field && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ field, direction });
+    };
+    const filteredAndSortedPrescripciones = sortedPrescripciones?.filter(receta => {
+        // Tu lógica de filtro existente por Paciente Seleccionado
+        if (!selectedPatient) return true;
+        return receta.PacienteID === selectedPatient.PacienteID;
+    });
+   
     
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);
         setShowRecetaModal(true);
     };
     const handleNuevoPaciente = () => setShowPacienteModal(true);
-    
+    const handlePacienteCreado = () => {
+        fetchPacientes();
+    };
     const handleEditarPaciente = (paciente) => {
         setSelectedPatient(paciente);
         setShowEditarPacienteModal(true);
+    };
+    const handlePacienteActualizado = () => {
+        fetchPacientes();
     };
 
     const handleVerODescargarPDF = async (prescriptionId, accion) => {
@@ -80,24 +115,19 @@ const Prescripciones = () => {
     setPrescriptionToDeleteId(prescriptionId);
         setShowConfirmDeleteModal(true);
     };
-    const handlePacienteCreado = () => {
-        alert("Paciente creado correctamente ✅");
-    };
 
-    const handlePacienteActualizado = () => {
-        alert("Paciente actualizado correctamente ✅");
-    };
     const confirmEliminarPrescripcion = async () => {
-        if (!prescriptionToDeleteId) return;
+        if (!prescriptionToDeleteId) return; // Seguridad
 
         try {
             await axios.delete(`/api/prescription/${prescriptionToDeleteId}`);
-            alert("Prescripción eliminada correctamente ✅");
-            window.location.reload();
+            
+            fetchPrescripciones();
         } catch (error) {
             console.error("Error al eliminar prescripción:", error);
-            alert("Hubo un error al eliminar la prescripción ❌");
+                
         } finally {
+            // Cerrar modal y limpiar ID en ambos casos
             setShowConfirmDeleteModal(false);
             setPrescriptionToDeleteId(null);
         }
@@ -125,28 +155,7 @@ const Prescripciones = () => {
     return (
         <div className="prescriptions-view-bg"> 
             
-            {/* ÁREA DE CONTADORES */}
-            <div className="metrics-dashboard">
-                <MetricCard 
-                    title="Nuevos Pacientes" 
-                    value={metrics.NewPacients || 0} 
-                    icon="fa-user-plus" 
-                    isLoading={loadingMetrics} 
-                />
-                <MetricCard 
-                    title="Nuevas Recetas" 
-                    value={metrics.NewPrescriptions || 0} 
-                    icon="fa-file-medical" 
-                    isLoading={loadingMetrics} 
-                />
-                <MetricCard 
-                    title="Nuevos Médicos" 
-                    value={metrics.NewDoctors || 0} 
-                    icon="fa-user-md" 
-                    isLoading={loadingMetrics} 
-                />
-                
-            </div>
+            
             
             <div className="main-content-wrapper">
                 
@@ -312,7 +321,16 @@ const Prescripciones = () => {
                             <table className="data-table">
                                 <thead>
                                     <tr>
-                                        <th className="px-4 py-2 text-left">Fecha</th>
+                                        <th 
+                                        className="px-4 py-2 text-left sortable"
+                                        onClick={() => handleSort('fchReceta')}
+                                    >
+                                        Fecha
+                                        {/* Indicador de dirección */}
+                                        {sortConfig.field === 'fchReceta' && (
+                                            <i className={`fa-solid ml-2 ${sortConfig.direction === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>
+                                        )}
+                                    </th>
                                         <th className="px-4 py-2 text-left">Diagnóstico</th>
                                         <th className="px-4 py-2 text-left">Paciente</th>
                                         <th className="px-4 py-2 text-left">Acciones</th>
@@ -321,7 +339,7 @@ const Prescripciones = () => {
                                 
                                 <tbody>
                                     {/* MANEJO DE LISTA VACÍA O FILTRADA VACÍA */}
-                                    {filteredPrescripciones?.length === 0 ? (
+                                    {filteredAndSortedPrescripciones?.length === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="text-center py-4">
                                                 {/* Muestra un mensaje diferente si hay un paciente seleccionado pero no tiene recetas */}
@@ -333,7 +351,7 @@ const Prescripciones = () => {
                                         </tr>
                                     ) : (
                                         /* MAPEADO DE LA LISTA FILTRADA */
-                                        filteredPrescripciones?.map((r) => (
+                                        filteredAndSortedPrescripciones?.map((r) => (
                                             <tr key={r.RecetaID}>
                                                 <td className="px-4 py-2">
                                                     {r.fchReceta ? r.fchReceta.slice(0, 10) : 'N/A'}
@@ -342,6 +360,7 @@ const Prescripciones = () => {
                                                 <td className="px-4 py-2">
                                                     {r.Apellido} {r.Nombres}
                                                 </td>
+                                                
                                                 
                                                 <td className="px-4 py-2 action-cell">
                                                     {/* 🔵 Ver PDF */}

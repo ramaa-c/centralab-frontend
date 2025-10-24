@@ -17,6 +17,7 @@ export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
                     
                     <button
                         onClick={onConfirm} 
+                        type="button"
                         className="ingresar-btn" 
                         style={{ width: '50%', padding: '10px 15px' }}
                     >
@@ -25,6 +26,7 @@ export default function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
                     
                     <button
                         onClick={onCancel} 
+                        type="button"
                         className="registro-btn" 
                         style={{ width: '50%', padding: '10px 15px' }}
                     >

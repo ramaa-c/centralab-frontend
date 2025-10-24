@@ -6,11 +6,13 @@ import { useAuth } from "../context/AuthContext";
 import ConfirmModal from "../components/ConfirmModal.jsx";
 import centraLabLogo from "../assets/images/centraLab_nuevo.png";
 import "../styles/prescripciones.css"; 
+import { useMetrics } from "../hooks/useMetrics"; 
+
 
 export default function SideBar({ children }) {
     
     const location = useLocation();
-
+    const { metrics, loadingMetrics, errorMetrics } = useMetrics();
     const { logout } = useAuth();
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const currentPath = location.pathname;
@@ -108,6 +110,31 @@ export default function SideBar({ children }) {
                         <i className="fa-solid fa-user nav-icon"></i> Datos de Usuario
                     </Link>
                     <hr className="nav-divider-bottom" />
+
+                    {/* 🎯 ÁREA DE CONTADORES DE MÉTRICAS */}
+                     
+                    <div className="sidebar-metrics-container">
+                        {errorMetrics && <p style={{ color: 'red', padding: '10px' }}>Error al cargar métricas.</p>}
+                        
+                        {metrics.map((metric, index) => (
+                            <div 
+                                key={index} 
+                                className="sidebar-metric-card" 
+                            >
+                                {/* Icono */}
+                                <i className={`fa-solid ${metric.icon} metric-icon`}></i>
+                                
+                                {/* Detalles: Título y Valor */}
+                                <div className="metric-details">
+                                    <p className="metric-title">{metric.title}</p>
+                                    <p className="metric-value">
+                                        {loadingMetrics ? '...' : metric.value}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {/* 🎯 FIN DEL ÁREA DE CONTADORES */}
                     
                     {/* Salir */}
                     <a href="#" onClick={handleLogoutClick} className="logout-btn">
