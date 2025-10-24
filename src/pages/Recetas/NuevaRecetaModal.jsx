@@ -30,6 +30,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
   const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
   const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -230,11 +231,13 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       console.log("Respuesta del backend al subir PDF:", resultadoSubida);
 
       console.log("Receta completa registrada y PDF asociado correctamente.");
-      onClose();
+   
+      return true;
 
     } catch (err) {
       console.error("Error al enviar la receta:", err);
       setError(err.message);
+      return false;
     }
   };
 
@@ -329,7 +332,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         <div className="form-wrapper" style={{ textAlign: "center" }}>
         <h1 className="main-title">Nueva Receta</h1>
 
-        <form className="Formulario" onSubmit={handleSubmit(enviar)}>
+        <form className="Formulario" id="recetaForm">
 
         {/* Paciente */}
         <div className="field-wrapper">
@@ -652,7 +655,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <div style={{ display: "flex", justifyContent: "center", gap: "10px",marginTop: "20px" }}>
-              <button className="enviar" type="submit">
+              <button className="enviar" type="button" onClick={() => setShowConfirmModal(true)}>
+                
                 Registrar Receta
               </button>
               
@@ -664,7 +668,89 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           </div>
       </div>
     </div>
-  </div>,
-  document.getElementById("modal-root")
-);
+    {showConfirmModal && createPortal(
+        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && setShowConfirmModal(false)}>
+          <div className="modal-content small">
+            <h3>¿Deseas guardar la receta?</h3>
+            <p>Selecciona una opción para continuar:</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+              
+              {/* Guardar simple */}
+             <button
+              className="enviar"
+              onClick={async () => { // Hacemos la función ASÍNCRONA
+                  setShowConfirmModal(false);
+                  await handleSubmit(async (data) => {
+                      const ok = await enviar(data);
+                      if (ok) {
+                          onClose(); // 🎯 Cierra el modal principal SOLO si el envío fue exitoso
+                      }
+                  })();
+              }}
+          >
+              Guardar
+          </button>
+
+              {/* Guardar e imprimir */}
+              <button
+                className="enviar"
+                style={{ backgroundColor: '#007bff' }}
+                onClick={async () => {
+                  setShowConfirmModal(false);
+                  
+                  // Esta es la lógica compleja que valida, guarda y luego imprime.
+                  try {
+                    // 1. Ejecutar la validación y el envío
+                    await handleSubmit(async (data) => {
+                      const ok = await enviar(data); // 2. Guardar (enviar) la receta
+                      if (!ok) return;
+
+                      // 3. Generar PDF (El PDF generado aquí debe ser el mismo que se subió)
+                      const previewElement = document.querySelector(".preview-container");
+                      if (!previewElement) {
+                         alert("Error: No se encontró el preview para imprimir.");
+                         return;
+                      }
+
+                      // Lógica de impresión del PDF (generarPDF, Blob, URL.createObjectURL)
+                      const pdfBase64 = await generarPDF(previewElement); 
+                      const blob = new Blob(
+                        [Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0))],
+                        { type: "application/pdf" }
+                      );
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, "_blank");
+                      
+                    })(); // <-- Ejecutar el handleSubmit con la función anónima
+                    
+                    // Solo si todo salió bien, cerramos el modal principal
+                    onClose(); 
+
+                  } catch (err) {
+                    console.error("Error al guardar o generar PDF:", err);
+                    alert("Hubo un problema al guardar o generar el PDF. Intente nuevamente.");
+                  }
+                }}
+              >
+                Guardar e Imprimir
+              </button>
+              
+              {/* Cancelar */}
+              <button
+                className="cancelar"
+                onClick={() => setShowConfirmModal(false)}
+                style={{ backgroundColor: '#ccc', color: '#333' }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.getElementById("modal-root") // Asegúrate de que 'modal-root' sea el ID correcto
+      )}
+
+    </div>,
+    document.getElementById("modal-root") // Renderizado del modal principal
+  );
 }

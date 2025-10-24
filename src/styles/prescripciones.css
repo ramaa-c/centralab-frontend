@@ -874,8 +874,11 @@ html, body {
 
 .metrics-dashboard {
     display: flex;
-    justify-content: space-around; 
-    gap: 20px;
+    /* CAMBIO CLAVE: Centra las tarjetas o las distribuye de manera uniforme */
+    justify-content: space-evenly; /* Opción A: Distribución uniforme del espacio */
+    /* justify-content: center; */ /* Opción B: Si quieres que estén juntas en el centro */
+    
+    gap: 30px; /* Incrementamos el gap para más separación entre 2 tarjetas */
     margin-bottom: 30px; 
     padding: 0 10px; 
     width: 100%;
@@ -888,9 +891,14 @@ html, body {
     padding: 15px 20px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 30%; 
+    
+    /* CAMBIO CLAVE: Ampliamos el ancho para que ocupen mejor el espacio disponible */
+    /* Calculo sugerido para 2 elementos: (100% - 30px de gap) / 2 = 48.5%. Usaremos un valor fijo para consistencia. */
+    width: 45%; 
+    /* Si las quieres más pequeñas, puedes usar un ancho fijo (ej: min-width: 250px;) */
 }
 
+/* El resto de las clases quedan igual */
 .metric-icon-container {
     font-size: 2rem;
     color: #0198CC;
@@ -949,7 +957,7 @@ html, body {
 
 
 .list-scroll-area {
-    max-height: 550px;
+    max-height: 670px;
     flex-grow: 1;
     min-height: 0;
    
@@ -1009,7 +1017,7 @@ html, body {
     border: 0;
     height: 1px; 
     background-color: rgba(255, 255, 255, 0.15); 
-    margin: 25px 0 15px 0; 
+   margin: 25px 0 15px 0; 
     width: 80%;
     margin-left: auto;
     margin-right: auto;
@@ -1056,3 +1064,136 @@ html, body {
     font-weight: 600;
     transition: background-color 0.2s;
 }
+/* ======================================= */
+/* ESTILOS PARA LAS MÉTRICAS EN EL SIDEBAR */
+/* ======================================= */
+.sidebar-metrics-container {
+    width: 100%;
+    padding: 0 10px;
+    margin-top: 10px;
+    
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-metric-card {
+    display: flex;
+    align-items: center;
+    background-color: #FFFFFF;
+
+    border-radius: 8px;
+    padding: 12px 15px;
+     margin-right: 18px;
+    color: #0198CC; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+    transition: background-color 0.2s;
+}
+
+.sidebar-metric-card:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.sidebar-metric-card .metric-icon {
+    font-size: 1.3rem;
+    margin-right: 15px;
+    color: #0198CC;
+    min-width: 25px; 
+    text-align: center;
+}
+
+.sidebar-metric-card .metric-details {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.sidebar-metric-card .metric-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.sidebar-metric-card .metric-title {
+    font-size: 0.8rem;
+    color: #0198CC; 
+    font-weight: 500;
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0.9;
+}
+
+.modal-content.small {
+    /* Ajusta el ancho para que sea pequeño (Ej: 400px o menos) */
+    max-width: 400px; 
+    width: 90%;
+    padding: 20px 30px; /* Un poco menos de padding que el modal grande */
+    text-align: center;
+}
+
+.modal-content.small h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-content.small p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Contenedor de botones (ya está definido en tu JSX, solo lo optimizamos) */
+.modal-content.small > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Botón Guardar y Guardar e Imprimir */
+.modal-content.small .enviar {
+    /* Reutiliza el estilo base del botón principal */
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: #0198CC !important; 
+    color: white !important;
+}
+
+/* Estilo para el botón secundario (Guardar e Imprimir) */
+.modal-content.small button[style*="#007bff"] {
+    background-color: #0198CC !important; /* Mantiene el color azul de impresión */
+}
+.modal-content.small button[style*="#007bff"]:hover {
+    background-color: #0198CC !important;
+}
+.modal-content.small button:hover {
+    background-color: #0077B3 !important;
+}
+
+/* Botón Cancelar */
+.modal-content.small .cancelar {
+    /* Estilo para el botón de cancelar, reutiliza o define uno nuevo */
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    /* Asegura que sobrescriba los estilos inline si es necesario */
+    background-color:#f0f0f0 !important; 
+    color: #333 !important;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-content.small .cancelar:hover {
+    background-color: red !important;
+}
+
+
+
+
