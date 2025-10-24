@@ -2,22 +2,37 @@ import api from "./apiAuthenticated";
 
 const RECETAS_ENDPOINT = "/prescriptions";
 
-export const obtenerRecetas = async (doctorId, retries = 3, delay = 1000) => {
-  const params = doctorId ? { doctor_id: doctorId } : undefined;
-
+export const obtenerRecetas = async ({
+  page = 1,
+  page_size = 15,
+  doctor_id = null,
+  patient_id = null,
+  retries = 3,
+  delay = 1000,
+} = {}) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      const params = {
+        page,
+        page_size,
+        ...(doctor_id && { doctor_id }),
+        ...(patient_id && { patient_id }),
+      };
+
       console.log(
-        doctorId
-          ? `Obteniendo recetas del doctor ${doctorId} (intento ${attempt})...`
-          : `Obteniendo todas las recetas (intento ${attempt})...`
+        `🧾 Obteniendo recetas (página ${page}${
+          doctor_id ? `, doctor ${doctor_id}` : ""
+        }${patient_id ? `, paciente ${patient_id}` : ""}) (intento ${attempt})...`
       );
 
       const response = await api.get(RECETAS_ENDPOINT, { params });
 
-      return response.data?.List || [];
+      const recetas = response.data?.List || [];
+      const meta = response.data?.Meta || {};
+
+      return { recetas, meta };
     } catch (error) {
-      console.error(`Error en obtenerRecetas (intento ${attempt}):`, error);
+      console.error(`❌ Error en obtenerRecetas (intento ${attempt}):`, error);
 
       if (attempt === retries) {
         const msg =
@@ -26,11 +41,11 @@ export const obtenerRecetas = async (doctorId, retries = 3, delay = 1000) => {
         throw new Error(msg);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const backoff = delay * 2 ** (attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, backoff));
     }
   }
 };
-
 
 export const crearReceta = async (recetaData) => {
   try {

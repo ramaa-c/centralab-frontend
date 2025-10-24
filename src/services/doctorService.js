@@ -33,7 +33,6 @@ export const getDoctorById = async (doctorId, { force = false } = {}) => {
   return data;
 };
 
-
 export const getAllEstablishments = async () => {
   return retryRequest(async () => {
     const response = await api.get(ESTABLECIMIENTOS_ENDPOINT);

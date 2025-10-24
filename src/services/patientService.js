@@ -2,22 +2,40 @@ import api from "./apiAuthenticated";
 
 const PACIENTES_ENDPOINT = "/patients";
 
-export const obtenerPacientes = async (doctorId, retries = 3, delay = 1000) => {
-  const params = doctorId ? { doctor_id: doctorId } : {};
-
+export const obtenerPacientes = async ({
+  page = 1,
+  page_size = 15,
+  id_number = "",
+  doctor_id = null,
+  establishment_id = null,
+  retries = 3,
+  delay = 1000,
+} = {}) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      const params = {
+        page,
+        page_size,
+        ...(id_number && { id_number }),
+        ...(doctor_id && { doctor_id }),
+        ...(establishment_id && { establishment_id }),
+      };
+
       console.log(
-        doctorId
-          ? `Obteniendo pacientes del doctor ${doctorId} (intento ${attempt})...`
-          : `Obteniendo todos los pacientes (intento ${attempt})...`
+        `📋 Obteniendo pacientes (página ${page}${
+          id_number ? `, búsqueda: ${id_number}` : ""
+        }) (intento ${attempt})...`
       );
 
       const response = await api.get(PACIENTES_ENDPOINT, { params });
+      const pacientes = response.data?.List || [];
 
-      return response.data?.List || [];
+      // Si el backend devuelve información de paginación (ej: total_pages)
+      const meta = response.data?.Meta || {};
+
+      return { pacientes, meta };
     } catch (error) {
-      console.error(`Error en obtenerPacientes (intento ${attempt}):`, error);
+      console.error(`❌ Error en obtenerPacientes (intento ${attempt}):`, error);
 
       if (attempt === retries) {
         const msg =
@@ -26,7 +44,9 @@ export const obtenerPacientes = async (doctorId, retries = 3, delay = 1000) => {
         throw new Error(msg);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      // 🔁 Backoff exponencial (1s, 2s, 4s, ...)
+      const backoff = delay * 2 ** (attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, backoff));
     }
   }
 };
