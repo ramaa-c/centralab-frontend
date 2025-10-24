@@ -31,7 +31,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
   const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
+ 
+const { 
+    patients: pacientes, 
+    loading: loadingPacientes, 
+    error: errorPacientes,
+    setSearchDni // 👈 AÑADIDO: Necesitamos esta función del hook
+} = usePatients(doctorId);
+  
   useEffect(() => {
     if (!loading) {
       setEstablecimientoName(
@@ -221,7 +228,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
       console.log("ID de la receta creada:", recetaId);
 
-      const previewElement = document.querySelector(".preview-container");
+      const previewElement = document.querySelector(".preview-column");
       if (!previewElement) {
         console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
@@ -676,47 +683,72 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
               {/* Guardar e imprimir */}
               <button
-                className="enviar"
-                style={{ backgroundColor: '#007bff' }}
-                onClick={async () => {
-                  setShowConfirmModal(false);
-                  
-                  // Esta es la lógica compleja que valida, guarda y luego imprime.
-                  try {
-                    // 1. Ejecutar la validación y el envío
-                    await handleSubmit(async (data) => {
-                      const ok = await enviar(data); // 2. Guardar (enviar) la receta
-                      if (!ok) return;
+			  className="enviar"
+			  style={{ backgroundColor: '#007bff' }}
+			  onClick={async () => {
+			    setShowConfirmModal(false);
+			    
+			    // 🔑 PASO CLAVE 1: Abrir la nueva ventana AHORA para evitar el bloqueo.
+			    // Se abre una pestaña vacía inmediatamente.
+			    const printWindow = window.open("", "_blank"); 
+			    if (!printWindow) {
+			        alert("El navegador bloqueó la ventana de impresión. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo.");
+			        // No cerramos el modal principal (onClose) porque la receta ya se guardará más abajo
+			        return; 
+			    }
 
-                      // 3. Generar PDF (El PDF generado aquí debe ser el mismo que se subió)
-                      const previewElement = document.querySelector(".preview-container");
-                      if (!previewElement) {
-                         alert("Error: No se encontró el preview para imprimir.");
-                         return;
-                      }
+			    // Disparamos la validación del formulario y el callback de envío
+			    await handleSubmit(async (data) => {
+			        try {
+			            // 1. Enviar/Guardar la receta (incluye subir el PDF al backend)
+			            const ok = await enviar(data); 
+			            if (!ok) {
+                            // Si falla el envío, cerrarle la pestaña vacía que abrimos
+                            printWindow.close();
+			                return; 
+			            }
 
-                      // Lógica de impresión del PDF (generarPDF, Blob, URL.createObjectURL)
-                      const pdfBase64 = await generarPDF(previewElement); 
-                      const blob = new Blob(
-                        [Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0))],
-                        { type: "application/pdf" }
-                      );
-                      const url = URL.createObjectURL(blob);
-                      window.open(url, "_blank");
-                      
-                    })(); // <-- Ejecutar el handleSubmit con la función anónima
-                    
-                    // Solo si todo salió bien, cerramos el modal principal
-                    onClose(); 
+			            // 2. Generar el PDF
+			            const previewElement = document.querySelector(".preview-column"); // o .preview-container
+			            if (!previewElement) {
+                            printWindow.close();
+			                console.error("No se encontró el preview para imprimir.");
+			                alert("Error: No se encontró el preview para imprimir. Receta guardada, pero no impresa.");
+			                onClose(); 
+			                return;
+			            }
 
-                  } catch (err) {
-                    console.error("Error al guardar o generar PDF:", err);
-                    alert("Hubo un problema al guardar o generar el PDF. Intente nuevamente.");
-                  }
-                }}
-              >
-                Guardar e Imprimir
-              </button>
+			            const pdfBase64 = await generarPDF(previewElement); 
+			            const binaryString = atob(pdfBase64);
+			            const len = binaryString.length;
+			            const bytes = new Uint8Array(len);
+			            for (let i = 0; i < len; i++) {
+			                bytes[i] = binaryString.charCodeAt(i);
+			            }
+
+			            const blob = new Blob([bytes], { type: "application/pdf" });
+			            const url = URL.createObjectURL(blob);
+			            
+			            // 🔑 PASO CLAVE 2: Asignar la URL del PDF a la ventana ya abierta
+			            printWindow.location.href = url; // Carga el PDF en la pestaña que ya existe
+			            
+			            // 3. Cerrar el modal principal 
+			            onClose(); 
+
+			        } catch (err) {
+			            console.error("Error en la secuencia Guardar e Imprimir:", err);
+                        printWindow.close(); // Cerrar la pestaña si algo falla
+			            alert("Hubo un problema inesperado al guardar o generar el PDF. Revise la consola.");
+			        }
+			    })().catch((validationError) => {
+			        // Si falla la validación del formulario
+			        console.log("Error de validación del formulario al intentar imprimir.", validationError);
+                    printWindow.close(); // Cerrar la pestaña
+			    });
+			  }}
+			>
+			  Guardar e Imprimir
+			</button>
               
               {/* Cancelar */}
               <button

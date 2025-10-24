@@ -99,6 +99,16 @@ export default function SideBar({ children }) {
                     <Link 
                         to="/resultados" 
                         className={`nav-link ${isActive('/resultados') ? 'active' : ''}`}
+                        // 🔑 CAMBIO CLAVE: Añadir onClick para prevenir la navegación
+                        onClick={(e) => {
+                            // Verifica si la ruta no está activa o si se desea bloquear siempre
+                            if (!isActive('/resultados')) {
+                                e.preventDefault();
+                               
+                            }
+                            // Si la ruta ya está activa, podrías permitir la navegación
+                            // pero para bloquearla completamente, solo deja el preventDefault.
+                        }}
                     >
                         <i className="fa-solid fa-flask nav-icon"></i> Resultados
                     </Link>
