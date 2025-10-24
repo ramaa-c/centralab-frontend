@@ -22,12 +22,13 @@ export const obtenerPacientes = async ({
       };
 
       console.log(
-        `📋 Obteniendo pacientes (página ${page}${
+        `Obteniendo pacientes (página ${page}${
           id_number ? `, búsqueda: ${id_number}` : ""
         }) (intento ${attempt})...`
       );
 
       const response = await api.get(PACIENTES_ENDPOINT, { params });
+
       const pacientes = response.data?.List || [];
 
       // Si el backend devuelve información de paginación (ej: total_pages)
@@ -53,7 +54,6 @@ export const obtenerPacientes = async ({
 
 export const crearPaciente = async (pacienteData) => {
   try {
-    console.log("Creando paciente con:", pacienteData);
     const response = await api.post(PACIENTES_ENDPOINT, pacienteData);
     return response.data;
   } catch (error) {

@@ -31,6 +31,7 @@ const Prescripciones = () => {
         loading: loadingPacientes,
         error: errorPacientes,
         setSearchDni,
+        searchDni,
     } = usePatients({ pageSize: 15 });
 
     const { 
@@ -76,13 +77,7 @@ const Prescripciones = () => {
         setSortConfig({ field, direction });
     };
 
-    const filteredAndSortedPrescripciones = sortedPrescripciones
-    ?.filter(receta => {
-        const dni = String(receta.DNI || "").toLowerCase();
-        return dni.includes(searchTerm.toLowerCase());
-    });
-
-    
+    const filteredAndSortedPrescripciones = sortedPrescripciones;
     
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);
@@ -247,13 +242,16 @@ const Prescripciones = () => {
                                         </tr>
                                     </thead>
                                     
-                                    <tbody>
-        {pacientes?.length === 0 ? (
-        <tr>
-            <td colSpan="4" className="text-center py-4">
-            No hay pacientes que coincidan con la búsqueda.
-            </td>
-        </tr>
+<tbody>
+        {pacientes?.length === 0 ? (
+        <tr>
+            <td colSpan="4" className="text-center py-4">
+            {setSearchDni.length > 0 && setSearchDni.length < 5 
+              ? "Escribe al menos 5 caracteres del DNI o Apellido para iniciar la búsqueda."
+              : "No hay pacientes que coincidan con la búsqueda."
+            }
+            </td>
+        </tr>
         ) : (
         pacientes.map((p) => (
             <tr 
@@ -294,16 +292,9 @@ const Prescripciones = () => {
                 <section className="content-card prescriptions-column">
                     <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
                         <h2 className="section-title">Prescripciones</h2>
-                        <button
-                            onClick={() => handleOpenRecetaModal()}
-                            className="btn-primary"
-                        >
-                            <i className="fa-solid fa-prescription-bottle-medical mr-2"></i> + Nueva Prescripción
-                        </button>
+                        <br />
                     </div>
                     
-                    
-
                     {loadingPrescripciones && prescripciones.length === 0 ? (
                         <p>Cargando prescripciones...</p>
                     ) : errorPrescripciones ? (
