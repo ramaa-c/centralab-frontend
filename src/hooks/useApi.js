@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import api from "../services/apiAuthenticated"; // tu instancia de axios autenticado
+import api from "../services/apiAuthenticated";
 
-// 🧠 Caché en memoria (por sesión)
 const memoryCache = new Map();
+const pendingRequests = new Map(); // 🧩 Mapa global para evitar peticiones duplicadas
 
-// 🧩 Normalizador (igual que antes)
 const normalizeToArray = (respData) => {
   if (!respData && respData !== 0) return [];
   if (Array.isArray(respData)) return respData;
@@ -14,40 +13,38 @@ const normalizeToArray = (respData) => {
   return [respData];
 };
 
-/**
- * Hook genérico para consumir APIs con soporte de caché.
- * @param {string} endpoint - Ruta del endpoint (por ejemplo, /api/tiposdocumento)
- * @param {boolean} autoFetch - Indica si debe cargar automáticamente al montar el componente.
- * @param {object} options - { cache: boolean, ttl: number }
- */
 export const useApi = (endpoint, autoFetch = true, options = {}) => {
-  const { cache = false, ttl = 300000 } = options; // TTL = 5 min por defecto
+  const { cache = false, ttl = 300000, debounce = 200 } = options;
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const cacheKey = endpoint;
   const mounted = useRef(true);
+  const debounceTimer = useRef(null);
 
   const fetchData = async (url = endpoint, { forceRefresh = false } = {}) => {
-    if (!url) return;
+    if (!url || pendingRequests.has(url)) return; // 🚫 evita duplicado
+    console.log("🔥 useApi ejecutado para:", url, "desde", new Error().stack);
 
-    // 🧠 1. Intentar cargar desde memoria si aplica
+    // 🧠 1. Verificar caché en memoria
     if (cache && !forceRefresh && memoryCache.has(cacheKey)) {
       const { data: cachedData, timestamp } = memoryCache.get(cacheKey);
       if (Date.now() - timestamp < ttl) {
+        console.log(`💾 Cache en memoria válida para ${cacheKey}`);
         setData(cachedData);
         return;
       } else {
-        memoryCache.delete(cacheKey); // expira
+        memoryCache.delete(cacheKey);
       }
     }
 
-    // 🧱 2. Intentar cargar desde localStorage si está habilitado
+    // 🧱 2. Verificar localStorage
     if (cache && !forceRefresh) {
       const stored = localStorage.getItem(`cache_${cacheKey}`);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() - parsed.timestamp < ttl) {
+          console.log(`📦 Cache localStorage válida para ${cacheKey}`);
           setData(parsed.data);
           return;
         } else {
@@ -56,9 +53,10 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       }
     }
 
-    // 🌐 3. Petición real a la API
+    // 🌐 3. Evitar duplicado y hacer request real
     try {
       setLoading(true);
+      pendingRequests.set(url, true); // 🚧 marca request en curso
       const response = await api.get(url);
       const result = normalizeToArray(response.data);
 
@@ -67,7 +65,6 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       setData(result);
       setError(null);
 
-      // 🧠 Guardar en memoria y localStorage
       if (cache) {
         const cachedValue = { data: result, timestamp: Date.now() };
         memoryCache.set(cacheKey, cachedValue);
@@ -75,18 +72,28 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       }
     } catch (err) {
       if (!mounted.current) return;
-      console.error("Error al obtener datos:", err);
+      console.error(`❌ Error al obtener datos de ${url}:`, err);
       setError(err.message || "Error al cargar datos");
     } finally {
+      pendingRequests.delete(url); // ✅ libera el endpoint
       if (mounted.current) setLoading(false);
     }
   };
 
   useEffect(() => {
     mounted.current = true;
-    if (autoFetch && endpoint) fetchData(endpoint);
+
+    if (autoFetch && endpoint) {
+      // ⏱️ debounce: evita múltiples llamadas en montajes consecutivos
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = setTimeout(() => {
+        fetchData(endpoint);
+      }, debounce);
+    }
+
     return () => {
       mounted.current = false;
+      clearTimeout(debounceTimer.current);
     };
   }, [endpoint]);
 

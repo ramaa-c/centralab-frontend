@@ -3,6 +3,17 @@ import api from './apiAuthenticated';
 const DOCTORS_ENDPOINT = "/doctors";
 const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
 
+const retryRequest = async (fn, retries = 3, delay = 500) => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    console.warn(`Reintentando (${3 - retries + 1})...`);
+    await new Promise((r) => setTimeout(r, delay));
+    return retryRequest(fn, retries - 1, delay * 2);
+  }
+};
+
 export const getDoctorById = async (doctorId) => {
   try {
     const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
@@ -14,23 +25,17 @@ export const getDoctorById = async (doctorId) => {
 };
 
 export const getAllEstablishments = async () => {
-  try {
+  return retryRequest(async () => {
     const response = await api.get(ESTABLECIMIENTOS_ENDPOINT);
     return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching establishments:", error);
-    throw error;
-  }
+  });
 };
 
 export const getDoctorEstablishments = async (doctorId) => {
-  try {
+  return retryRequest(async () => {
     const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
     return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching doctor establishments:", error);
-    throw error;
-  }
+  });
 };
 
 export const addDoctorEstablishment = async (doctorId, establishmentId) => {
@@ -67,14 +72,13 @@ export const updateDoctor = async (doctorData) => {
 };
 
 export const getAllSpecialties = async () => {
-  try {
-    const response = await api.get('/specialties'); 
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener especialidades:", error);
-    throw error;
-  }
+  return retryRequest(async () => {
+    const response = await api.get("/specialties");
+    const data = response.data;
+    return Array.isArray(data.List) ? data.List : Array.isArray(data) ? data : [];
+  });
 };
+
 export const setActiveEstablishmentForDoctor = async (doctorId, activeEstablishmentId) => {
   try {
     const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
