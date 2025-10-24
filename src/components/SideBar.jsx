@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getDoctorEstablishments } from "../services/doctorService";
+import { Link, useLocation } from 'react-router-dom';
+import { useDoctorEstablishments } from "../hooks/useDoctorEstablishments";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useAuth } from "../context/AuthContext"; 
 import ConfirmModal from "../components/ConfirmModal.jsx";
@@ -22,11 +22,20 @@ export default function SideBar({ children }) {
 
     const doctorId = userProfile.id || 0;
     const establecimientoId = userProfile.establecimientoId || 1;
+    const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
     
     const name = userProfile.name || "NOMBRE DE USUARIO";
     const email = userProfile.email || "email@nodisponible.com";
     const specialty = userProfile.specialty || "Especialidad no definida";
     const [establishmentName, setEstablishmentName] = useState("Cargando establecimiento...");
+
+    useEffect(() => {
+    if (!loading) {
+        setEstablishmentName(
+        activeEstablishment?.Descripcion || "Establecimiento no encontrado"
+        );
+    }
+    }, [activeEstablishment, loading]);
 
     const handleLogoutClick = (e) => {
     e.preventDefault();
@@ -39,43 +48,8 @@ export default function SideBar({ children }) {
     };
 
     const handleCancelLogout = () => {
-    setShowConfirmModal(false); 
-    };
-
-    useEffect(() => {
-        const fetchEstablishment = async () => {
-            if (!doctorId) return;
-
-            try {
-                const establishments = await getDoctorEstablishments(doctorId);
-                
-                const activeEstablishment = establishments.find(
-                    (est) => est.Activo === "1"
-                );
-                
-                let nameToShow = "Establecimiento no encontrado";
-
-                if (activeEstablishment) {
-                    nameToShow = activeEstablishment.Descripcion;
-                } else {
-                    const userEstablishment = establishments.find(
-                        (est) => est.EstablecimientoID === establecimientoId
-                    );
-                    if (userEstablishment) {
-                        nameToShow = userEstablishment.Descripcion;
-                    }
-                }
-
-                setEstablishmentName(nameToShow);
-
-            } catch (error) {
-                console.error("Error al obtener establecimientos del doctor:", error);
-                setEstablishmentName("Error de carga");
-            }
-        };
-        
-        fetchEstablishment();
-    }, [doctorId, establecimientoId]);
+    setShowConfirmModal(false); 
+    };
 
     return (
         <div className="app-layout">

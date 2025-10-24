@@ -3,9 +3,11 @@ import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select';
 import { createPortal } from "react-dom";
 import { useApi } from "../../hooks/useApi";
+import { usePatients } from "../../hooks/usePatients";
 import { crearReceta, subirPDFReceta } from "../../services/prescriptionService.js";
 import RecetaPreview from '../../components/RecetaPreview.jsx';
-import { getDoctorById, getDoctorEstablishments } from "../../services/doctorService";
+import { getDoctorById } from "../../services/doctorService";
+import { useDoctorEstablishments } from "../../hooks/useDoctorEstablishments";
 import { generarPDF } from "../../components/generarPDF";
 
 
@@ -23,54 +25,30 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: coberturas } = useApi("/private_healthcares", true, { cache: true, ttl: 86400000 });
   const { data: practicas } = useApi("/tests/all", true, { cache: true, ttl: 86400000 });
   const { data: practicasNormales } = useApi("/RD/PrescriptionOrder", true, { cache: true, ttl: 86400000 });
-  const { data: pacientes } = useApi("/patients");
+  const { patients: pacientes, loading: loadingPacientes, error: errorPacientes } = usePatients(doctorId);
   const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
   const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
-  const handleEliminarPractica = (practicaId) => {
-    setPracticasSeleccionadas(prevPracticas =>
-        prevPracticas.filter(p => p.PracticaID !== practicaId)
-    );
-};
+  const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
 
   useEffect(() => {
-        const fetchEstablishment = async () => {
-            if (!doctorId) return;
-
-            try {
-                const establishments = await getDoctorEstablishments(doctorId);
-                
-                const activeEstablishment = establishments.find(
-                    (est) => est.Activo === "1"
-                );
-                
-                let nameToShow = "Establecimiento Desconocido";
-
-                if (activeEstablishment) {
-                    nameToShow = activeEstablishment.Descripcion;
-                } else {
-                    const userEstablishment = establishments.find(
-                        (est) => est.EstablecimientoID === establecimientoId
-                    );
-                    if (userEstablishment) {
-                        nameToShow = userEstablishment.Descripcion;
-                    }
-                }
-
-                setEstablecimientoName(nameToShow);
-
-            } catch (error) {
-                console.error("Error al obtener establecimientos del doctor:", error);
-                setEstablecimientoName("Error al cargar establecimiento");
-            }
-        };
-        
-        fetchEstablishment();
-  }, [doctorId, establecimientoId]);
+    if (!loading) {
+      setEstablecimientoName(
+        activeEstablishment?.Descripcion || "Establecimiento desconocido"
+      );
+    }
+  }, [activeEstablishment, loading]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
+        const local = localStorage.getItem(`doctor_${doctorId}`);
+        if (local) {
+          const parsed = JSON.parse(local);
+          setDoctorData(parsed);
+          return;
+        }
+
         const data = await getDoctorById(doctorId);
         setDoctorData(data);
       } catch (error) {
@@ -163,15 +141,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   }, [pacienteId]);
 
   useEffect(() => {
-    console.log("🔍 --- Debug credencialSeleccionada ---");
-  console.log("➡️ Cobertura seleccionada:", coberturaId);
-  console.log("➡️ Plan seleccionado:", planId);
-  console.log("➡️ Datos de credencialData:", credencialData);
-  console.log("➡️ credencialData.List:", credencialData?.List);
-  console.log("➡️ Cantidad de credenciales:", credencialData?.List?.length || 0);
 
     if (!Array.isArray(credencialData) || !credencialData.length) {
-      console.warn("⚠️ credencialData vacío o sin credenciales disponibles aún");
       setCredencialSeleccionada(null);
       return;
     }
@@ -186,7 +157,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
       console.log("✅ Credencial encontrada:", encontrada);
       setCredencialSeleccionada(encontrada);
     } else {
-      console.warn("⚠️ No se encontró una credencial que coincida con cobertura/plan");
       setCredencialSeleccionada(null);
     }
   }, [credencialData, coberturaId, planId]);
@@ -205,6 +175,12 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     if (practicasSeleccionadas.some((p) => p.PracticaID === practica.PracticaID)) return;
 
     setPracticasSeleccionadas([...practicasSeleccionadas, { ...practica, origen: "manual" }]);
+  };
+
+  const handleEliminarPractica = (practicaId) => {
+    setPracticasSeleccionadas(prevPracticas =>
+        prevPracticas.filter(p => p.PracticaID !== practicaId)
+    );
   };
 
   const enviar = async (data) => {
@@ -400,7 +376,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                                 onChange={option => field.onChange(option ? option.value : null)}
                                 placeholder="Escribe para buscar y seleccionar un paciente..."
                                 isClearable
-                                isLoading={!pacientes} 
+                                isLoading={loadingPacientes} 
                                 loadingMessage={() => "Cargando pacientes..."}
                                 noOptionsMessage={() => "No se encontraron pacientes"}
                                 classNamePrefix="custom-select"

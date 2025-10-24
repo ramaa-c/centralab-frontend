@@ -34,7 +34,7 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
 
         
     const handleOpenConfirm = (formData) => {
-        etShowConfirm(true); 
+        setShowConfirm(true); 
     };  
        
     const enviar = async (formData) => {
@@ -55,7 +55,8 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
             };
             setShowConfirm(false);
 
-            await crearPaciente(payload);
+            const response = await crearPaciente(payload);
+            console.log("Respuesta de crearPaciente:", response);
             onSuccess();
             onClose();
 

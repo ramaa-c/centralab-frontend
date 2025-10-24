@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useApi } from "../../hooks/useApi";
+import { usePatients } from "../../hooks/usePatients";
+import { usePrescriptions } from "../../hooks/usePrescriptions";
 import NuevaRecetaModal from "./NuevaRecetaModal";
 import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
 import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
@@ -19,9 +21,11 @@ const Prescripciones = () => {
     const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
     const [prescriptionToDeleteId, setPrescriptionToDeleteId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    
-    const { data: pacientes, loading: loadingPacientes, error: errorPacientes, fetchData: fetchPacientes } = useApi("/patients");
-    const { data: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones, fetchData: fetchPrescripciones } = useApi("/prescriptions");
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const doctorId = user?.id || 0;
+    const { patients: pacientes, loading: loadingPacientes, error: errorPacientes } = usePatients(doctorId);
+    const { prescriptions: prescripciones, loading: loadingPrescripciones, error: errorPrescripciones } = usePrescriptions(doctorId);
     
     const { 
         data: metricsData, 
@@ -30,22 +34,16 @@ const Prescripciones = () => {
     } = useApi("/RD/Info"); 
     
     const metrics = (metricsData && Array.isArray(metricsData) && metricsData.length > 0) ? metricsData[0] : {};
-    console.log("Métricas de RD/Info:", metrics);
     
     const handleOpenRecetaModal = (paciente = null) => {
         setSelectedPatient(paciente);
         setShowRecetaModal(true);
     };
     const handleNuevoPaciente = () => setShowPacienteModal(true);
-    const handlePacienteCreado = () => {
-        fetchPacientes();
-    };
+    
     const handleEditarPaciente = (paciente) => {
         setSelectedPatient(paciente);
         setShowEditarPacienteModal(true);
-    };
-    const handlePacienteActualizado = () => {
-        fetchPacientes();
     };
 
     const handleVerODescargarPDF = async (prescriptionId, accion) => {
@@ -82,26 +80,31 @@ const Prescripciones = () => {
     setPrescriptionToDeleteId(prescriptionId);
         setShowConfirmDeleteModal(true);
     };
+    const handlePacienteCreado = () => {
+        alert("Paciente creado correctamente ✅");
+    };
 
+    const handlePacienteActualizado = () => {
+        alert("Paciente actualizado correctamente ✅");
+    };
     const confirmEliminarPrescripcion = async () => {
-        if (!prescriptionToDeleteId) return; // Seguridad
+        if (!prescriptionToDeleteId) return;
 
         try {
             await axios.delete(`/api/prescription/${prescriptionToDeleteId}`);
             alert("Prescripción eliminada correctamente ✅");
-            fetchPrescripciones();
+            window.location.reload();
         } catch (error) {
             console.error("Error al eliminar prescripción:", error);
             alert("Hubo un error al eliminar la prescripción ❌");
         } finally {
-            // Cerrar modal y limpiar ID en ambos casos
             setShowConfirmDeleteModal(false);
             setPrescriptionToDeleteId(null);
         }
     };
     const handleClearSelection = () => {
         setSelectedPatient(null);
-        setSearchTerm(""); // Opcional: limpiar la búsqueda al deseleccionar
+        setSearchTerm("");
     };
     const filteredPacientes = pacientes?.filter(paciente => {
         const fullName = `${paciente.Apellido} ${paciente.Nombres}`.toLowerCase();

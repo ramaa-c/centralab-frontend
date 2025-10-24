@@ -3,34 +3,49 @@ import api from './apiAuthenticated';
 const DOCTORS_ENDPOINT = "/doctors";
 const ESTABLECIMIENTOS_ENDPOINT = "/establishments";
 
-export const getDoctorById = async (doctorId) => {
+const retryRequest = async (fn, retries = 3, delay = 500) => {
   try {
-    const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}`);
-    return response.data;
+    return await fn();
   } catch (error) {
-    console.error("Error fetching doctor by ID:", error);
-    throw error;
+    if (retries <= 0) throw error;
+    console.warn(`Reintentando (${3 - retries + 1})...`);
+    await new Promise((r) => setTimeout(r, delay));
+    return retryRequest(fn, retries - 1, delay * 2);
   }
 };
 
+const DOCTOR_CACHE = new Map();
+
+export const getDoctorById = async (doctorId, { force = false } = {}) => {
+  if (!doctorId) throw new Error("Doctor ID inválido");
+
+  if (!force && DOCTOR_CACHE.has(doctorId)) {
+    console.log(`💾 Usando cache para el doctor ${doctorId}`);
+    return DOCTOR_CACHE.get(doctorId);
+  }
+
+  const response = await api.get(`/doctors/${doctorId}`);
+  const data = response.data;
+
+  DOCTOR_CACHE.set(doctorId, data);
+  localStorage.setItem(`doctor_${doctorId}`, JSON.stringify(data));
+
+  return data;
+};
+
+
 export const getAllEstablishments = async () => {
-  try {
+  return retryRequest(async () => {
     const response = await api.get(ESTABLECIMIENTOS_ENDPOINT);
     return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching establishments:", error);
-    throw error;
-  }
+  });
 };
 
 export const getDoctorEstablishments = async (doctorId) => {
-  try {
+  return retryRequest(async () => {
     const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
     return response.data.List || [];
-  } catch (error) {
-    console.error("Error fetching doctor establishments:", error);
-    throw error;
-  }
+  });
 };
 
 export const addDoctorEstablishment = async (doctorId, establishmentId) => {
@@ -67,14 +82,13 @@ export const updateDoctor = async (doctorData) => {
 };
 
 export const getAllSpecialties = async () => {
-  try {
-    const response = await api.get('/specialties'); 
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener especialidades:", error);
-    throw error;
-  }
+  return retryRequest(async () => {
+    const response = await api.get("/specialties");
+    const data = response.data;
+    return Array.isArray(data.List) ? data.List : Array.isArray(data) ? data : [];
+  });
 };
+
 export const setActiveEstablishmentForDoctor = async (doctorId, activeEstablishmentId) => {
   try {
     const response = await api.get(`${DOCTORS_ENDPOINT}/${doctorId}/establishments`);
