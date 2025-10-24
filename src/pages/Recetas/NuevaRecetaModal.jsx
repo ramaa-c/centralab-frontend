@@ -17,7 +17,9 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const establecimientoId = user?.establecimientoId || 1;
   const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm();
   const watchedValues = watch();
+  const paciente = pacienteProp; 
   const pacienteRecibido = pacienteProp || null;
+  const [doctorData, setDoctorData] = useState(null); // <--- CONTINÚA
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
   const coberturaSeleccionada = watch("Cobertura");
@@ -25,8 +27,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const { data: coberturas } = useApi("/private_healthcares", true, { cache: true, ttl: 86400000 });
   const { data: practicas } = useApi("/tests/all", true, { cache: true, ttl: 86400000 });
   const { data: practicasNormales } = useApi("/RD/PrescriptionOrder", true, { cache: true, ttl: 86400000 });
-  const { patients: pacientes, loading: loadingPacientes, error: errorPacientes } = usePatients(doctorId);
-  const [doctorData, setDoctorData] = useState(null);
   const [establecimientoName, setEstablecimientoName] = useState("Cargando...");
   const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
   const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
@@ -61,14 +61,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
   const { data: credencialData, fetchData: fetchCredencial } = useApi(null, false);
   const { data: planes, fetchData: fetchPlanes } = useApi(null, false);
-
-  const pacienteOptions = useMemo(() =>
-      pacientes?.map(p => ({
-        value: p.PacienteID,
-        label: `${p.Apellido} ${p.Nombres} (DNI: ${p.DNI})`
-      })) || [],
-      [pacientes]
-  );
     
   const diagnosticoOptions = useMemo(() =>
       diagnosticos?.map(d => ({
@@ -109,9 +101,15 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     }
   }, [pacienteRecibido, setValue]);
 
+  useEffect(() => {
+    if (paciente) {
+      setValue("Paciente", paciente.PacienteID);
+    }
+  }, [paciente, setValue]);
+
   const coberturaId = watch("Cobertura");
   const planId = watch("Plan");
-  const pacienteId = pacienteRecibido?.PacienteID || watch("Paciente");
+  const pacienteId = paciente?.PacienteID || watch("Paciente");
 
   useEffect(() => {
     if (!coberturaId) {
@@ -155,7 +153,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     );
 
     if (encontrada) {
-      console.log("✅ Credencial encontrada:", encontrada);
+      console.log("Credencial encontrada:", encontrada);
       setCredencialSeleccionada(encontrada);
     } else {
       setCredencialSeleccionada(null);
@@ -195,7 +193,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           fchReceta: new Date().toISOString().slice(0, 19),
           EstablecimientoID: establecimientoId,
           MedicoID: doctorId,
-          PacienteID: parseInt(data.Paciente) || pacienteRecibido?.PacienteID || 0,
+          PacienteID: parseInt(data.Paciente) || paciente.PacienteID || 0,
           DiagnosticoID: parseInt(data.Diagnostico) || 0,
           Notas: data.Notas || "",
           NotasReceta: data.NotasReceta || "",
@@ -221,7 +219,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         throw new Error("No se recibió un ID válido de la receta");
       }
 
-      console.log("🧾 ID de la receta creada:", recetaId);
+      console.log("ID de la receta creada:", recetaId);
 
       const previewElement = document.querySelector(".preview-container");
       if (!previewElement) {
@@ -255,16 +253,16 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   };
 
   const previewData = useMemo(() => {
-    const selectedPaciente = pacientes.find(p => p.PacienteID === parseInt(watchedValues.Paciente)) || pacienteRecibido;
+    const selectedPaciente = paciente;
     const selectedDiagnostico = diagnosticos.find(d => d.DiagnosticoID === parseInt(watchedValues.Diagnostico));
     const selectedCobertura = coberturas.find(c => c.PrepagaID === parseInt(watchedValues.Cobertura));
     const selectedPlan = planes.find(p => p.PrepagaPlanID === parseInt(watchedValues.Plan));
 
     return {
       paciente: selectedPaciente ? {
-          NombreCompleto: `${selectedPaciente.Apellido} ${selectedPaciente.Nombres}`,
-          DNI: selectedPaciente.DNI
-      } : null,
+          NombreCompleto: `${selectedPaciente.Apellido} ${selectedPaciente.Nombres}`,
+          DNI: selectedPaciente.DNI
+      } : null,
       fecha: watchedValues.Fecha
         ? new Date(watchedValues.Fecha + 'T00:00:00').toLocaleDateString('es-AR')
         : '',
@@ -282,7 +280,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   }, [
     watchedValues,
     practicasSeleccionadas,
-    pacientes,
+    paciente,
     diagnosticos,
     coberturas,
     planes,
@@ -341,56 +339,33 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
         <form className="Formulario" id="recetaForm">
 
-        {/* Paciente */}
-        <div className="field-wrapper">
-            <label>Paciente:</label>
-            {pacienteRecibido ? (
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '10px',
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: '5px',
-                    color: '#333'
-                }}>
-                    <strong>
-                        {pacienteRecibido.Apellido} {pacienteRecibido.Nombres}
-                    </strong>
-                    <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {pacienteRecibido.DNI}</span>
-                    <input
-                        type="hidden"
-                        value={pacienteRecibido.PacienteID}
-                        {...register("Paciente")}
-                    />
-                </div>
-            ) : (
-                <Controller
-                    name="Paciente"
-                    control={control}
-                    rules={{ required: "Debes seleccionar un paciente" }}
-                    render={({ field, fieldState: { error } }) => (
-                        <>
-                        <div className={error ? 'select-container-error' : ''}>
-                            <Select
-                                {...field}
-                                options={pacienteOptions}
-                                value={pacienteOptions.find(option => option.value === field.value)}
-                                onChange={option => field.onChange(option ? option.value : null)}
-                                placeholder="Escribe para buscar y seleccionar un paciente..."
-                                isClearable
-                                isLoading={loadingPacientes} 
-                                loadingMessage={() => "Cargando pacientes..."}
-                                noOptionsMessage={() => "No se encontraron pacientes"}
-                                classNamePrefix="custom-select"
-                            />
-                            {error && <p className="error-msg-paciente" style={{ marginTop: '5px' }}>{error.message}</p>}
-                          </div>
-                        </>
-                    )}
-                />
-            )}
-        </div>
+          {/* Paciente */}
+          <div className="field-wrapper">
+              <label>Paciente:</label>
+              {paciente ? (
+                  <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '10px',
+                      backgroundColor: '#f9f9f9',
+                      borderRadius: '5px',
+                      color: '#333'
+                  }}>
+                      <strong>
+                          {paciente.Apellido} {paciente.Nombres}
+                      </strong>
+                      <span style={{ color: '#666', fontSize: '0.9em' }}>DNI: {paciente.DNI}</span>
+                      <input
+                          type="hidden"
+                          value={paciente.PacienteID}
+                          {...register("Paciente")}
+                      />
+                  </div>
+              ) : (
+                  <p style={{ color: 'red' }}>Error: No se ha seleccionado un paciente. Cierre e intente de nuevo.</p>
+              )}
+          </div>
 
           <div className="form-row diag-calendar">
           {/* Diagnóstico */}
