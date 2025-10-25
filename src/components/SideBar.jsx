@@ -97,8 +97,8 @@ export default function SideBar({ children }) {
                     </Link>
                     
                     <Link 
-                        to="/resultados" 
-                        className={`nav-link ${isActive('/resultados') ? 'active' : ''}`}
+                        to="" 
+                        className={`nav-link ${isActive('') ? 'active' : ''}`}
                     >
                         <i className="fa-solid fa-flask nav-icon"></i> Resultados
                     </Link>
