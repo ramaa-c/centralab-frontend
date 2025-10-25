@@ -203,7 +203,12 @@ export default function Registro() {
             </div>
 
             {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
+            {/* Muestra el mensaje de error si existe */}
+            {error && <p style={{ color: 'red', marginTop: '1rem', fontWeight: 'bold' }}>{error}</p>}
+            
+            {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
 
+            <div className="button-group" style={{ marginTop: '1.5rem' }}></div>
             <div className="button-group" style={{ marginTop: '1.5rem' }}>
               <button className="ingresar-btn" type="submit" disabled={isLoading}>
                 {isLoading ? 'Registrando...' : 'Registrar Cuenta'}

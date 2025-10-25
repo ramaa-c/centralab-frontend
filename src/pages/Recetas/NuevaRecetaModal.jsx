@@ -31,7 +31,14 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [credencialSeleccionada, setCredencialSeleccionada] = useState(null); 
   const { activeEstablishment, loading } = useDoctorEstablishments(doctorId, establecimientoId);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
+ 
+const { 
+    patients: pacientes, 
+    loading: loadingPacientes, 
+    error: errorPacientes,
+    setSearchDni 
+} = usePatients(doctorId);
+  
   useEffect(() => {
     if (!loading) {
       setEstablecimientoName(
@@ -221,7 +228,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 
       console.log("ID de la receta creada:", recetaId);
 
-      const previewElement = document.querySelector(".preview-container");
+      const previewElement = document.querySelector(".preview-column");
       if (!previewElement) {
         console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
@@ -675,38 +682,31 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           </button>
 
               {/* Guardar e imprimir */}
-<button
+              <button
 			  className="enviar"
 			  style={{ backgroundColor: '#007bff' }}
 			  onClick={async () => {
 			    setShowConfirmModal(false);
 			    
-			    // 馃攽 PASO CLAVE 1: Abrir la nueva ventana AHORA para evitar el bloqueo.
-			    // Se abre una pesta帽a vac铆a inmediatamente.
 			    const printWindow = window.open("", "_blank"); 
 			    if (!printWindow) {
-			        alert("El navegador bloque贸 la ventana de impresi贸n. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo.");
-			        // No cerramos el modal principal (onClose) porque la receta ya se guardar谩 m谩s abajo
+			        alert("El navegador bloqueó la ventana de impresión. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo.");
 			        return; 
 			    }
 
-			    // Disparamos la validaci贸n del formulario y el callback de env铆o
 			    await handleSubmit(async (data) => {
 			        try {
-			            // 1. Enviar/Guardar la receta (incluye subir el PDF al backend)
 			            const ok = await enviar(data); 
 			            if (!ok) {
-                            // Si falla el env铆o, cerrarle la pesta帽a vac铆a que abrimos
                             printWindow.close();
 			                return; 
 			            }
 
-			            // 2. Generar el PDF
-			            const previewElement = document.querySelector(".preview-column"); // o .preview-container
+			            const previewElement = document.querySelector(".preview-column");
 			            if (!previewElement) {
                             printWindow.close();
-			                console.error("No se encontr贸 el preview para imprimir.");
-			                alert("Error: No se encontr贸 el preview para imprimir. Receta guardada, pero no impresa.");
+			                console.error("No se encontró el preview para imprimir.");
+			                alert("Error: No se encontró el preview para imprimir. Receta guardada, pero no impresa.");
 			                onClose(); 
 			                return;
 			            }
@@ -722,21 +722,18 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
 			            const blob = new Blob([bytes], { type: "application/pdf" });
 			            const url = URL.createObjectURL(blob);
 			            
-			            // 馃攽 PASO CLAVE 2: Asignar la URL del PDF a la ventana ya abierta
-			            printWindow.location.href = url; // Carga el PDF en la pesta帽a que ya existe
+			            printWindow.location.href = url;
 			            
-			            // 3. Cerrar el modal principal 
 			            onClose(); 
 
 			        } catch (err) {
 			            console.error("Error en la secuencia Guardar e Imprimir:", err);
-                        printWindow.close(); // Cerrar la pesta帽a si algo falla
+                        printWindow.close();
 			            alert("Hubo un problema inesperado al guardar o generar el PDF. Revise la consola.");
 			        }
 			    })().catch((validationError) => {
-			        // Si falla la validaci贸n del formulario
-			        console.log("Error de validaci贸n del formulario al intentar imprimir.", validationError);
-                    printWindow.close(); // Cerrar la pesta帽a
+			        console.log("Error de validación del formulario al intentar imprimir.", validationError);
+                    printWindow.close();
 			    });
 			  }}
 			>
@@ -754,10 +751,10 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
             </div>
           </div>
         </div>,
-        document.getElementById("modal-root") // Asegúrate de que 'modal-root' sea el ID correcto
+        document.getElementById("modal-root")
       )}
 
     </div>,
-    document.getElementById("modal-root") // Renderizado del modal principal
+    document.getElementById("modal-root")
   );
 }

@@ -344,12 +344,26 @@ const Prescripciones = () => {
                                                     
                                                     
                                                     <td className="px-4 py-2 action-cell">
+                                                        {/* Botón para VER PDF (ya existente) */}
                                                         <button
                                                             className="btn-action-ver"
                                                             onClick={() => handleVerODescargarPDF(r.RecetaID, "ver")}
+                                                            title="Ver PDF" // Agregado para mejor UX
                                                         >
                                                             <i className="fa-solid fa-file-pdf"></i>
                                                         </button>
+                                                        
+                                                        {/* 👇 NUEVO BOTÓN PARA IMPRIMIR/DESCARGAR PDF 👇 */}
+                                                        <button
+                                                            className="btn-action-imprimir" // Clase CSS para el botón de imprimir
+                                                            onClick={() => handleVerODescargarPDF(r.RecetaID, "descargar")} // Se usa "descargar" para forzar la descarga o apertura del diálogo de impresión
+                                                            title="Descargar/Imprimir PDF" // Agregado para mejor UX
+                                                        >
+                                                            <i className="fa-solid fa-print"></i> 
+                                                        </button>
+                                                        {/* 👆 FIN NUEVO BOTÓN 👆 */}
+
+                                                        {/* Botón para ELIMINAR (ya existente) */}
                                                         <button
                                                             className="btn-action-eliminar"
                                                             onClick={() => handleEliminarPrescripcion(r.RecetaID)}
