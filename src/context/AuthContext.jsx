@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem("user");
       return storedUser ? JSON.parse(storedUser) : null;
     } catch (e) {
-      console.error("⚠️ Error al parsear user desde localStorage:", e);
+      console.error("Error al parsear user desde localStorage:", e);
       return null;
     }
   });
@@ -43,9 +43,9 @@ export const AuthProvider = ({ children }) => {
 
           localStorage.setItem(`cache_${endpoint}`, JSON.stringify(cachedValue));
 
-          console.log(`✅ Prefetch completado: ${endpoint} (${result.length} registros)`);
+          console.log(`Prefetch completado: ${endpoint} (${result.length} registros)`);
         } catch (error) {
-          console.error(`❌ Error precargando ${endpoint}:`, error);
+          console.error(`Error precargando ${endpoint}:`, error);
         }
       })
     );
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       return loggedInUser;
       
     } catch (error) {
-      console.error("💥 Error en login:", error);
+      console.error("Error en login:", error);
       throw error;
     }
   };
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log("🔒 Cerrando sesión...");
+    console.log("Cerrando sesión...");
 
     localStorage.removeItem("user");
 

@@ -2,9 +2,7 @@ import axios from 'axios';
 
 const isDev = import.meta.env.DEV;
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const baseURL = isDev ? '/api' : `${API_URL}/api`;
+const baseURL = isDev ? '/api' : '/api';
 
 const apiAuthenticated = axios.create({
   baseURL,

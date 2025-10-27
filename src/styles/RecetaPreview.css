@@ -1,9 +1,8 @@
-/* Estilos para el contenedor principal de la previsualización */
 .preview-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #ffffff;
   padding: 35px;
-  color: #212529; /* Un negro no tan intenso, más legible */
+  color: #212529;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
   height: auto;
@@ -11,10 +10,9 @@
   font-size: 14px;
   line-height: 1.6;
   display: block;
-  flex-direction: column; /* Para empujar el pie de página hacia abajo */
+  flex-direction: column;
 }
 
-/* --- Cabecera: Info del Establecimiento --- */
 .preview-header {
   text-align: left;
   margin-bottom: 20px;
@@ -35,7 +33,6 @@
 }
 
 
-/* --- Info del Paciente --- */
 .preview-patient-info {
   margin-bottom: 0;
 }
@@ -45,20 +42,17 @@
 }
 
 
-/* --- Cuerpo: Diagnóstico y Prácticas --- */
 .preview-body p {
   margin: 0 0;
 }
 
-/* Para resaltar los títulos como "Paciente:", "Diagnóstico:", etc. */
 .preview-body strong,
 .preview-patient-info strong {
   font-weight: 600;
   display: inline-block;
-  min-width: 90px; /* Alinea los valores */
+  min-width: 90px;
 }
 
-/* Estilo para la lista de prácticas médicas */
 .preview-body ul {
   list-style-type: none;
   padding-left: 20px;
@@ -66,12 +60,10 @@
 }
 
 .preview-body ul li::before {
-  content: "-"; /* Viñeta simple */
+  content: "-";
   margin-right: 8px;
 }
 
-
-/* --- Pie de página: Fecha y Firma --- */
 .preview-footer {
   padding-top: 20px;
   text-align: left;
@@ -85,7 +77,6 @@
   border-top: 1px solid #495057;
 }
 
-/* Línea divisoria opcional */
 hr {
   border: none;
   border-top: 1px solid #f0f0f0;

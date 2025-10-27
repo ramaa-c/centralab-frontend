@@ -451,7 +451,7 @@ html, body {
 
 
 .modal-content::-webkit-scrollbar-thumb:hover {
-    background-color: #007bff; /
+    background-color: #007bff;
 }
 .select-input p{
     color: #222;
@@ -874,11 +874,8 @@ html, body {
 
 .metrics-dashboard {
     display: flex;
-    /* CAMBIO CLAVE: Centra las tarjetas o las distribuye de manera uniforme */
-    justify-content: space-evenly; /* Opción A: Distribución uniforme del espacio */
-    /* justify-content: center; */ /* Opción B: Si quieres que estén juntas en el centro */
-    
-    gap: 30px; /* Incrementamos el gap para más separación entre 2 tarjetas */
+    justify-content: space-evenly;    
+    gap: 30px;
     margin-bottom: 30px; 
     padding: 0 10px; 
     width: 100%;
@@ -891,14 +888,9 @@ html, body {
     padding: 15px 20px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    
-    /* CAMBIO CLAVE: Ampliamos el ancho para que ocupen mejor el espacio disponible */
-    /* Calculo sugerido para 2 elementos: (100% - 30px de gap) / 2 = 48.5%. Usaremos un valor fijo para consistencia. */
     width: 45%; 
-    /* Si las quieres más pequeñas, puedes usar un ancho fijo (ej: min-width: 250px;) */
 }
 
-/* El resto de las clases quedan igual */
 .metric-icon-container {
     font-size: 2rem;
     color: #0198CC;
@@ -953,8 +945,6 @@ html, body {
 .btn-action-eliminar:hover {
   color: #a71d2a;
 }
-
-
 
 .list-scroll-area {
     max-height: 670px;
@@ -1064,9 +1054,7 @@ html, body {
     font-weight: 600;
     transition: background-color 0.2s;
 }
-/* ======================================= */
-/* ESTILOS PARA LAS MÉTRICAS EN EL SIDEBAR */
-/* ======================================= */
+
 .sidebar-metrics-container {
     width: 100%;
     padding: 0 10px;
@@ -1126,10 +1114,9 @@ html, body {
 }
 
 .modal-content.small {
-    /* Ajusta el ancho para que sea pequeño (Ej: 400px o menos) */
     max-width: 400px; 
     width: 90%;
-    padding: 20px 30px; /* Un poco menos de padding que el modal grande */
+    padding: 20px 30px;
     text-align: center;
 }
 
@@ -1145,7 +1132,6 @@ html, body {
     margin-bottom: 20px;
 }
 
-/* Contenedor de botones (ya está definido en tu JSX, solo lo optimizamos) */
 .modal-content.small > div {
     display: flex;
     flex-direction: column;
@@ -1153,9 +1139,7 @@ html, body {
     margin-top: 20px;
 }
 
-/* Botón Guardar y Guardar e Imprimir */
 .modal-content.small .enviar {
-    /* Reutiliza el estilo base del botón principal */
     width: 100%;
     padding: 10px 16px;
     font-size: 1rem;
@@ -1164,9 +1148,8 @@ html, body {
     color: white !important;
 }
 
-/* Estilo para el botón secundario (Guardar e Imprimir) */
 .modal-content.small button[style*="#007bff"] {
-    background-color: #0198CC !important; /* Mantiene el color azul de impresión */
+    background-color: #0198CC !important;
 }
 .modal-content.small button[style*="#007bff"]:hover {
     background-color: #0198CC !important;
@@ -1175,15 +1158,12 @@ html, body {
     background-color: #0077B3 !important;
 }
 
-/* Botón Cancelar */
 .modal-content.small .cancelar {
-    /* Estilo para el botón de cancelar, reutiliza o define uno nuevo */
     width: 100%;
     padding: 10px 16px;
     border-radius: 8px;
     font-weight: 600;
     transition: background-color 0.2s;
-    /* Asegura que sobrescriba los estilos inline si es necesario */
     background-color:#f0f0f0 !important; 
     color: #333 !important;
     border: none;
@@ -1196,15 +1176,12 @@ html, body {
 
 
 .action-cell {
-    /* Nueva regla para organizar los botones */
     display: flex;
-    gap: 8px; /* Espacio entre los botones */
-    justify-content: center; /* Centra los botones horizontalmente */
+    gap: 8px;
+    justify-content: center;
     align-items: center;
 }
-/* Asegúrate que el thead para acciones también esté centrado si es necesario */
 .data-table thead tr th:nth-child(4) { 
-    /* Esta es la columna de Acciones en la tabla de Prescripciones */
     text-align: center;
 }
 
@@ -1212,20 +1189,18 @@ html, body {
     background-color: transparent;
     border: none;
     cursor: pointer;
-    margin: -10px; /* Ajuste para alinear con los otros iconos */
+    margin: -10px;
     font-size: 1.3rem;
-    color: #0198CC; /* Color verde para la acción de imprimir */
+    color: #0198CC;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-action-imprimir:hover {
-    color: #0077B3; /* Tono de verde más oscuro al pasar el mouse */
+    color: #0077B3;
     transform: scale(1.05);
 }
-/* Reajuste de márgenes para los botones existentes para una mejor alineación */
 .btn-action-ver, .btn-action-imprimir, .btn-action-eliminar {
-    /* Quitamos el margin negativo individual y lo manejamos con el `gap` del `action-cell` */
     margin: 0;
-    padding: 0 5px; /* Un poco de padding si lo necesitas, o déjalo en 0 */
+    padding: 0 5px;
 }
 

@@ -23,7 +23,6 @@ export const useDoctorEstablishments = (doctorId, establecimientoId, delay = 300
 
     const cacheKey = `doctor_${doctorId}_establishments`;
 
-    // 🧠 Intentamos cargar desde cache primero
     if (cache.has(cacheKey)) {
       const { data, timestamp } = cache.get(cacheKey);
       if (Date.now() - timestamp < 300000) {
@@ -34,7 +33,6 @@ export const useDoctorEstablishments = (doctorId, establecimientoId, delay = 300
       }
     }
 
-    // 🌐 Debounce con setTimeout
     const handler = setTimeout(() => {
       const fetchData = async () => {
         setLoading(true);
@@ -53,7 +51,6 @@ export const useDoctorEstablishments = (doctorId, establecimientoId, delay = 300
       fetchData();
     }, delay);
 
-    // Cleanup si doctorId/establecimientoId cambian antes de que pase el delay
     return () => clearTimeout(handler);
   }, [doctorId, establecimientoId, delay]);
 

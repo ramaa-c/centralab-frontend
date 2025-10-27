@@ -26,7 +26,6 @@ export const usePatients = (doctorId, options = {}) => {
       
       const currentSearch = searchDni.trim();
       
-      // Si la búsqueda no está vacía Y es corta, abortamos
       if (currentSearch.length > 0 && currentSearch.length < 5 && reset) {
           setPatients([]);
           setHasMore(false);
@@ -57,7 +56,6 @@ export const usePatients = (doctorId, options = {}) => {
           reset ? pacientes : [...prev, ...pacientes]
         );
 
-        // La condición de hasMore asume que si la lista es del tamaño exacto, puede haber más.
         const more = meta?.has_next_page ?? pacientes.length === pageSize;
         setHasMore(more);
 
@@ -76,28 +74,24 @@ export const usePatients = (doctorId, options = {}) => {
     [doctorId, page, pageSize, searchDni, ttl, loading]
   );
 
-  // 🔑 EFECTO PRINCIPAL Y DE BÚSQUEDA
   useEffect(() => {
     clearTimeout(debounceTimer.current);
     
     const currentSearchLength = searchDni.trim().length;
 
-    // 1. Caso: Búsqueda iniciada (más de 0 caracteres) pero muy corta
     if (currentSearchLength > 0 && currentSearchLength < 5) {
       setPatients([]);
       setHasMore(false);
       return;
     }
 
-    // 2. Caso: Búsqueda vacía (0 caracteres) O búsqueda larga (>= 5)
-    // Dispara la carga con debounce
     debounceTimer.current = setTimeout(() => {
       fetchData({ reset: true });
       setPage(1);
     }, debounceMs);
 
     return () => clearTimeout(debounceTimer.current);
-  }, [searchDni]); // Depende de searchDni
+  }, [searchDni]);
 
   const loadMore = useCallback(() => {
     if (hasMore && !loading) {
