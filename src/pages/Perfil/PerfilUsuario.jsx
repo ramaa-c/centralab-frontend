@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react"; // Eliminamos useEffect
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-// ❌ Eliminamos las importaciones directas de servicios de carga de datos
 import {
   updateDoctor,
   addDoctorEstablishment,
@@ -11,55 +10,39 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/perfil.css";
 import "../../styles/login.css";
 
-// 💡 Importamos el nuevo hook
 import { useDoctorProfileData } from "../../hooks/useDoctorProfileData.js"; 
 
 export default function PerfilUsuario() {
   const { user, updateActiveEstablishment } = useAuth();
   const doctorId = user?.id;
     
-  // 1. Usamos el nuevo hook para obtener los datos y el estado de carga/error
   const {
     profile, 
-    doctorEstablishments: currentDoctorEstablishments, // Renombrado para evitar conflicto con el setter local
+    doctorEstablishments: currentDoctorEstablishments,
     allEstablishments,
-    specialties: especialidadesFromHook, // Renombrado para usarlo en la vista
-    loading, // Estado de carga ahora viene del hook
+    specialties: especialidadesFromHook,
+    loading,
     error,
   } = useDoctorProfileData(doctorId); 
 
-  // --- ESTADOS LOCALES ---
-  // Mantenemos los estados que manejan la interacción del usuario y los cambios (drafts/borradores)
   const [draftActiveEstablishment, setDraftActiveEstablishment] = useState("");
-  // 'doctor' será nuestro borrador de los datos del perfil
   const [doctor, setDoctor] = useState(null); 
-  // 'doctorEstablishments' será nuestro borrador de los establecimientos vinculados
   const [doctorEstablishments, setDoctorEstablishments] = useState([]);
-  
-  // Guardamos las versiones iniciales para el cálculo de cambios
   const [initialDoctor, setInitialDoctor] = useState(null);
   const [initialDoctorEstablishments, setInitialDoctorEstablishments] = useState([]);
-
-  // Eliminamos: especialidades, establishments (vienen del hook)
   const [selectedEstablishment, setSelectedEstablishment] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  // Eliminamos: isLoading (ahora es 'loading' del hook)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  // 2. Lógica para inicializar los estados locales (borradores) cuando el hook termina de cargar
     useEffect(() => {
-    // Solo inicializa si los datos están cargados y aún no se ha inicializado
     if (profile && currentDoctorEstablishments && !isInitialized) { 
 
-      // 1. Inicializar el estado del doctor
       setDoctor(profile);
       setInitialDoctor(profile);
       
-      // 2. Inicializar los establecimientos (borradores)
       setDoctorEstablishments(currentDoctorEstablishments);
       setInitialDoctorEstablishments(currentDoctorEstablishments);
 
-      // 3. Inicializar el establecimiento activo
       const userEst = user?.establecimientoId;
       if (userEst !== undefined && userEst !== null) {
         setDraftActiveEstablishment(String(userEst));
@@ -67,19 +50,14 @@ export default function PerfilUsuario() {
         setDraftActiveEstablishment(String(currentDoctorEstablishments[0].EstablecimientoID));
       }
 
-      // 4. Establecer el flag a true para evitar futuras ejecuciones
       setIsInitialized(true); 
     }
 
     if (error) {
       console.error("Error cargando el perfil desde el hook:", error);
     }
-  // Se eliminan las dependencias que cambian (como user?.establecimientoId)
-  // y solo se deja 'isInitialized' para que React no se queje si se usa en el cuerpo del efecto.
   }, [profile, currentDoctorEstablishments, error, user?.establecimientoId, isInitialized]);
 
-
-  // Función para convertir archivo a Base64 (se mantiene igual)
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -87,8 +65,6 @@ export default function PerfilUsuario() {
       reader.onload = () => resolve(reader.result.split(",")[1]);
       reader.onerror = (error) => reject(error);
     });
-
-  // --- Handlers (se mantienen casi idénticos) ---
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -105,7 +81,6 @@ export default function PerfilUsuario() {
     );
     if (alreadyExists) return;
 
-    // Usamos allEstablishments que viene del hook
     const establishmentToAdd = allEstablishments.find(
       (est) => est.EstablecimientoID === parseInt(selectedEstablishment)
     );
@@ -130,7 +105,6 @@ export default function PerfilUsuario() {
     const apiCalls = [];
     let newDoctorState = { ...doctor };
     
-    // 1. Guardar cambios del perfil y firma
     if (JSON.stringify(doctor) !== JSON.stringify(initialDoctor) || selectedFile) {
       let firmaBase64 = doctor.FirmaImagen;
       if (selectedFile) {
@@ -151,7 +125,6 @@ export default function PerfilUsuario() {
       apiCalls.push(updateDoctor(payload));
     }
 
-    // 2. Guardar cambios en los establecimientos (añadir/eliminar)
     const added = doctorEstablishments.filter(
       (e) => !initialDoctorEstablishments.some((i) => i.EstablecimientoID === e.EstablecimientoID)
     );
@@ -165,32 +138,22 @@ export default function PerfilUsuario() {
     try {
       await Promise.all(apiCalls);
 
-      // 3. Actualizar el establecimiento activo en sesión
       if (draftActiveEstablishment) {
-        // Asumo que updateActiveEstablishment también actualiza el backend si es necesario,
-        // si no, deberías llamar a setActiveEstablishmentForDoctor aquí.
         updateActiveEstablishment(Number(draftActiveEstablishment)); 
-        console.log("Establecimiento activo actualizado en sesión:", draftActiveEstablishment);
       }
 
-      // 4. Actualizar los estados iniciales después de guardar exitosamente
       setDoctor(newDoctorState); 
       setInitialDoctor(newDoctorState); 
       setInitialDoctorEstablishments(doctorEstablishments);
       setSelectedFile(null); 
       
-      console.log("Guardado correctamente. Establecimiento activo:", draftActiveEstablishment);
     } catch (error) {
       console.error("Error al guardar perfil:", error);
     }
   };
 
-  // --- Renderizado ---
-
-  // Usamos 'loading' del hook y verificamos que 'doctor' (el borrador) exista
   if (loading || !doctor) return <div className="p-4">Cargando perfil...</div>;
   
-  // Si hay un error, puedes mostrar un mensaje de error
   if (error) return <div className="p-4 text-red-500">Error al cargar el perfil: {error.message}</div>;
 
 
@@ -230,9 +193,6 @@ export default function PerfilUsuario() {
                   ))}
                 </select>
               </div>
-
-              {/* Campo: Matrícula (y otros campos de la izquierda... se mantienen iguales) */}
-              {/* ... */}
               
               {/* Campo: Matrícula */}
               <div>
@@ -330,7 +290,6 @@ export default function PerfilUsuario() {
                   className="border p-2 rounded flex-1 profile-card-input"
                 >
                   <option value="">Seleccionar establecimiento</option>
-                  {/* Usamos allEstablishments que viene del hook */}
                   {allEstablishments.map((est) => (
                     <option key={est.EstablecimientoID} value={est.EstablecimientoID}>
                       {est.Descripcion}

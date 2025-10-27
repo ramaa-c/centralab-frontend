@@ -160,7 +160,6 @@ const {
     );
 
     if (encontrada) {
-      console.log("Credencial encontrada:", encontrada);
       setCredencialSeleccionada(encontrada);
     } else {
       setCredencialSeleccionada(null);
@@ -191,8 +190,6 @@ const {
 
   const enviar = async (data) => {
     try {
-      console.log("Enviando receta...");
-      console.log("Datos del formulario:", data);
 
       const payload = {
         Prescription: {
@@ -214,35 +211,22 @@ const {
           Comentario: p.Descripcion || "",
         }))
       };
-      console.log("Contenido de Credencial:", payload.Credential);
-      console.log("Payload final enviado a crearReceta:", payload);
 
       const response = await crearReceta(payload);
-      console.log("Respuesta de crearReceta:", response);
 
       const recetaId = response?.assigned_id;
       if (!recetaId || recetaId === 0) {
-        console.error("No se recibió un ID válido de la receta");
         throw new Error("No se recibió un ID válido de la receta");
       }
 
-      console.log("ID de la receta creada:", recetaId);
-
       const previewElement = document.querySelector(".preview-column");
       if (!previewElement) {
-        console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
       }
 
-      console.log("Generando PDF...");
       const pdfBase64 = await generarPDF(previewElement);
-      console.log("PDF generado correctamente, tamaño Base64:", pdfBase64.length);
 
-      console.log("Subiendo PDF al backend...");
-      const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
-      console.log("Respuesta del backend al subir PDF:", resultadoSubida);
-
-      console.log("Receta completa registrada y PDF asociado correctamente.");
+      await subirPDFReceta(recetaId, pdfBase64);
    
       return true;
 
@@ -732,7 +716,6 @@ const {
 			            alert("Hubo un problema inesperado al guardar o generar el PDF. Revise la consola.");
 			        }
 			    })().catch((validationError) => {
-			        console.log("Error de validación del formulario al intentar imprimir.", validationError);
                     printWindow.close();
 			    });
 			  }}

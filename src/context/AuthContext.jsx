@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }) => {
 
           localStorage.setItem(`cache_${endpoint}`, JSON.stringify(cachedValue));
 
-          console.log(`Prefetch completado: ${endpoint} (${result.length} registros)`);
         } catch (error) {
           console.error(`Error precargando ${endpoint}:`, error);
         }

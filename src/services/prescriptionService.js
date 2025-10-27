@@ -19,12 +19,6 @@ export const obtenerRecetas = async ({
         ...(patient_id && { patient_id }),
       };
 
-      console.log(
-        `🧾 Obteniendo recetas (página ${page}${
-          doctor_id ? `, doctor ${doctor_id}` : ""
-        }${patient_id ? `, paciente ${patient_id}` : ""}) (intento ${attempt})...`
-      );
-
       const response = await api.get(RECETAS_ENDPOINT, { params });
 
       const recetas = response.data?.List || [];
@@ -32,7 +26,6 @@ export const obtenerRecetas = async ({
 
       return { recetas, meta };
     } catch (error) {
-      console.error(`❌ Error en obtenerRecetas (intento ${attempt}):`, error);
 
       if (attempt === retries) {
         const msg =
@@ -49,7 +42,6 @@ export const obtenerRecetas = async ({
 
 export const crearReceta = async (recetaData) => {
   try {
-    console.log("Enviando receta:", recetaData);
     const response = await api.post(RECETAS_ENDPOINT, recetaData);
     return response.data;
   } catch (error) {
@@ -60,15 +52,11 @@ export const crearReceta = async (recetaData) => {
 };
 
 export const subirPDFReceta = async (recetaId, archivoBase64) => {
-  console.log("[subirPDFReceta] Iniciando subida del PDF...");
-  console.log("ID de receta:", recetaId);
-  console.log("Longitud del PDF base64:", archivoBase64.length);
   try {
     const response = await api.post(`/prescription/${recetaId}/pdf`, {
       RecetaID: recetaId,
       ArchivoPDF: archivoBase64,
     });
-        console.log("[subirPDFReceta] Respuesta del servidor:", response.data);
 
     return response.data;
   } catch (error) {

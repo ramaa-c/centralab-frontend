@@ -21,22 +21,14 @@ export const obtenerPacientes = async ({
         ...(establishment_id && { establishment_id }),
       };
 
-      console.log(
-        `Obteniendo pacientes (página ${page}${
-          id_number ? `, búsqueda: ${id_number}` : ""
-        }) (intento ${attempt})...`
-      );
-
       const response = await api.get(PACIENTES_ENDPOINT, { params });
 
       const pacientes = response.data?.List || [];
 
-      // Si el backend devuelve información de paginación (ej: total_pages)
       const meta = response.data?.Meta || {};
 
       return { pacientes, meta };
     } catch (error) {
-      console.error(`❌ Error en obtenerPacientes (intento ${attempt}):`, error);
 
       if (attempt === retries) {
         const msg =
@@ -45,7 +37,6 @@ export const obtenerPacientes = async ({
         throw new Error(msg);
       }
 
-      // 🔁 Backoff exponencial (1s, 2s, 4s, ...)
       const backoff = delay * 2 ** (attempt - 1);
       await new Promise((resolve) => setTimeout(resolve, backoff));
     }
