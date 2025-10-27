@@ -24,12 +24,10 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
 
   const fetchData = async (url = endpoint, { forceRefresh = false } = {}) => {
     if (!url || pendingRequests.has(url)) return;
-    console.log("🔥 useApi ejecutado para:", url, "desde", new Error().stack);
 
     if (cache && !forceRefresh && memoryCache.has(cacheKey)) {
       const { data: cachedData, timestamp } = memoryCache.get(cacheKey);
       if (Date.now() - timestamp < ttl) {
-        console.log(`💾 Cache en memoria válida para ${cacheKey}`);
         setData(cachedData);
         return;
       } else {
@@ -42,7 +40,6 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() - parsed.timestamp < ttl) {
-          console.log(`📦 Cache localStorage válida para ${cacheKey}`);
           setData(parsed.data);
           return;
         } else {
@@ -69,7 +66,7 @@ export const useApi = (endpoint, autoFetch = true, options = {}) => {
       }
     } catch (err) {
       if (!mounted.current) return;
-      console.error(`❌ Error al obtener datos de ${url}:`, err);
+      console.error(`Error al obtener datos de ${url}:`, err);
       setError(err.message || "Error al cargar datos");
     } finally {
       pendingRequests.delete(url);

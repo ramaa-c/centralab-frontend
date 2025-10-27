@@ -1,24 +1,16 @@
-// src/hooks/useMetrics.js
-import { useApi } from './useApi'; // Asegúrate de que la ruta sea correcta
+import { useApi } from './useApi';
 
-/**
- * Hook personalizado para obtener las métricas de la barra lateral.
- * @returns {object} Un objeto con data, loading y error.
- */
 export const useMetrics = () => {
-    // Reutiliza tu hook useApi para /RD/Info
     const { 
         data: metricsData, 
         loading: loadingMetrics, 
         error: errorMetrics 
     } = useApi("/RD/Info"); 
     
-    // Procesa los datos para obtener el objeto de métricas
     const metrics = (metricsData && Array.isArray(metricsData) && metricsData.length > 0) 
         ? metricsData[0] 
         : {};
         
-    // Normaliza el objeto al formato final que quieres
     const formattedMetrics = [
         { 
             title: "Nuevos Pacientes", 

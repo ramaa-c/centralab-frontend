@@ -15,8 +15,6 @@ export const login = async (credentials) => {
   }
 
   const doctorId = searchResponse.data.List[0].MedicoID;
-  console.log("DoctorId:", doctorId);
-  console.log("Identificador dni o email:",identifier);
 
   const response = await api.post(LOGIN_ENDPOINT, {
     doctor_id: identifier,
@@ -44,7 +42,6 @@ export const login = async (credentials) => {
 
 export const cambiarClave = async (doctorId, newPassword) => {
   try {
-    console.log("cambio de clave con:", doctorId, newPassword);
     const response = await api.put(`${DOCTORS_ENDPOINT}/${doctorId}/password:change`, {
       doctor_id: String(doctorId),
       password: newPassword,
@@ -61,7 +58,6 @@ export const cambiarClave = async (doctorId, newPassword) => {
 
 export const register = async (userData) => {
   try {
-    console.log("registro con:", userData);
     const response = await api.post(DOCTORS_ENDPOINT, userData);
     return response.data;
   } catch (error) {

@@ -32,6 +32,7 @@ const Prescripciones = () => {
         error: errorPacientes,
         setSearchDni,
         searchDni,
+        refresh: fetchPacientes,
     } = usePatients({ pageSize: 15 });
 
     const { 
@@ -247,7 +248,7 @@ const Prescripciones = () => {
         <tr>
             <td colSpan="4" className="text-center py-4">
             {setSearchDni.length > 0 && setSearchDni.length < 5 
-              ? "Escribe al menos 5 caracteres del DNI o Apellido para iniciar la búsqueda."
+              ? "Escribe en número de DNI completo para buscar."
               : "No hay pacientes que coincidan con la búsqueda."
             }
             </td>
@@ -376,13 +377,6 @@ const Prescripciones = () => {
                                         )}
                                     </tbody>
                                 </table>
-                                {hasMore && !loadingPrescripciones && (
-                                    <div style={{ textAlign: "center", marginTop: "10px" }}>
-                                        <button onClick={loadMore} className="btn-secondary">
-                                            Cargar más
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}

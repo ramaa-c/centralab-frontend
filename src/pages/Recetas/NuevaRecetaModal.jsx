@@ -19,7 +19,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const watchedValues = watch();
   const paciente = pacienteProp; 
   const pacienteRecibido = pacienteProp || null;
-  const [doctorData, setDoctorData] = useState(null); // <--- CONTINÚA
+  const [doctorData, setDoctorData] = useState(null);
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
   const coberturaSeleccionada = watch("Cobertura");
@@ -36,7 +36,7 @@ const {
     patients: pacientes, 
     loading: loadingPacientes, 
     error: errorPacientes,
-    setSearchDni // 👈 AÑADIDO: Necesitamos esta función del hook
+    setSearchDni 
 } = usePatients(doctorId);
   
   useEffect(() => {
@@ -160,7 +160,6 @@ const {
     );
 
     if (encontrada) {
-      console.log("Credencial encontrada:", encontrada);
       setCredencialSeleccionada(encontrada);
     } else {
       setCredencialSeleccionada(null);
@@ -191,8 +190,6 @@ const {
 
   const enviar = async (data) => {
     try {
-      console.log("Enviando receta...");
-      console.log("Datos del formulario:", data);
 
       const payload = {
         Prescription: {
@@ -214,35 +211,22 @@ const {
           Comentario: p.Descripcion || "",
         }))
       };
-      console.log("Contenido de Credencial:", payload.Credential);
-      console.log("Payload final enviado a crearReceta:", payload);
 
       const response = await crearReceta(payload);
-      console.log("Respuesta de crearReceta:", response);
 
       const recetaId = response?.assigned_id;
       if (!recetaId || recetaId === 0) {
-        console.error("No se recibió un ID válido de la receta");
         throw new Error("No se recibió un ID válido de la receta");
       }
 
-      console.log("ID de la receta creada:", recetaId);
-
       const previewElement = document.querySelector(".preview-column");
       if (!previewElement) {
-        console.error("No se encontró el elemento .preview-container para generar PDF");
         throw new Error("No se encontró el elemento del preview para generar PDF");
       }
 
-      console.log("Generando PDF...");
       const pdfBase64 = await generarPDF(previewElement);
-      console.log("PDF generado correctamente, tamaño Base64:", pdfBase64.length);
 
-      console.log("Subiendo PDF al backend...");
-      const resultadoSubida = await subirPDFReceta(recetaId, pdfBase64);
-      console.log("Respuesta del backend al subir PDF:", resultadoSubida);
-
-      console.log("Receta completa registrada y PDF asociado correctamente.");
+      await subirPDFReceta(recetaId, pdfBase64);
    
       return true;
 
@@ -688,28 +672,21 @@ const {
 			  onClick={async () => {
 			    setShowConfirmModal(false);
 			    
-			    // 🔑 PASO CLAVE 1: Abrir la nueva ventana AHORA para evitar el bloqueo.
-			    // Se abre una pestaña vacía inmediatamente.
 			    const printWindow = window.open("", "_blank"); 
 			    if (!printWindow) {
 			        alert("El navegador bloqueó la ventana de impresión. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo.");
-			        // No cerramos el modal principal (onClose) porque la receta ya se guardará más abajo
 			        return; 
 			    }
 
-			    // Disparamos la validación del formulario y el callback de envío
 			    await handleSubmit(async (data) => {
 			        try {
-			            // 1. Enviar/Guardar la receta (incluye subir el PDF al backend)
 			            const ok = await enviar(data); 
 			            if (!ok) {
-                            // Si falla el envío, cerrarle la pestaña vacía que abrimos
                             printWindow.close();
 			                return; 
 			            }
 
-			            // 2. Generar el PDF
-			            const previewElement = document.querySelector(".preview-column"); // o .preview-container
+			            const previewElement = document.querySelector(".preview-column");
 			            if (!previewElement) {
                             printWindow.close();
 			                console.error("No se encontró el preview para imprimir.");
@@ -729,21 +706,17 @@ const {
 			            const blob = new Blob([bytes], { type: "application/pdf" });
 			            const url = URL.createObjectURL(blob);
 			            
-			            // 🔑 PASO CLAVE 2: Asignar la URL del PDF a la ventana ya abierta
-			            printWindow.location.href = url; // Carga el PDF en la pestaña que ya existe
+			            printWindow.location.href = url;
 			            
-			            // 3. Cerrar el modal principal 
 			            onClose(); 
 
 			        } catch (err) {
 			            console.error("Error en la secuencia Guardar e Imprimir:", err);
-                        printWindow.close(); // Cerrar la pestaña si algo falla
+                        printWindow.close();
 			            alert("Hubo un problema inesperado al guardar o generar el PDF. Revise la consola.");
 			        }
 			    })().catch((validationError) => {
-			        // Si falla la validación del formulario
-			        console.log("Error de validación del formulario al intentar imprimir.", validationError);
-                    printWindow.close(); // Cerrar la pestaña
+                    printWindow.close();
 			    });
 			  }}
 			>
@@ -761,10 +734,10 @@ const {
             </div>
           </div>
         </div>,
-        document.getElementById("modal-root") // Asegúrate de que 'modal-root' sea el ID correcto
+        document.getElementById("modal-root")
       )}
 
     </div>,
-    document.getElementById("modal-root") // Renderizado del modal principal
+    document.getElementById("modal-root")
   );
 }

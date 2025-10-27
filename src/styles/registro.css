@@ -5,11 +5,9 @@
     overflow-y: auto;
 }
 
-
 .identifier-container {
     margin-bottom: 10px; 
 }
-
 
 .reg-input { 
     width: 100%;
@@ -26,7 +24,6 @@
     background-color: white; 
     color: #333;
 }
-
 
 .input-icon {
     transform: translateY(-85%) !important; 

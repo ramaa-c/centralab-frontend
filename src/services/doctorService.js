@@ -20,7 +20,6 @@ export const getDoctorById = async (doctorId, { force = false } = {}) => {
   if (!doctorId) throw new Error("Doctor ID inválido");
 
   if (!force && DOCTOR_CACHE.has(doctorId)) {
-    console.log(`💾 Usando cache para el doctor ${doctorId}`);
     return DOCTOR_CACHE.get(doctorId);
   }
 
@@ -102,7 +101,6 @@ export const setActiveEstablishmentForDoctor = async (doctorId, activeEstablishm
     });
 
     await Promise.all(updateCalls);
-    console.log("Establecimiento activo actualizado correctamente en la base de datos.");
 
     return true;
   } catch (error) {
