@@ -19,7 +19,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const watchedValues = watch();
   const paciente = pacienteProp; 
   const pacienteRecibido = pacienteProp || null;
-  const [doctorData, setDoctorData] = useState(null); // <--- CONTINÚA
+  const [doctorData, setDoctorData] = useState(null);
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
   const coberturaSeleccionada = watch("Cobertura");

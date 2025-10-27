@@ -80,9 +80,11 @@ export const AuthProvider = ({ children }) => {
     console.log("Cerrando sesión...");
 
     localStorage.removeItem("user");
-
+      
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("cache_/")) localStorage.removeItem(key);
+      if (key.startsWith("cache_/") || key.startsWith("doctor_")) {
+        localStorage.removeItem(key);
+      }
     });
 
     setUser(null);
