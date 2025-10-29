@@ -20,7 +20,12 @@ export default function Login() {
     setError(null);
     try {
       const user = await login(data);
-      if (user.must_change_password === "1" || user.must_change_password === true) {
+
+      const debeCambiarClave = !!user.must_change_password;
+
+      console.log("Valor de must_change_password:", debeCambiarClave);
+      
+      if (debeCambiarClave) {
         navigate("/cambiarclave", { replace: true });
       } else {
         navigate("/prescripciones", { replace: true });

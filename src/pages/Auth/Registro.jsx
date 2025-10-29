@@ -23,8 +23,6 @@ export default function Registro() {
   const listaEspecialidades = especialidades.List || especialidades;
 
   const enviar = async (data) => {
-    console.log("Datos del formulario:", data);
-
     setIsLoading(true);
     setError(null);
     setSuccess(false);
@@ -45,7 +43,6 @@ export default function Registro() {
 
     try {
       await registerUser(payload);
-      console.log("Registro exitoso");
       setSuccess(true);
       setTimeout(() => navigate('/Login'), 1500);
     } catch (err) {

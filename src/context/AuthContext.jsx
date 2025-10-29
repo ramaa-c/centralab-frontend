@@ -76,7 +76,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log("Cerrando sesión...");
 
     localStorage.removeItem("user");
       

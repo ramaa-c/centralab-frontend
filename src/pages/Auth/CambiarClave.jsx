@@ -26,7 +26,7 @@ export default function CambiarClave() {
     setSuccess(false);
 
     try {
-      await cambiarClave(doctor.id, password);
+      await cambiarClave(doctor.id, data.password);
       setSuccess(true);
       localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: "0" }));
       setTimeout(() => navigate('/prescripciones'), 1500);

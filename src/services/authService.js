@@ -4,17 +4,28 @@ const LOGIN_ENDPOINT = "/auth/login";
 const DOCTORS_ENDPOINT = "/doctors";
 
 export const login = async (credentials) => {
-  const { identifier, password } = credentials;
+    const { identifier, password } = credentials;
 
-  const isEmail = identifier.includes('@');
-  const queryParam = isEmail ? `Email=${identifier}` : `DNI=${identifier}`;
-  const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
+    const queryParam = `idnumber=${identifier}`; 
+    
+    const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
+    
+    if (!searchResponse.data || searchResponse.data.List?.length === 0) {
+        throw new Error('El DNI o Email no se encuentra registrado.');
+    }
 
-  if (!searchResponse.data || searchResponse.data.List?.length === 0) {
-    throw new Error('El DNI o Email no se encuentra registrado.');
-  }
+    const isEmail = identifier.includes('@');
+    
+    const foundDoctor = searchResponse.data.List.find(doctor =>
+        (isEmail && doctor.Email === identifier) || (!isEmail && doctor.DNI === identifier)
+    );
 
-  const doctorId = searchResponse.data.List[0].MedicoID;
+    if (!foundDoctor) {
+        throw new Error('Error de consistencia. No se encontró el médico en los resultados.');
+    }
+
+    const doctorId = foundDoctor.MedicoID; 
+  console.log("ID del doctor:", doctorId);
 
   const response = await api.post(LOGIN_ENDPOINT, {
     doctor_id: identifier,
