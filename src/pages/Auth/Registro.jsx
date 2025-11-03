@@ -34,7 +34,7 @@ export default function Registro() {
       Denominacion: data.Denominacion.trim(),
       EspecialidadID: parseInt(data.EspecialidadID, 10),
       Matricula: data.Matricula.trim(),
-      FirmaTexto: data.FirmaTexto.trim(),
+      FirmaTexto: "",
       FirmaImagen: "",
       HashSeguridad: "",
       DebeCambiarClave: "1",
@@ -88,8 +88,8 @@ export default function Registro() {
                   {...register("Email", {
                     required: "Este campo es obligatorio",
                     pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Formato de email inválido"
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Formato de email inválido"
                     }
                   })}
                 />
@@ -182,29 +182,10 @@ export default function Registro() {
               {errors.Matricula && <p className="error-msg">{errors.Matricula.message}</p>}
             </div>
 
-            {/* Firma */}
-            <div className="field-wrapper">
-              <div className="identifier-container">
-                <i className="fa-solid fa-signature input-icon"></i>
-                <input
-                  type="text"
-                  placeholder="Ingresa tu Firma y Aclaración"
-                  className={`reg-input ${errors.FirmaTexto ? 'input-error' : ''}`}
-                  {...register("FirmaTexto", {
-                    required: "Este campo es obligatorio",
-                    minLength: { value: 3, message: "Debe tener al menos 3 caracteres" }
-                  })}
-                />
-              </div>
-              {errors.FirmaTexto && <p className="error-msg">{errors.FirmaTexto.message}</p>}
-            </div>
-
             {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
-            {/* Muestra el mensaje de error si existe */}
+
             {error && <p style={{ color: 'red', marginTop: '1rem', fontWeight: 'bold' }}>{error}</p>}
             
-            {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
-
             <div className="button-group" style={{ marginTop: '1.5rem' }}></div>
             <div className="button-group" style={{ marginTop: '1.5rem' }}>
               <button className="ingresar-btn" type="submit" disabled={isLoading}>

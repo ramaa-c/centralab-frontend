@@ -51,6 +51,57 @@ export const login = async (credentials) => {
   return { user: userToStore, token: apiResponseData.token };
 };
 
+export const recuperarClave = async (identificador) => {
+  try {
+    const isEmail = identificador.includes("@");
+    const queryParam = isEmail
+      ? `email=${encodeURIComponent(identificador)}`
+      : `idnumber=${identificador}`;
+
+    const searchResponse = await api.get(`${DOCTORS_ENDPOINT}?${queryParam}`);
+
+    if (!searchResponse.data || searchResponse.data.List?.length === 0) {
+      throw new Error("El DNI o Email no se encuentra registrado.");
+    }
+
+    const foundDoctor = searchResponse.data.List.find(
+      (doctor) =>
+        (isEmail && doctor.Email === identificador) ||
+        (!isEmail && doctor.DNI === identificador)
+    );
+
+    if (!foundDoctor) {
+      throw new Error("No se encontró el médico con los datos proporcionados.");
+    }
+
+    const doctorId = foundDoctor.MedicoID;
+    console.log("ID del doctor encontrado:", doctorId);
+    console.log("Datos del doctor encontrado:", foundDoctor);
+
+    const resetResponse = await api.put(`${DOCTORS_ENDPOINT}/${doctorId}/password`);
+
+    const updatePayload = {
+      ...foundDoctor,
+      DebeCambiarClave: "1",
+    };
+
+    const updateResponse = await api.put(DOCTORS_ENDPOINT, updatePayload);
+
+    return (
+      resetResponse.data ||
+      updateResponse.data ||
+      { message: "Se ha enviado un correo con la nueva contraseña." }
+    );
+  } catch (error) {
+    console.error("Error al recuperar clave:", error);
+    const msg =
+      error.response?.data?.message ||
+      error.message ||
+      "Error al recuperar la clave.";
+    throw new Error(msg);
+  }
+};
+
 export const cambiarClave = async (doctorId, newPassword) => {
   try {
     const response = await api.put(`${DOCTORS_ENDPOINT}/${doctorId}/password:change`, {

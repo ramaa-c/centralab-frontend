@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Auth/Login';
 import Registro from './pages/Auth/Registro';
+import RecuperarClave from './pages/Auth/RecuperarClave';
 import CambiarClave from './pages/Auth/CambiarClave';
 import PerfilUsuario from './pages/Perfil/PerfilUsuario';
 import Prescripciones from "./pages/Recetas/Prescripciones";
@@ -37,6 +38,14 @@ function App() {
             element={
               <PublicRoute>
                 <Registro />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/recuperarclave"
+            element={
+              <PublicRoute>
+                <RecuperarClave />
               </PublicRoute>
             }
           />

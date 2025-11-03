@@ -100,7 +100,7 @@ export default function Login() {
                 </p>
               )}
             </div>
-            <Link to="/" className="forgot-password-link">
+            <Link to="/recuperarclave" className="forgot-password-link">
               ¿Olvidó su contraseña?
             </Link>
 
