@@ -22,37 +22,47 @@ export default function Registro() {
 
   const listaEspecialidades = especialidades.List || especialidades;
 
-  const enviar = async (data) => {
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
+const enviar = async (data) => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
 
-    const payload = {
-      MedicoID: 0,
-      Email: data.Email.trim(),
-      DNI: data.DNI.trim(),
-      Denominacion: data.Denominacion.trim(),
-      EspecialidadID: parseInt(data.EspecialidadID, 10),
-      Matricula: data.Matricula.trim(),
-      FirmaTexto: "",
-      FirmaImagen: "",
-      HashSeguridad: "",
-      DebeCambiarClave: "1",
-      MomentoAlta: new Date().toISOString().slice(0, 19),
-    };
+    const payload = {
+      MedicoID: 0,
+      Email: data.Email.trim(),
+      DNI: data.DNI.trim(),
+      Denominacion: data.Denominacion.trim(),
+      EspecialidadID: parseInt(data.EspecialidadID, 10),
+      Matricula: data.Matricula.trim(),
+      FirmaTexto: "",
+      FirmaImagen: "",
+      HashSeguridad: "",
+      DebeCambiarClave: "1",
+      MomentoAlta: new Date().toISOString().slice(0, 19),
+    };
 
-    try {
+    try {
       await registerUser(payload);
       setSuccess(true);
       setTimeout(() => navigate('/Login'), 1500);
     } catch (err) {
       console.error("Error detallado al registrar:", err);
-      const userFriendlyMessage = 'Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.';
+      let userFriendlyMessage = 'Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.';
+      
+      if (err.message && err.message.includes("Ya existe un médico con ese email")) {
+          userFriendlyMessage = "Usuario ya registrado! El Email ya está en uso.";
+      } else if (err.message && err.message.includes("Ya existe un médico con ese número de identificación")) {
+          userFriendlyMessage = "Usuario ya registrado! El DNI ya está en uso.";
+      }
+      else if (err.message && err.message.includes("Network Error")) {
+          userFriendlyMessage = "Error de conexión. Por favor, revisa tu red.";
+      } 
+      
       setError(userFriendlyMessage); 
     } finally {
       setIsLoading(false);
     }
-  };
+  };
 
   return (
     <div className="login-page">
@@ -185,7 +195,7 @@ export default function Registro() {
 
             {success && <p style={{ color: 'green', marginTop: '1rem' }}>¡Registro exitoso! Redirigiendo...</p>}
 
-            {error && <p style={{ color: 'red', marginTop: '1rem', fontWeight: 'bold' }}>{error}</p>}
+            {error && <p style={{ color: 'red', marginTop: '1rem'}}>{error}</p>}
             
             <div className="button-group" style={{ marginTop: '1.5rem' }}></div>
             <div className="button-group" style={{ marginTop: '1.5rem' }}>
