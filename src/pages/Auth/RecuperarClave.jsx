@@ -12,34 +12,28 @@ const RecuperarClave = () => {
   const handleRecuperarClave = async (e) => {
     e.preventDefault();
     setError('');
-    setMensaje(''); // Se limpia al inicio
+    setMensaje('');
 
     if (!identificador.trim()) {
       setError('Por favor, ingrese su email o DNI.');
       return;
     }
 
-    // Mensaje de éxito genérico para EVITAR enumeración de usuarios.
-    const successFallbackMessage = 'Si el usuario está registrado, recibirá un correo con instrucciones para restablecer la clave.';
+    const successFallbackMessage = 'Contraseña restablecida, rebibirá un correo con la nueva clave.';
 
     try {
       setLoading(true);
-      await recuperarClave(identificador); // No necesitamos 'response' si el único resultado es el mensaje de éxito genérico.
+      await recuperarClave(identificador);
       
-      // Si llega aquí, fue un éxito (o éxito simulado por seguridad)
       setMensaje(successFallbackMessage); 
       
     } catch (err) {
-      // 1. Registra el error completo en la consola para el desarrollador.
       console.error("Error detallado al recuperar clave:", err);
       
-      // 2. Limpia cualquier mensaje de éxito que pudiera haber quedado (¡CLAVE!)
       setMensaje(''); 
       
-      // 3. Define el mensaje genérico y SEGURO para el usuario.
-      const userFriendlyError = 'Hubo un problema al procesar su solicitud. Por favor, verifique el Email/DNI e intente nuevamente.';
+      const userFriendlyError = 'Email/DNI no encontrado.';
       
-      // 4. Establece el mensaje genérico en el estado 'error'.
       setError(userFriendlyError);
 
     } finally {
