@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const { user: loggedInUser } = await loginService(credentials);
-
+      console.log("Usuario logueado:", loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       setUser(loggedInUser);
 
@@ -76,7 +76,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log("Cerrando sesión...");
 
     localStorage.removeItem("user");
       
@@ -94,6 +93,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     isLoggedIn,
     login,
     logout,

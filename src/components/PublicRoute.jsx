@@ -3,9 +3,13 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function PublicRoute({ children }) {
-  const { isLoggedIn } = useAuth();
+  const { user, isLoggedIn } = useAuth();
 
-  if (isLoggedIn) {
+  if (isLoggedIn && user) {
+
+    if (user.must_change_password || user.must_change_password === "1") {
+      return <Navigate to="/cambiarclave" replace />;
+    }
     return <Navigate to="/prescripciones" replace />;
   }
 

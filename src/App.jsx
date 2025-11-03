@@ -2,10 +2,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Auth/Login';
 import Registro from './pages/Auth/Registro';
+import RecuperarClave from './pages/Auth/RecuperarClave';
 import CambiarClave from './pages/Auth/CambiarClave';
 import PerfilUsuario from './pages/Perfil/PerfilUsuario';
 import Prescripciones from "./pages/Recetas/Prescripciones";
 import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedChangePasswordRoute from './components/ProtectedChangePasswordRoute';
 import PublicRoute from './components/PublicRoute';
 import SideBar from "./components/SideBar.jsx";
 import Resultados from './pages/Perfil/Resultados';
@@ -40,11 +42,19 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route
+            path="/recuperarclave"
+            element={
+              <PublicRoute>
+                <RecuperarClave />
+              </PublicRoute>
+            }
+          />
 
           {/* Rutas protegidas */}
           <Route
             path="/cambiarclave"
-            element={<ProtectedLayout><CambiarClave /></ProtectedLayout>}
+            element={<ProtectedChangePasswordRoute><CambiarClave /></ProtectedChangePasswordRoute>}
           />
           <Route
             path="/prescripciones"

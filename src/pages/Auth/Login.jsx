@@ -18,12 +18,16 @@ export default function Login() {
   const enviar = async (data) => {
     setIsLoading(true);
     setError(null);
+    console.log("Intentando ingresar con datos:", data);
     try {
       const user = await login(data);
-      if (user.must_change_password === "1" || user.must_change_password === true) {
-        navigate("/cambiarclave", { replace: true });
+
+      const debeCambiarClave = !!user.must_change_password;
+      
+      if (debeCambiarClave) {
+        console.log("Navegando a /cambiarclave");
       } else {
-        navigate("/prescripciones", { replace: true });
+        console.log("Navegando a /prescripciones");
       }
     } catch (err) {
       setError(err.message || "Credenciales incorrectas.");
@@ -95,7 +99,7 @@ export default function Login() {
                 </p>
               )}
             </div>
-            <Link to="/" className="forgot-password-link">
+            <Link to="/recuperarclave" className="forgot-password-link">
               ¿Olvidó su contraseña?
             </Link>
 

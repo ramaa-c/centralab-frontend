@@ -5,11 +5,13 @@ import { cambiarClave } from '../../services/authService';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import "../../styles/login.css"; 
 import centraLabLogo from '../../assets/images/cl_logo.jpg';
+import { useAuth } from '../../context/AuthContext';
 
 
 export default function CambiarClave() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm(); 
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,16 +22,19 @@ export default function CambiarClave() {
   const doctor = JSON.parse(localStorage.getItem('user'));
 
   const enviar = async (data) => {
-    
     setIsLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      await cambiarClave(doctor.id, password);
-      setSuccess(true);
-      localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: "0" }));
-      setTimeout(() => navigate('/prescripciones'), 1500);
+      await cambiarClave({
+        doctorId: doctor.id,
+        password: data.password,
+      });
+      const updatedUser = { ...doctor, must_change_password: false };
+      localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: false }));
+      setUser(updatedUser);
+      navigate('/prescripciones', { replace: true });
     } catch (err) {
       setError(err.message || "Error al cambiar la contraseña.");
     } finally {
