@@ -31,7 +31,9 @@ export default function CambiarClave() {
       localStorage.setItem('user', JSON.stringify({ ...doctor, must_change_password: "0" }));
       setTimeout(() => navigate('/prescripciones'), 1500);
     } catch (err) {
-      setError(err.message || "Error al cambiar la contraseña.");
+      console.error("Error detallado al cambiar clave:", err);
+      const userFriendlyMessage = 'Ha ocurrido un error inesperado al intentar cambiar la contraseña. Por favor, inténtalo de nuevo.';
+      setError(userFriendlyMessage); 
     } finally {
       setIsLoading(false);
     }

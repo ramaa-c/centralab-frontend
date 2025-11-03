@@ -42,15 +42,16 @@ export default function Registro() {
     };
 
     try {
-      await registerUser(payload);
-      setSuccess(true);
-      setTimeout(() => navigate('/Login'), 1500);
-    } catch (err) {
-      console.error("Error al registrar:", err);
-      setError(err.message || 'Error en el registro');
-    } finally {
-      setIsLoading(false);
-    }
+      await registerUser(payload);
+      setSuccess(true);
+      setTimeout(() => navigate('/Login'), 1500);
+    } catch (err) {
+      console.error("Error detallado al registrar:", err);
+      const userFriendlyMessage = 'Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.';
+      setError(userFriendlyMessage); 
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

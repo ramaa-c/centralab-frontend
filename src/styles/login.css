@@ -322,3 +322,61 @@
     box-shadow: 0 0 0 1px #e63946 !important; 
 }
 
+
+
+.login-card.single-column {
+
+    display: block !important; 
+    min-height: 370px; 
+    text-align: center; 
+}
+
+
+.login-card.single-column .card-center-content {
+    align-items: center; 
+    padding: 0; 
+}
+
+
+.login-card.single-column .login-form {
+    width: 100%; 
+    max-width: 350px; 
+    margin: 0 auto; 
+}
+
+
+
+.login-card.single-column .button-group {
+    justify-content: center; 
+    flex-direction: column; 
+    gap: 15px; 
+    width: 100%; 
+}
+
+
+.login-card.single-column .button-group .ingresar-btn,
+.login-card.single-column .button-group .registro-btn {
+    width: 100% !important; 
+}
+
+
+.login-card.single-column .identifier-container {
+    margin-bottom: 25px; 
+}
+.login-card.single-column .input-icon {
+
+    transform: translateY(-50%) !important; 
+
+}
+
+.login-card.single-column .field-wrapper {
+    margin-bottom: 20px !important; 
+}
+
+.login-card.single-column .error-msg {
+    position: relative !important; 
+    bottom: auto !important;
+    left: auto !important;
+    text-align: left;
+    margin-top: -10px; 
+}

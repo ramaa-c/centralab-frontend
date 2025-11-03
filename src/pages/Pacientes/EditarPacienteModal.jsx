@@ -74,10 +74,12 @@ export default function EditarPacienteModal({ paciente, onClose, onSuccess }) {
             onSuccess();
             onClose();
         } catch (err) {
-            setError(err.message || 'Error al actualizar el paciente');
+        console.error("Error detallado al actualizar paciente:", err);
+        const userFriendlyMessage = 'Ha ocurrido un error inesperado al guardar los cambios. Por favor, inténtalo de nuevo.';
+        setError(userFriendlyMessage); 
         } finally {
-            setIsLoading(false);
-        }
+        setIsLoading(false);
+    }
     };
 
     const handleMouseDown = (e) => {
