@@ -1,0 +1,36 @@
+
+.card-right-column.registration-mode {
+    padding: 1.5rem 2rem; 
+    justify-content: flex-start;
+    overflow-y: auto;
+}
+
+.identifier-container {
+    margin-bottom: 10px; 
+}
+
+.reg-input { 
+    width: 100%;
+    padding: 12px 15px; 
+    padding-left: 40px; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box; 
+    padding-left: 40px !important;
+    margin-top: 1px; 
+    margin-bottom: 15px;
+    
+    background-color: white; 
+    color: #333;
+}
+
+.input-icon {
+    transform: translateY(-85%) !important; 
+    top: 50%;
+    
+}
+
+.select-container .reg-input {
+    margin-top: 1px; 
+}

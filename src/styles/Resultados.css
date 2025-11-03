@@ -1,0 +1,134 @@
+
+.results-view-container {
+    padding: 20px;
+    width: 100%;
+}
+
+.results-main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; 
+}
+
+
+.results-view-container .view-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+
+.results-filter-panel {
+    flex-shrink: 0; 
+    width: 250px; 
+    padding: 20px;
+   
+}
+
+.results-filter-panel .filter-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #0198CC;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #DDDCDC;
+    padding-bottom: 5px;
+}
+
+.results-filter-panel .filter-group {
+    margin-bottom: 15px;
+}
+
+.results-filter-panel label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.filter-input, .filter-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    background-color: #FFFFFF;
+    color: #333;
+}
+
+
+
+
+.btn-filter-action {
+    width: 100%;
+    padding: 10px;
+    background-color: #0198CC;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+
+.results-table-panel {
+    flex-grow: 1;
+    min-width: 0;
+
+}
+
+
+.table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+.header-btn {
+    padding: 8px 12px;
+    background-color: #DDDCDC; 
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+.header-btn i {
+    margin-right: 5px;
+    color: #0198CC; 
+}
+
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+
+.status-En { 
+    background-color: #ffe0b2;
+    color: #ff9800;
+}
+.status-Parcial {
+    background-color: #bbdefb;
+    color: #2196f3;
+}
+.status-Finalizado {
+    background-color: #c8e6c9;
+    color: #4caf50;
+}

@@ -1,0 +1,226 @@
+
+@import url("./login.css"); 
+
+.content-area {
+    margin-left: 250px; 
+    flex-grow: 1; 
+    width: calc(100% - 250px); 
+    box-sizing: border-box; 
+    padding: 20px; 
+}
+
+.profile-page-wrapper {
+    background-color: #F3F2F3; 
+    min-height: 100vh; 
+    width: 100%;      
+    padding: 30px 20px; 
+    box-sizing: border-box; 
+}
+
+.profile-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    color: #333 !important;
+    
+  
+    max-width: 900px;
+    width: 100%;     
+    margin: 0 auto;
+    padding: 30px;
+    display: block !important; 
+}
+
+.profile-card h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333 !important; 
+    margin-bottom: 25px;
+    
+    border-bottom: 2px solid #0198CC;
+    padding-bottom: 10px;
+}
+
+.profile-main-split {
+    display: flex;
+    gap: 30px; 
+    align-items: stretch;
+    margin-bottom: 30px;
+}
+
+.profile-data-column {
+    flex-basis: 60%; 
+    flex-grow: 1;
+}
+
+.profile-est-column {
+    flex-basis: 40%; 
+    flex-shrink: 0; 
+    
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; 
+    row-gap: 15px;
+    margin-bottom: 30px;
+}
+
+.profile-card-input {
+    
+    width: 100% !important; 
+    padding: 10px 15px !important;
+    box-sizing: border-box !important;
+    background-color: #f9f9f9; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    
+    font-size: 1rem !important; 
+    color: #333 !important; 
+    
+    
+    margin-bottom: 0; 
+}
+
+.profile-card label {
+    display: block;
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+.profile-grid > div:last-child {
+    grid-column: 1 / -1; 
+}
+
+.profile-card img {
+    margin-top: 15px; 
+    border: 1px solid #DDDCDC;
+    border-radius: 4px;
+    object-fit: contain; 
+    padding: 5px; 
+    background-color: white; 
+}
+
+.establishment-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.establishment-section ul {
+    list-style: none;     
+    padding-left: 0;     
+    margin-left: 0;      
+    margin-top: 15px;   
+}
+
+.est-control-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.est-item {
+    background-color: #F3F2F3; 
+    border: 1px solid #DDDCDC; 
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.est-item label {
+    font-weight: 500; 
+    color: #333;
+    cursor: pointer;
+}
+
+.est-item label.active-est {
+    color: #0198CC !important; 
+    font-weight: 700;
+}
+
+.est-item button {
+    color: #dc3545; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+
+.save-button-wrapper {
+    text-align: center;
+    padding-top: 25px; 
+    margin-top: 30px;
+    border-top: 1px solid #E0E0E0; 
+}
+
+.ingresar-btn {
+   
+    box-shadow: 0 5px 15px -5px rgba(1, 152, 204, 0.6); 
+}
+
+.btn-add-est {
+    background-color: #0198CC;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+}
+
+
+
+.hidden-file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.file-upload-label {
+    display: block;
+    width: 100%;
+    background-color: #f9f9f9; 
+    border: 1px dashed #ccc; 
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left; 
+    padding: 10px 15px 10px 60px; 
+    margin-top: 5px; 
+    box-sizing: border-box;
+    transition: background-color 0.2s;
+}
+
+.file-upload-label:hover {
+    background-color: #e0e0e0;
+}
+
+
+.custom-placeholder {
+    font-size: 1rem;
+    color: #666; 
+    font-weight: 500;
+}
+
+.profile-card img {
+    display: block;
+    max-width: 400px; 
+    max-height: 200px;  
+    width: auto;       
+    height: auto;       
+    margin-top: 15px; 
+    border: 1px solid #DDDCDC;
+    border-radius: 4px;
+    object-fit: contain; 
+    padding: 5px; 
+    background-color: white; 
+}
