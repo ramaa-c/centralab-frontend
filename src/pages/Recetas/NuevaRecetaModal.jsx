@@ -231,8 +231,10 @@ const {
       return true;
 
     } catch (err) {
-      console.error("Error al enviar la receta:", err);
-      setError(err.message);
+      console.error("Error detallado al enviar la receta:", err);
+      const userFriendlyMessage = 'Ha ocurrido un error inesperado al registrar la receta. Por favor, inténtalo de nuevo.';
+      setError(userFriendlyMessage); 
+      
       return false;
     }
   };

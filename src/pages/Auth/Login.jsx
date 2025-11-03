@@ -30,8 +30,16 @@ export default function Login() {
         console.log("Navegando a /prescripciones");
       }
     } catch (err) {
-      setError(err.message || "Credenciales incorrectas.");
-      console.error("Falló al ingresar:", err);
+      console.error("Falló al ingresar (Detalle técnico):", err);
+      let userFriendlyMessage = "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.";
+      if (err.response?.status === 401 || err.response?.status === 403) {
+          userFriendlyMessage = "Contraseña o Usuario incorrecto";
+      } else if (err.message && err.message.includes("Network Error")) {
+          userFriendlyMessage = "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.";
+      }
+      
+      setError(userFriendlyMessage); 
+
     } finally {
       setIsLoading(false);
     }

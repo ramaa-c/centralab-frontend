@@ -36,7 +36,9 @@ export default function CambiarClave() {
       setUser(updatedUser);
       navigate('/prescripciones', { replace: true });
     } catch (err) {
-      setError(err.message || "Error al cambiar la contraseña.");
+      console.error("Error detallado al cambiar clave:", err);
+      const userFriendlyMessage = 'Ha ocurrido un error inesperado al intentar cambiar la contraseña. Por favor, inténtalo de nuevo.';
+      setError(userFriendlyMessage); 
     } finally {
       setIsLoading(false);
     }

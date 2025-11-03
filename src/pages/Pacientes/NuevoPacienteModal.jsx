@@ -61,10 +61,13 @@ export default function NuevoPacienteModal({ onClose, onSuccess }) {
             onClose();
 
         } catch (err) {
-            setError(err.message || 'Error al crear el paciente');
+        // 1. (DEBUG) Registra el error completo en la consola para el desarrollador
+        console.error("Error detallado al crear paciente:", err);
+        const userFriendlyMessage = 'Ha ocurrido un error inesperado al registrar el paciente. Por favor, verifica los datos e inténtalo de nuevo.';
+        setError(userFriendlyMessage); 
         } finally {
-            setIsLoading(false);
-        }
+        setIsLoading(false);
+    }
     };
     const handleMouseDown = (e) => {
     if (e.target === e.currentTarget) {
