@@ -18,17 +18,16 @@ export default function Login() {
   const enviar = async (data) => {
     setIsLoading(true);
     setError(null);
+    console.log("Intentando ingresar con datos:", data);
     try {
       const user = await login(data);
 
       const debeCambiarClave = !!user.must_change_password;
-
-      console.log("Valor de must_change_password:", debeCambiarClave);
       
       if (debeCambiarClave) {
-        navigate("/cambiarclave", { replace: true });
+        console.log("Navegando a /cambiarclave");
       } else {
-        navigate("/prescripciones", { replace: true });
+        console.log("Navegando a /prescripciones");
       }
     } catch (err) {
       setError(err.message || "Credenciales incorrectas.");
