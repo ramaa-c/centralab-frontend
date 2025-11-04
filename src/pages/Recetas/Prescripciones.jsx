@@ -12,7 +12,6 @@ import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
 import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
 import axios from "axios";
 import "../../styles/prescripciones.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
 
 const Prescripciones = () => {

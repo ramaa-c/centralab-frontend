@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css"; 
 import "../../styles/login.css"; 
 //import { useApi } from "../../hooks/useApi"; 
 import "../../styles/Resultados.css";

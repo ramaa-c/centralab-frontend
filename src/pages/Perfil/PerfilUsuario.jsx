@@ -6,7 +6,6 @@ import {
   removeDoctorEstablishment,
 } from "../../services/doctorService.js";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/perfil.css";
 import "../../styles/login.css";
 

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/login.css";
 import centraLabLogo from "../../assets/images/centraLab_nuevo.png";
 
