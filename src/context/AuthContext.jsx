@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       }
     });
     Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith("patients_")) {
+      if (key.startsWith("patients_") || key.startsWith("prescriptions_")) {
         sessionStorage.removeItem(key);
       }
     });

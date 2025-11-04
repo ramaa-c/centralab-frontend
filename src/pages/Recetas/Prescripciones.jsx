@@ -189,6 +189,11 @@ const Prescripciones = () => {
   const prevScrollHeight = useRef(0);
   const isPaginating = useRef(false);
 
+  const prescripcionesScrollRef = useRef(null);
+  const prevPrescScrollTop = useRef(0);
+  const prevPrescScrollHeight = useRef(0);
+  const isPrescPaginating = useRef(false);
+
   const handleLoadMorePacientes = () => {
     if (pacientesScrollRef.current) {
       prevScrollTop.current = pacientesScrollRef.current.scrollTop;
@@ -196,6 +201,16 @@ const Prescripciones = () => {
       isPaginating.current = true;
     }
     loadMorePacientes();
+  };
+
+  const handleLoadMorePrescripciones = () => {
+    if (prescripcionesScrollRef.current) {
+      prevPrescScrollTop.current = prescripcionesScrollRef.current.scrollTop;
+      prevPrescScrollHeight.current =
+        prescripcionesScrollRef.current.scrollHeight;
+      isPrescPaginating.current = true;
+    }
+    loadMore();
   };
 
   useLayoutEffect(() => {
@@ -214,6 +229,23 @@ const Prescripciones = () => {
       prevScrollHeight.current = 0;
     }
   }, [pacientes]);
+
+  useLayoutEffect(() => {
+    if (prescripcionesScrollRef.current && isPrescPaginating.current) {
+      const area = prescripcionesScrollRef.current;
+
+      const newScrollHeight = area.scrollHeight;
+      const heightDifference = newScrollHeight - prevPrescScrollHeight.current;
+
+      if (heightDifference > 0) {
+        area.scrollTop = prevPrescScrollTop.current + heightDifference;
+      }
+
+      isPrescPaginating.current = false;
+      prevPrescScrollTop.current = 0;
+      prevPrescScrollHeight.current = 0;
+    }
+  }, [prescripciones]);
 
   return (
     <div className="prescriptions-view-bg">
@@ -380,8 +412,8 @@ const Prescripciones = () => {
                       </>
                     ) : (
                       <>
-                        <i className="fa-solid fa-angles-down mr-2"></i>
-                        Cargar más pacientes
+                        <i className="fa-solid fa-caret-down"></i>
+                        Cargar más
                       </>
                     )}
                   </button>
@@ -490,6 +522,28 @@ const Prescripciones = () => {
                   </tbody>
                 </table>
               </div>
+              {/* INICIO: Botón Cargar Más Prescripciones */}
+              {hasMore && (
+                <div style={{ textAlign: "center", padding: "15px 0" }}>
+                  <button
+                    onClick={handleLoadMorePrescripciones}
+                    className="btn-primary"
+                    disabled={loadingPrescripciones}
+                  >
+                    {loadingPrescripciones ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                        Cargando más...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-caret-down"></i>
+                        Cargar más
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </section>
