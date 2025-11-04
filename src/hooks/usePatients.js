@@ -1,116 +1,164 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { obtenerPacientes } from "../services/patientService";
 
-const cache = new Map();
+export const usePatients = (options = {}) => {
+  const { ttl = 300000, pageSize = 15, debounceMs = 300 } = options;
 
-export const usePatients = (doctorId, options = {}) => {
-  const {
-    ttl = 300000,
-    pageSize = 15,
-    debounceMs = 300,
-  } = options;
+  const cacheRef = useRef(new Map());
 
-  const [patients, setPatients] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [searchDni, setSearchDni] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const debounceTimer = useRef(null);
+  const [patients, setPatients] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [searchDni, setSearchDni] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const cacheKey = `patients_${doctorId || "all"}_${searchDni || "none"}`;
+  const debounceTimer = useRef(null);
+  const loadingRef = useRef(loading);
 
-  const fetchData = useCallback(
-    async ({ reset = false } = {}) => {
-      if (loading) return;
-      
-      const currentSearch = searchDni.trim();
-      
-      if (currentSearch.length > 0 && currentSearch.length < 5 && reset) {
-          setPatients([]);
-          setHasMore(false);
-          setLoading(false);
-          return;
-      }
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
 
-      const currentPage = reset ? 1 : page;
-      const cached = cache.get(cacheKey);
+  const cacheKey = useMemo(
+    () => `patients_search_${searchDni || "none"}`,
+    [searchDni]
+  );
 
-      if (!reset && cached && Date.now() - cached.timestamp < ttl) {
-        setPatients(cached.data);
-        setHasMore(cached.hasMore);
-        return;
-      }
+  const fetchData = useCallback(
+    async ({ reset = false, targetPage = 1 } = {}) => {
+      if (loadingRef.current) return;
 
-      try {
-        setLoading(true);
+      const currentSearch = searchDni.trim();
+      if (currentSearch.length > 0 && currentSearch.length < 5) {
+        if (reset) {
+          setPatients([]);
+          setHasMore(false);
+        }
+        setLoading(false);
+        return;
+      }
 
-        const { pacientes, meta } = await obtenerPacientes({
-          doctor_id: doctorId,
-          page: currentPage,
-          page_size: pageSize,
-          id_number: currentSearch,
-        });
+      const currentPage = reset ? 1 : targetPage;
+      const cache = cacheRef.current;
+      const cached = cache.get(cacheKey);
+      const now = Date.now();
 
-        setPatients((prev) =>
-          reset ? pacientes : [...prev, ...pacientes]
-        );
+      const isCacheValid =
+        !reset &&
+        cached &&
+        now - cached.timestamp < ttl &&
+        (!cached.lastPage || currentPage <= cached.lastPage);
 
-        const more = meta?.has_next_page ?? pacientes.length === pageSize;
-        setHasMore(more);
+      if (isCacheValid) {
+        setPatients(cached.data);
+        setHasMore(cached.hasMore);
+        setPage(cached.lastPage);
+        return;
+      }
 
-        cache.set(cacheKey, {
-          data: reset ? pacientes : [...(cached?.data || []), ...pacientes],
-          hasMore: more,
-          timestamp: Date.now(),
-        });
-      } catch (err) {
-        console.error("❌ Error al obtener pacientes:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [doctorId, page, pageSize, searchDni, ttl, loading]
-  );
+      try {
+        setLoading(true);
+        const { pacientes, meta } = await obtenerPacientes({
+          page: currentPage,
+          page_size: pageSize,
+          id_number: currentSearch,
+        });
 
-  useEffect(() => {
-    clearTimeout(debounceTimer.current);
-    
+        setPatients((prev) => (reset ? pacientes : [...prev, ...pacientes]));
+        const more = meta?.has_next_page ?? pacientes.length === pageSize;
+        setHasMore(more);
+
+        if (!reset) setPage((prev) => prev + 1);
+
+        cache.set(cacheKey, {
+          data: reset ? pacientes : [...(cached?.data || []), ...pacientes],
+          hasMore: more,
+          lastPage: currentPage,
+          timestamp: now,
+        });
+
+        const validEntries = [...cache.entries()].filter(
+          ([, v]) => now - v.timestamp < ttl
+        );
+        sessionStorage.setItem("patients_cache", JSON.stringify(validEntries));
+      } catch (err) {
+        console.error("Error al obtener pacientes:", err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize, searchDni, ttl, cacheKey]
+  );
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !loadingRef.current) {
+      const nextPage = page + 1;
+      fetchData({ reset: false, targetPage: nextPage });
+    }
+  }, [hasMore, page, fetchData]);
+
+  useEffect(() => {
+    clearTimeout(debounceTimer.current);
     const currentSearchLength = searchDni.trim().length;
 
     if (currentSearchLength > 0 && currentSearchLength < 5) {
-      setPatients([]);
-      setHasMore(false);
-      return;
-    }
+      setPatients([]);
+      setHasMore(false);
+      return;
+    }
 
-    debounceTimer.current = setTimeout(() => {
-      fetchData({ reset: true });
-      setPage(1);
-    }, debounceMs);
+    if (currentSearchLength === 0) {
+      const cache = cacheRef.current;
+      const cachedBase = cache.get("patients_search_none");
+      if (cachedBase && cachedBase.data?.length) {
+        setPatients(cachedBase.data);
+        setHasMore(cachedBase.hasMore);
+        setPage(cachedBase.lastPage || 1);
+        return;
+      }
+      setHasMore(true);
+    }
 
-    return () => clearTimeout(debounceTimer.current);
-  }, [searchDni]);
+    debounceTimer.current = setTimeout(() => {
+      setPage(1);
+      fetchData({ reset: true });
+    }, debounceMs);
 
-  const loadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      setPage((prev) => prev + 1);
-    }
-  }, [hasMore, loading]);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchDni, debounceMs, fetchData]);
 
-  useEffect(() => {
-    if (page > 1) fetchData();
-  }, [page]);
+  const refresh = useCallback(() => {
+    setPage(1);
+    fetchData({ reset: true });
+  }, [fetchData]);
 
-  return {
-    patients,
-    loading,
-    error,
-    hasMore,
-    searchDni,
-    setSearchDni,
-    loadMore,
-    refresh: () => fetchData({ reset: true }),
-  };
+  useEffect(() => {
+    const stored = sessionStorage.getItem("patients_cache");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const now = Date.now();
+      const validEntries = parsed.filter(([, v]) => now - v.timestamp < ttl);
+      const restored = new Map(validEntries);
+      restored.forEach((v, k) => cacheRef.current.set(k, v));
+    }
+  }, [ttl]);
+
+  useEffect(() => {
+    return () => {
+      cacheRef.current.clear();
+    };
+  }, []);
+
+  return {
+    patients,
+    loading,
+    error,
+    hasMore,
+    searchDni,
+    setSearchDni,
+    loadMore,
+    refresh,
+  };
 };

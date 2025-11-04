@@ -207,7 +207,7 @@ export default function PerfilUsuario() {
 
               {/* Campo: Firma Texto */}
               <div>
-                <label className="font-medium">Firma Texto</label>
+                <label className="font-medium">Aclaración de firma</label>
                 <input
                   name="FirmaTexto"
                   value={doctor.FirmaTexto || ""}

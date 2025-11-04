@@ -53,7 +53,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const { user: loggedInUser } = await loginService(credentials);
-      console.log("Usuario logueado:", loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       setUser(loggedInUser);
 
@@ -82,6 +81,11 @@ export const AuthProvider = ({ children }) => {
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith("cache_/") || key.startsWith("doctor_")) {
         localStorage.removeItem(key);
+      }
+    });
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("patients_")) {
+        sessionStorage.removeItem(key);
       }
     });
 
