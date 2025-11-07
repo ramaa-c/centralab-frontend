@@ -22,12 +22,13 @@ export default function Registro() {
 
   const listaEspecialidades = especialidades.List || especialidades;
 
-  const enviar = async (data) => {
+const enviar = async (data) => {
     setIsLoading(true);
     setError(null);
     setSuccess(false);
 
     const payload = {
+      // ... (Tu objeto payload)
       MedicoID: 0,
       Email: data.Email.trim(),
       DNI: data.DNI.trim(),
@@ -42,16 +43,24 @@ export default function Registro() {
     };
 
     try {
-      await registerUser(payload);
-      setSuccess(true);
-      setTimeout(() => navigate('/Login'), 1500);
-    } catch (err) {
-      console.error("Error detallado al registrar:", err);
-      const userFriendlyMessage = 'Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.';
-      setError(userFriendlyMessage); 
-    } finally {
-      setIsLoading(false);
-    }
+      await registerUser(payload);
+      setSuccess(true);
+      setTimeout(() => navigate('/Login'), 1500);
+    } catch (err) {
+      console.error("Error detallado al registrar:", err);
+      let userFriendlyMessage = 'Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.';
+      
+      if (err.message && err.message.includes("Ya existe un médico con ese email")) {
+          userFriendlyMessage = "Usuario ya registrado! El Email ya está en uso.";
+      } 
+      else if (err.message && err.message.includes("Network Error")) {
+          userFriendlyMessage = "Error de conexión. Por favor, revisa tu red.";
+      } 
+      
+      setError(userFriendlyMessage); 
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
