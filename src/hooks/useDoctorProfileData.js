@@ -18,14 +18,12 @@ export const useDoctorProfileData = (doctorId, options = {}) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('useDoctorProfileData: doctorId actual:', doctorId);
     if (!doctorId) return;
 
     const cacheKey = `doctor_profile_${doctorId}`;
     const cached = cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < ttl) {
-      console.log("Cargando perfil del cache:", cacheKey);
       setProfile(cached.profile);
       setDoctorEstablishments(cached.doctorEstablishments);
       setAllEstablishments(cached.allEstablishments);
@@ -39,7 +37,6 @@ export const useDoctorProfileData = (doctorId, options = {}) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log("Cargando datos del perfil del doctor:", doctorId);
 
         const [profileRes, doctorEstRes, allEstRes, specialtiesRes] =
           await Promise.all([

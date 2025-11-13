@@ -1,8 +1,6 @@
 
 @import url("./login.css"); 
 
-
-
 .content-area {
     margin-left: 250px; 
     flex-grow: 1; 
@@ -19,7 +17,6 @@
     box-sizing: border-box; 
 }
 
-
 .profile-card {
     background: white;
     border-radius: 10px;
@@ -34,7 +31,6 @@
     display: block !important; 
 }
 
-
 .profile-card h2 {
     font-size: 1.8rem;
     font-weight: 700;
@@ -44,7 +40,6 @@
     border-bottom: 2px solid #0198CC;
     padding-bottom: 10px;
 }
-
 
 .profile-main-split {
     display: flex;
@@ -71,9 +66,6 @@
     row-gap: 15px;
     margin-bottom: 30px;
 }
-
-
-
 
 .profile-card-input {
     
@@ -110,7 +102,6 @@
     padding: 5px; 
     background-color: white; 
 }
-
 
 .establishment-section h3 {
     font-size: 1.2rem;
@@ -219,9 +210,6 @@
     color: #666; 
     font-weight: 500;
 }
-
-
-
 
 .profile-card img {
     display: block;

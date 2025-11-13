@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useDoctorEstablishments } from "../hooks/useDoctorEstablishments";
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useAuth } from "../context/AuthContext"; 
 import ConfirmModal from "../components/ConfirmModal.jsx";
 import centraLabLogo from "../assets/images/centraLab_nuevo.png";
@@ -97,8 +96,8 @@ export default function SideBar({ children }) {
                     </Link>
                     
                     <Link 
-                        to="" 
-                        className={`nav-link ${isActive('') ? 'active' : ''}`}
+                        to="/resultados" 
+                        className={`nav-link ${isActive('/resultados') ? 'active' : ''}`}
                     >
                         <i className="fa-solid fa-flask nav-icon"></i> Resultados
                     </Link>
