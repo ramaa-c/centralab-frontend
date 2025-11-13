@@ -31,6 +31,8 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
   const [doctorData, setDoctorData] = useState(null);
   const [practicasSeleccionadas, setPracticasSeleccionadas] = useState([]);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting2, setIsSubmitting2] = useState(false);
   const coberturaSeleccionada = watch("Cobertura");
   const { data: diagnosticos } = useApi("/diagnostics", true, {
     cache: true,
@@ -55,6 +57,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     establecimientoId
   );
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
 
   const {
     patients: pacientes,
@@ -199,6 +202,16 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     }
   }, [credencialSeleccionada, setValue]);
 
+  useEffect(() => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0"); 
+  const day = String(today.getDate()).padStart(2, "0");
+
+  const todayFormatted = `${year}-${month}-${day}`;
+  setValue("Fecha", todayFormatted);
+}, [setValue]);
+
   const handleAgregarPractica = (id) => {
     const listaPracticas = practicas?.List || practicas || [];
     const practica = listaPracticas.find((p) => p.PracticaID === id);
@@ -221,6 +234,80 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
     );
   };
 
+  const handleGuardarEImprimir = async (data) => {
+  setIsSubmitting2(true);
+  let printWindow = null;
+  
+  try {
+    // 1. Abrir la ventana de impresión (Debe hacerse aquí, antes de los await)
+    // Inicializa la ventana de impresión
+    printWindow = window.open("", "_blank");
+    
+    if (!printWindow) {
+      alert(
+        "El navegador bloqueó la ventana de impresión. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo."
+      );
+      return; // Salir si la ventana no se abre
+    }
+
+    // 2. Enviar la receta y subir el PDF
+    const ok = await enviar(data);
+    if (!ok) {
+      if (printWindow && !printWindow.closed) {
+        printWindow.close(); // Cerrar si el envío falla
+      }
+      return; // Salir si el envío falló
+    }
+
+    // 3. Generar e Imprimir PDF (solo si el envío fue exitoso)
+    const previewElement = document.querySelector(".preview-column");
+    if (!previewElement) {
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+      }
+      console.error("No se encontró el preview para imprimir.");
+      alert(
+        "Error: No se encontró el preview para imprimir. Receta guardada, pero no impresa."
+      );
+      onClose(); // Cerrar modal principal si ya se guardó
+      return;
+    }
+
+    // Lógica de conversión a PDF
+    const pdfBase64 = await generarPDF(previewElement);
+    const binaryString = atob(pdfBase64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    printWindow.location.href = url;
+    setTimeout(() => {
+      if (printWindow && !printWindow.closed) {
+        printWindow.print();
+      }
+    }, 1000);
+
+    // 4. Finalizar y cerrar modales
+    setShowConfirmModal(false);
+    onClose();
+
+  } catch (err) {
+    console.error("Error en la secuencia Guardar e Imprimir:", err);
+    setError("Ocurrió un error al intentar guardar e imprimir la receta.");
+    // Asegurarse de cerrar la ventana de impresión si existe un error
+    if (printWindow && !printWindow.closed) {
+      printWindow.close();
+    }
+  } finally {
+    // Asegurarse de que el estado de carga se desactive siempre
+    setIsSubmitting2(false);
+  }
+};
+
   const enviar = async (data) => {
     try {
       const payload = {
@@ -232,7 +319,6 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
           PacienteID: parseInt(data.Paciente) || paciente.PacienteID || 0,
           DiagnosticoID: parseInt(data.Diagnostico) || 0,
           Notas: data.Notas || "",
-          NotasReceta: data.NotasReceta || "",
           PrepagaPlanID: parseInt(data.Plan),
           Activo: "1",
           MomentoAlta: new Date().toISOString().slice(0, 19),
@@ -373,40 +459,41 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
         </button>
         <div className="modal-body-split">
           <div className="form-wrapper" style={{ textAlign: "center" }}>
-            <h1 className="main-title">Nueva Receta</h1>
-
+            <h1 className="main-title" style={{ marginTop: '-15px' }}>
+              Nueva Receta
+            </h1>
             <form className="Formulario" id="recetaForm">
-              {/* Paciente */}       {" "}
+              {/* Paciente */}{" "}
               <div className="field-wrapper">
-                            <label>Paciente:</label>           {" "}
+                 <label>Paciente:</label>{" "}
                 {paciente ? (
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      padding: "10px",
+                      padding: "5px 10px",
                       backgroundColor: "#f9f9f9",
                       borderRadius: "5px",
                       color: "#333",
                     }}
                   >
-                                       {" "}
+                    {" "}
                     <strong>
-                                              {paciente.Apellido}{" "}
-                      {paciente.Nombres}                   {" "}
+                      {paciente.Apellido}{" "}
+                      {paciente.Nombres}{" "}
                     </strong>
-                                       {" "}
+                    {" "}
                     <span style={{ color: "#666", fontSize: "0.9em" }}>
                       DNI: {paciente.DNI}
                     </span>
-                                       {" "}
+                          {" "}
                     <input
                       type="hidden"
                       value={paciente.PacienteID}
                       {...register("Paciente")}
                     />
-                                   {" "}
+                    {" "}
                   </div>
                 ) : (
                   <p style={{ color: "red" }}>
@@ -414,7 +501,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                     de nuevo.
                   </p>
                 )}
-                       {" "}
+                {" "}
               </div>
               <div className="form-row diag-calendar">
                 {/* Diagnóstico */}
@@ -560,6 +647,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                   <input
                     type="text"
                     className="select-input"
+                    style={{ color: '#000' }}
                     {...register("Credencial", {
                       required:
                         "Debes ingresar un número de afiliado o credencial",
@@ -585,8 +673,15 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                 <label>Prácticas:</label>
                 <div
                   className="practice-list"
-                  style={{ display: "flex", gap: "1rem" }}
-                >
+                  style={{
+                  display: "flex",
+                  gap: "1rem",
+                  maxHeight: '280px', // Por ejemplo, 280px. Ajusta este valor.
+                  overflowY: 'auto', 
+                  overflowX: 'hidden',
+                  paddingRight: '10px' // Para que la barra de scroll no choque con el borde
+                  }}
+                  >
                   {columnas.map((columna, i) => (
                     <div
                       key={i}
@@ -754,12 +849,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                 placeholder="Nota de receta..."
                 rows="3"
               />
-              <label>Observaciones al laboratorio:</label>
-              <textarea
-                {...register("NotasReceta")}
-                placeholder="Nota al laboratorio..."
-                rows="3"
-              />
+              
               {error && <p style={{ color: "red" }}>{error}</p>}
               <div
                 style={{
@@ -806,90 +896,71 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
               >
                 {/* Guardar simple */}
                 <button
-                  className="enviar"
-                  onClick={async () => {
-                    setShowConfirmModal(false);
-                    await handleSubmit(async (data) => {
-                      const ok = await enviar(data);
-                      if (ok) {
-                        onClose();
-                      }
-                    })();
-                  }}
-                >
-                  Guardar
-                </button>
+  className="enviar"
+  onClick={() => {
+    setIsSubmitting(true);
+    
+    // Usamos handleSubmit con dos callbacks:
+    handleSubmit(async (data) => {
+      // **1. Función de Éxito (Validación OK)**
+      const ok = await enviar(data);
+      if (ok) {
+        setShowConfirmModal(false); // Cierra modal de confirmación
+        onClose(); // Cierra modal principal
+      }
+      setIsSubmitting(false); // Detiene el estado de carga
+    }, (validationErrors) => {
+      // **2. Función de Error de Validación (Validación Fallida)**
+      console.log("Errores de validación detectados:", validationErrors);
+      setShowConfirmModal(false); // <--- ESTA ES LA CLAVE: Cierra la modal de confirmación.
+      setIsSubmitting(false); // Detiene el estado de carga
+    })(); // Invocamos el resultado de handleSubmit
+  }}
+  disabled={isSubmitting} 
+>
+  {isSubmitting ? (
+    <>
+      <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+      Guardando...
+    </>
+  ) : (
+    "Guardar"
+  )}
+</button>
 
                 {/* Guardar e imprimir */}
-                <button
-                  className="enviar"
-                  style={{ backgroundColor: "#007bff" }}
-                  onClick={async () => {
-                    setShowConfirmModal(false);
-
-                    const printWindow = window.open("", "_blank");
-                    if (!printWindow) {
-                      alert(
-                        "El navegador bloqueó la ventana de impresión. Deshabilite el bloqueador de pop-ups y vuelva a intentarlo."
-                      );
-                      return;
-                    }
-
-                    await handleSubmit(async (data) => {
-                      try {
-                        const ok = await enviar(data);
-                        if (!ok) {
-                          printWindow.close();
-                          return;
-                        }
-
-                        const previewElement =
-                          document.querySelector(".preview-column");
-                        if (!previewElement) {
-                          printWindow.close();
-                          console.error(
-                            "No se encontró el preview para imprimir."
-                          );
-                          alert(
-                            "Error: No se encontró el preview para imprimir. Receta guardada, pero no impresa."
-                          );
-                          onClose();
-                          return;
-                        }
-
-                        const pdfBase64 = await generarPDF(previewElement);
-                        const binaryString = atob(pdfBase64);
-                        const len = binaryString.length;
-                        const bytes = new Uint8Array(len);
-                        for (let i = 0; i < len; i++) {
-                          bytes[i] = binaryString.charCodeAt(i);
-                        }
-
-                        const blob = new Blob([bytes], {
-                          type: "application/pdf",
-                        });
-                        const url = URL.createObjectURL(blob);
-
-                        printWindow.location.href = url;
-
-                        onClose();
-                      } catch (err) {
-                        console.error(
-                          "Error en la secuencia Guardar e Imprimir:",
-                          err
-                        );
-                        printWindow.close();
-                        alert(
-                          "Hubo un problema inesperado al guardar o generar el PDF. Revise la consola."
-                        );
-                      }
-                    })().catch((validationError) => {
-                      printWindow.close();
-                    });
-                  }}
-                >
-                  Guardar e Imprimir
-                </button>
+                   <button
+                    className="enviar"
+                    style={{ backgroundColor: "#007bff" }}
+                    onClick={() => {
+                      // Llamamos a handleSubmit con dos funciones:
+                      // 1. La función de éxito (handleGuardarEImprimir)
+                      // 2. La función de error de validación (errors)
+                      handleSubmit(handleGuardarEImprimir, (errors) => {
+                        // Si hay errores de validación (campos vacíos, etc.):
+                        console.log("Errores de validación detectados:", errors);
+                        
+                        // 1. Desactivamos el estado de carga (si se activó antes de handleSubmit)
+                        // En este caso, lo activamos dentro de handleGuardarEImprimir para más seguridad.
+                        // Pero si usas el enfoque anterior de setIsSubmitting2(true) antes del handleSubmit:
+                        // setIsSubmitting2(false); 
+                        
+                        // 2. Cerramos la modal de confirmación
+                        // Esto permite al usuario ver los mensajes de error en los campos principales.
+                        setShowConfirmModal(false); 
+                      })(); // Invocamos la función devuelta por handleSubmit
+                    }}
+                    disabled={isSubmitting2}
+                  >
+                    {isSubmitting2 ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                        Generando PDF...
+                      </>
+                    ) : (
+                      "Guardar e Imprimir"
+                    )}
+                  </button>
 
                 {/* Cancelar */}
                 <button
