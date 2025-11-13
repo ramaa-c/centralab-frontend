@@ -10,7 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProtectedChangePasswordRoute from './components/ProtectedChangePasswordRoute';
 import PublicRoute from './components/PublicRoute';
 import SideBar from "./components/SideBar.jsx";
-import Resultados from './pages/Perfil/Resultados';
+import Resultados from './pages/Resultados/VerResultados';
 
 const ProtectedLayout = ({ children }) => (
   <ProtectedRoute>

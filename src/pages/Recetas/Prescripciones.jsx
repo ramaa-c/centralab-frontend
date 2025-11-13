@@ -5,11 +5,11 @@ import React, {
   useRef,
   useLayoutEffect,
 } from "react";
-import { usePatients } from "../../hooks/usePatients";
-import { usePrescriptions } from "../../hooks/usePrescriptions";
+import { usePatients } from "../../hooks/usePatients.js";
+import { usePrescriptions } from "../../hooks/usePrescriptions.js";
 import NuevaRecetaModal from "./NuevaRecetaModal";
-import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal";
-import EditarPacienteModal from "../Pacientes/EditarPacienteModal";
+import NuevoPacienteModal from "../Pacientes/NuevoPacienteModal.jsx";
+import EditarPacienteModal from "../Pacientes/EditarPacienteModal.jsx";
 import axios from "axios";
 import "../../styles/prescripciones.css";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
