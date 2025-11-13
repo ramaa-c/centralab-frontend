@@ -777,7 +777,7 @@ export default function NuevaRecetaModal({ paciente: pacienteProp, onClose }) {
                       display: "flex",
                       flexDirection: "column",
                       gap: "8px",
-                      maxHeight: "150px",
+                      maxHeight: "55px",
                       overflowY: "auto",
                       padding: "10px",
                       border: "1px solid #ccc",
