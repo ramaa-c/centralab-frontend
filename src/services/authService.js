@@ -26,7 +26,6 @@ export const login = async (credentials) => {
     }
 
     const doctorId = foundDoctor.MedicoID; 
-    console.log("ID del doctor:", doctorId);
 
     const response = await api.post(LOGIN_ENDPOINT, {
         doctor_id: identifier,
@@ -76,7 +75,6 @@ export const recuperarClave = async (identificador) => {
         }
 
         const doctorId = initialDoctor.MedicoID;
-        console.log("ID del doctor encontrado:", doctorId);
 
         const resetResponse = await api.put(`${DOCTORS_ENDPOINT}/${doctorId}/password`);
 

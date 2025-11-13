@@ -6,8 +6,6 @@ export const obtenerPacientes = async ({
   page = 1,
   page_size = 15,
   id_number = "",
-  doctor_id = null,
-  establishment_id = null,
   retries = 3,
   delay = 1000,
 } = {}) => {
@@ -17,19 +15,15 @@ export const obtenerPacientes = async ({
         page,
         page_size,
         ...(id_number && { id_number }),
-        ...(doctor_id && { doctor_id }),
-        ...(establishment_id && { establishment_id }),
       };
 
       const response = await api.get(PACIENTES_ENDPOINT, { params });
 
       const pacientes = response.data?.List || [];
-
       const meta = response.data?.Meta || {};
 
       return { pacientes, meta };
     } catch (error) {
-
       if (attempt === retries) {
         const msg =
           error.response?.data?.message ||

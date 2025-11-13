@@ -6,7 +6,6 @@ import {
   removeDoctorEstablishment,
 } from "../../services/doctorService.js";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../../styles/perfil.css";
 import "../../styles/login.css";
 
@@ -207,7 +206,7 @@ export default function PerfilUsuario() {
 
               {/* Campo: Firma Texto */}
               <div>
-                <label className="font-medium">Firma Texto</label>
+                <label className="font-medium">Aclaración de firma</label>
                 <input
                   name="FirmaTexto"
                   value={doctor.FirmaTexto || ""}
