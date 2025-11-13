@@ -23,6 +23,7 @@ export default function Registro() {
   const listaEspecialidades = especialidades.List || especialidades;
 
 const enviar = async (data) => {
+
     setIsLoading(true);
     setError(null);
     setSuccess(false);
@@ -63,6 +64,7 @@ const enviar = async (data) => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="login-page">

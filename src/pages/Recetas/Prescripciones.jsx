@@ -297,29 +297,7 @@ const Prescripciones = () => {
                   borderRadius: "4px",
                 }}
               />
-              {selectedPatientFiltered && (
-                <div
-                  className="selected-patient-info"
-                  style={{
-                    padding: "10px",
-                    backgroundColor: "#e6f7ff",
-                    borderLeft: "3px solid #1890ff",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                  }}
-                >
-                  <button
-                    onClick={handleClearSelection}
-                    className="btn-clear-filter"
-                    style={{ padding: "5px 10px", fontSize: "0.8rem" }}
-                  >
-                    <i className="fa-solid fa-xmark"></i> Quitar Filtro (
-                    {selectedPatientFiltered.Apellido}{" "}
-                    {selectedPatientFiltered.Nombres})
-                  </button>
-                </div>
-              )}
+              
             </div>
           </div>
 
@@ -428,7 +406,30 @@ const Prescripciones = () => {
             style={{ marginBottom: "20px" }}
           >
             <h2 className="section-title">Prescripciones</h2>
-            <br />
+            {selectedPatientFiltered && (
+              <div
+                className="selected-patient-info"
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#e6f7ff",
+                  borderLeft: "3px solid #1890ff",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                <button
+                  onClick={handleClearSelection}
+                  className="btn-clear-filter"
+                  style={{ padding: "5px 10px", fontSize: "0.8rem" }}
+                >
+                  <i className="fa-solid fa-xmark"></i> Quitar Filtro (
+                  {selectedPatientFiltered.Apellido}{" "}
+                  {selectedPatientFiltered.Nombres})
+                </button>
+              </div>
+            )}
+            
           </div>
 
           {loadingPrescripciones && prescripciones.length === 0 ? (
